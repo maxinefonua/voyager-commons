@@ -7,6 +7,10 @@
     <groupId>org.voyager</groupId>
     <artifactId>voyager-commons</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>models</module>
+    </modules>
 
     <properties>
         <java.version>17</java.version>
