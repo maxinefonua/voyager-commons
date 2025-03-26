@@ -19,7 +19,7 @@ public class Airport {
     String name;
     String city;
     @Column(name="subd")
-    String subDivision;
+    String subdivision;
     @Column(name="country")
     String countryCode;
     Float elevation;
