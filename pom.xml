@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>voyager-migration</module>
+        <module>voyager-models</module>
     </modules>
 
     <properties>
