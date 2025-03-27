@@ -1,12 +1,19 @@
 package org.voyager.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NonNull;
 
-@Data
+@RequiredArgsConstructor
+@NoArgsConstructor
+@Getter @Setter
 public class TownDisplay {
+    @NonNull
     String name;
+    @NonNull
     String country;
+    @NonNull
     String regionName;
 }

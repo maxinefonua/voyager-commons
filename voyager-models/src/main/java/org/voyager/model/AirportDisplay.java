@@ -1,10 +1,14 @@
 package org.voyager.model;
 
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NonNull;
-import java.util.TimeZone;
 
-@Data
+@RequiredArgsConstructor
+@NoArgsConstructor
+@Getter @Setter
 public class AirportDisplay {
     @NonNull
     String name;
@@ -14,8 +18,8 @@ public class AirportDisplay {
     String subdivision;
     @NonNull
     String countryCode;
-    Double latitude;
-    Double longitude;
     @NonNull
-    TimeZone timeZone;
+    Double latitude;
+    @NonNull
+    Double longitude;
 }

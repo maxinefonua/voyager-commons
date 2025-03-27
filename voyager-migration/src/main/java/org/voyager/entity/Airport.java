@@ -13,22 +13,21 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor
 public class Airport {
-    @Id
-    String icao;
+    @Id @Column(length = 3,
+            columnDefinition = "bpchar")
     String iata;
     String name;
+    @Column(length = 50)
     String city;
-    @Column(name="subd")
+    @Column(name="subd",length = 50)
     String subdivision;
-    @Column(name="country")
+    @Column(name="country",length = 2,
+            columnDefinition = "bpchar")
     String countryCode;
-    Float elevation;
     @Column(name = "lon")
     Double longitude;
     @Column(name = "lat")
     Double latitude;
-    @Column(name = "tz")
+    @Column(name = "tz",length = 50)
     String timezoneName;
-    @Column(name = "lid")
-    String locationIdFAA;
 }
