@@ -1,15 +1,17 @@
-# <img src="/src/main/resources/images/logo.svg" width="30"> Voyager Commons
-### a commons module for Voyager project
-A personal project I took on to relearn full-cycle development, and to better organize my travel wish list. Built entirely on open-sourced data.
+# <img src="voyager-models/src/main/resources/images/logo.svg" width="30"> Voyager Commons
+### commons modules for Voyager project
+A personal project I took on to relearn full-cycle development, and to better organize my travel wish list. Modules created to uncouple unnecessary dependencies.
 
-#### Defines shared classes and utility methods to: 
-- Voyager UI <a href='https://github.com/maxinefonua/voyager-ui' target='_blank' rel='noopener noreferrer nofollow'>GitHub</a>
-- Voyager API <a href='https://github.com/maxinefonua/voyager-api' target='_blank' rel='noopener noreferrer nofollow'>GitHub</a>
+### Project Repos: 
+- Voyager UI https://github.com/maxinefonua/voyager-ui
+- Voyager API https://github.com/maxinefonua/voyager-api
 
-#### Built using:
-- Spring Boot
-- Lombok
-- Java Code Coverage
-- IntelliJ
+### <i>voyager-models</i>
+- shared data models and utils to centralize edits
+### <i>voyager-migration</i>
+- DB service interfaces and PostgreSQL implementation
+### <i>voyager-datasync</i>
+- executable jars for fetching/updating db entries
+- to be deployed on an orchestration service
 
 Full README and LICENSE coming soon.
