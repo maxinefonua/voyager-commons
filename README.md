@@ -2,9 +2,13 @@
 ### commons modules for Voyager project
 A personal project I took on to relearn full-cycle development, and to better organize my travel wish list. Modules created to uncouple unnecessary dependencies.
 
-### Project Repos: 
-- Voyager UI https://github.com/maxinefonua/voyager-ui
-- Voyager API https://github.com/maxinefonua/voyager-api
+### Project Repos:
+- Voyager UI <a href='https://github.com/maxinefonua/voyager-ui' target='_blank' rel='noopener noreferrer nofollow'>GitHub</a>
+    - request mapping for web domain
+    - dynamic page injection
+- Voyager API <a href='https://github.com/maxinefonua/voyager-api' target='_blank' rel='noopener noreferrer nofollow'>GitHub</a>
+    - standalone backend services
+    - caching, request limits, auth tokens
 
 ### <i>voyager-models</i>
 - shared data models and utils to centralize edits
@@ -12,6 +16,6 @@ A personal project I took on to relearn full-cycle development, and to better or
 - DB service interfaces and PostgreSQL implementation
 ### <i>voyager-datasync</i>
 - bash scripts and executable jars to fetch/update db entries
-- to be deployed on an orchestration service
+- AWS deployment pipelines (coming soon)
 
 Full README and LICENSE coming soon.

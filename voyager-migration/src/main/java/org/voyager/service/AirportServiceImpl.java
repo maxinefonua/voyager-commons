@@ -1,12 +1,14 @@
 package org.voyager.service;
 
-import org.apache.commons.lang3.StringUtils;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.voyager.entity.Airport;
 import org.voyager.model.AirportDisplay;
 import org.voyager.respository.AirportRepository;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,15 @@ import java.util.stream.Collectors;
 public class AirportServiceImpl implements AirportService<AirportDisplay> {
     @Autowired
     AirportRepository airportRepository;
+    List<AirportDisplay> airportDisplayList;
+
+    @PostConstruct
+    public void loadAirportList() {
+        airportDisplayList = airportRepository.findAll().stream().map(airport ->
+            new AirportDisplay(airport.getName(),airport.getIata(),airport.getCity(),
+                    airport.getSubdivision(),airport.getCountryCode(),airport.getLatitude(),
+                    airport.getLongitude(),0.0)).collect(Collectors.toList());
+    }
 
     @Override
     public List<String> getAllIataCodes() {
@@ -36,8 +47,13 @@ public class AirportServiceImpl implements AirportService<AirportDisplay> {
     // ORDER BY LAT, THEN ORDER BY LON TOP 5?
     // WHAT IF LON, LAT is BETTER RESULTS?
     @Override
-    public List<AirportDisplay> getClosest(float latitude, float longitude, int limit) {
-        return null;
+    public List<AirportDisplay> getClosest(double latitude, double longitude, int limit) {
+        airportDisplayList.forEach(airportDisplay -> {
+            airportDisplay.setDistance(AirportDisplay.calculateDistance(
+                    latitude, longitude, airportDisplay.getLatitude(),airportDisplay.getLongitude()
+            ));});
+        return airportDisplayList.stream().sorted(Comparator.comparingDouble(AirportDisplay::getDistance))
+                .limit(limit).collect(Collectors.toList());
     }
 
     // TODO: implement either
