@@ -11,7 +11,7 @@ A personal project I took on to relearn full-cycle development, and to better or
 ### <i>voyager-migration</i>
 - DB service interfaces and PostgreSQL implementation
 ### <i>voyager-datasync</i>
-- executable jars for fetching/updating db entries
+- bash scripts and executable jars to fetch/update db entries
 - to be deployed on an orchestration service
 
 Full README and LICENSE coming soon.
