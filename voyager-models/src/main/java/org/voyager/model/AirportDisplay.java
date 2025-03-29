@@ -1,15 +1,18 @@
 package org.voyager.model;
 
-import lombok.RequiredArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.Setter;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.NonNull;
+import org.voyager.utls.MapperUtils;
 
 @RequiredArgsConstructor
 @NoArgsConstructor @AllArgsConstructor
-@Getter @Setter
+@Getter @Setter @ToString(includeFieldNames = false)
 public class AirportDisplay {
     @NonNull
     String name;
@@ -25,6 +28,7 @@ public class AirportDisplay {
     Double longitude;
     Double distance;
 
+    private static final MapperUtils<AirportDisplay> mapper = new MapperUtils<>(AirportDisplay.class);
     private static final int EARTH_RADIUS = 6371;
 
     private static double haversine(double val) {
@@ -42,5 +46,9 @@ public class AirportDisplay {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return EARTH_RADIUS * c;
+    }
+
+    public String toJson() {
+        return mapper.mapToJson(this);
     }
 }
