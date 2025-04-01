@@ -1,8 +1,6 @@
-package org.voyager.utls;
+package org.voyager.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.lang.reflect.ParameterizedType;
 
 public class MapperUtils<T> {
     private Class<T> type;

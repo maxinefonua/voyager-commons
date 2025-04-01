@@ -1,6 +1,6 @@
-package org.voyager.utls;
+package org.voyager.utils;
 
-public class MessageUtil {
+public class MessageUtils {
     private static final String EMPTY_ENV_VAR = "Environment variable %s cannot be empty.";
     public static String getEmptyEnvVarMessage(String envVarKey){
         return String.format(EMPTY_ENV_VAR,envVarKey);
