@@ -1,12 +1,7 @@
 package org.voyager.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.ToString;
-import lombok.NonNull;
+import lombok.*;
 import org.voyager.utils.MapperUtils;
 
 @Builder(toBuilder = true) @Getter
@@ -14,9 +9,9 @@ import org.voyager.utils.MapperUtils;
 @ToString(includeFieldNames = false)
 public class AirportDisplay {
     @NonNull
-    String name;
-    @NonNull
     String iata;
+    @NonNull
+    String name;
     String city;
     String subdivision;
     @NonNull
@@ -25,7 +20,9 @@ public class AirportDisplay {
     Double latitude;
     @NonNull
     Double longitude;
-    @JsonIgnore
+    @NonNull
+    AirportType type;
+    @JsonIgnore @Setter
     Double distance;
 
     private static final MapperUtils<AirportDisplay> mapper = new MapperUtils<>(AirportDisplay.class);

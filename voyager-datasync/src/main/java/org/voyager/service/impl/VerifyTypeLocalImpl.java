@@ -145,8 +145,10 @@ public class VerifyTypeLocalImpl implements VerifyType {
                     "Incorrectly formatted input file: %s\nMust be a line of valid, comma-separated, 3-letter IATA codes.",fileName));
             String[] tokens = line.split(",");
             for (String token : tokens) {
-                if (token.length() != 3) throw new IllegalArgumentException(String.format(
-                        "Incorrectly formatted input file: %s\nMust be a line of valid, comma-separated, 3-letter IATA codes.",fileName));
+                if (token.length() != 3) {
+                    throw new IllegalArgumentException(String.format(
+                            "Incorrectly formatted input file: %s\nMust be a line of valid, comma-separated, 3-letter IATA codes.", fileName));
+                }
                 codes.add(token);
             }
             return codes;
@@ -175,7 +177,7 @@ public class VerifyTypeLocalImpl implements VerifyType {
         String filePath = VerifyTypeLocalImpl.class.getClassLoader().getResource(file).getFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             StringJoiner joiner = new StringJoiner(",");
-            airports.forEach(joiner::add);
+            airports.forEach(code -> joiner.add(String.format("'%s'",code)));
             writer.write(joiner.toString());
         } catch (IOException e) {
             throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),VerifyTypeLocalImpl.class.getName(),filePath);
@@ -191,7 +193,7 @@ public class VerifyTypeLocalImpl implements VerifyType {
                 sb.append(entry.getKey());
                 sb.append("=");
                 StringJoiner joiner = new StringJoiner(",");
-                entry.getValue().forEach(joiner::add);
+                entry.getValue().forEach(code -> joiner.add(String.format("'%s'",code)));
                 sb.append(joiner);
                 if (!first) writer.newLine();
                 else first = false;
