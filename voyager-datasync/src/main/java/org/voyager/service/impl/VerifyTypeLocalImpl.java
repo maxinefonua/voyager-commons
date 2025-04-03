@@ -4,7 +4,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 import org.voyager.service.VerifyType;
 
 import java.io.*;
@@ -172,19 +171,19 @@ public class VerifyTypeLocalImpl implements VerifyType {
         return codes;
     }
 
-    // TODO: Logger
-    private static void writeSetToFile(Set<String> airports, String filePath) {
+    private static void writeSetToFile(Set<String> airports, String file) {
+        String filePath = VerifyTypeLocalImpl.class.getClassLoader().getResource(file).getFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             StringJoiner joiner = new StringJoiner(",");
             airports.forEach(joiner::add);
             writer.write(joiner.toString());
         } catch (IOException e) {
-            // TODO: logger
-            System.err.println(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()));
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),VerifyTypeLocalImpl.class.getName(),filePath);
         }
     }
 
-    private static void writeMapToFile(Map<String, Set<String>> special, String filePath) {
+    private static void writeMapToFile(Map<String, Set<String>> special, String file) {
+        String filePath = VerifyTypeLocalImpl.class.getClassLoader().getResource(file).getFile();
         boolean first = true;
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             for (Map.Entry<String,Set<String>> entry : special.entrySet()) {
@@ -199,8 +198,7 @@ public class VerifyTypeLocalImpl implements VerifyType {
                 writer.write(sb.toString());
             }
         } catch (IOException e) {
-            // TODO: Logger
-            System.err.println(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()));
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),VerifyTypeLocalImpl.class.getName(),filePath);
         }
     }
 
