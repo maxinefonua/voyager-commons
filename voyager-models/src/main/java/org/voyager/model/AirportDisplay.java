@@ -1,6 +1,6 @@
 package org.voyager.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.voyager.utils.MapperUtils;
 
@@ -22,7 +22,7 @@ public class AirportDisplay {
     Double longitude;
     @NonNull
     AirportType type;
-    @JsonIgnore @Setter
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Double distance;
 
     private static final MapperUtils<AirportDisplay> mapper = new MapperUtils<>(AirportDisplay.class);
