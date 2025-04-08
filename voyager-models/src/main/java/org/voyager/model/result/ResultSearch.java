@@ -15,7 +15,6 @@ public class ResultSearch {
     String countryName;
     Double latitude;
     Double longitude;
-//    [west, south, east, north]
     Double[] bounds;
     String type;
 }
