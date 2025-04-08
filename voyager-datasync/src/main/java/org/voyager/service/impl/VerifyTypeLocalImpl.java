@@ -5,6 +5,8 @@ import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.service.VerifyType;
+import org.voyager.utils.ConstantsLocal;
+import org.voyager.utils.ConstantsUtils;
 
 import java.io.*;
 import java.util.*;
@@ -47,18 +49,18 @@ public class VerifyTypeLocalImpl implements VerifyType {
 
     @Override
     public void loadCodesToProcess() {
-        all = loadAllCodesFromJson(IATA_FILE);
+        all = ConstantsLocal.loadAllCodesFromJson(IATA_FILE);
 
-        civil = loadCodesFromFile(CIVIL_FILE);
+        civil = ConstantsLocal.loadCodesFromFile(CIVIL_FILE);
         civilStartSize = civil.size();
 
-        military = loadCodesFromFile(MILITARY_FILE);
+        military = ConstantsLocal.loadCodesFromFile(MILITARY_FILE);
         militaryStartSize = military.size();
 
-        historical = loadCodesFromFile(HISTORICAL_FILE);
+        historical = ConstantsLocal.loadCodesFromFile(HISTORICAL_FILE);
         historicalStartSize = historical.size();
 
-        issue = loadCodesFromFile(ISSUES_FILE);
+        issue = ConstantsLocal.loadCodesFromFile(ISSUES_FILE);
         issueStartSize = issue.size();
 
         specialMap = loadSpecialMapFromFile();
@@ -105,10 +107,10 @@ public class VerifyTypeLocalImpl implements VerifyType {
 
     @Override
     public void saveProcessed() {
-        writeSetToFile(civil, CIVIL_FILE);
-        writeSetToFile(military, MILITARY_FILE);
-        writeSetToFile(historical, HISTORICAL_FILE);
-        writeSetToFile(issue, ISSUES_FILE);
+        ConstantsLocal.writeSetToFile(civil, CIVIL_FILE);
+        ConstantsLocal.writeSetToFile(military, MILITARY_FILE);
+        ConstantsLocal.writeSetToFile(historical, HISTORICAL_FILE);
+        ConstantsLocal.writeSetToFile(issue, ISSUES_FILE);
         writeMapToFile(specialMap, SPECIAL_FILE);
     }
 
@@ -131,56 +133,6 @@ public class VerifyTypeLocalImpl implements VerifyType {
             return specialMap;
         } catch (IOException e) {
             throw new RuntimeException(String.format("Error reading special map from file %s\nError message: %s", SPECIAL_FILE,e.getMessage()),e);
-        }
-    }
-
-    private static Set<String> loadCodesFromFile(String fileName) {
-        InputStream is = VerifyTypeLocalImpl.class.getClassLoader().getResourceAsStream(fileName);
-        if (is == null) throw new MissingResourceException(String.format("Required file missing from resources directory: %s",fileName),VerifyTypeLocalImpl.class.getName(),fileName);
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        Set<String> codes = new HashSet<>();
-        try {
-            String line = br.readLine();
-            if (line == null) throw new IllegalArgumentException(String.format(
-                    "Incorrectly formatted input file: %s\nMust be a line of valid, comma-separated, 3-letter IATA codes.",fileName));
-            String[] tokens = line.split(",");
-            for (String token : tokens) {
-                if (token.length() != 3) {
-                    throw new IllegalArgumentException(String.format(
-                            "Incorrectly formatted input file: %s\nMust be a line of valid, comma-separated, 3-letter IATA codes.", fileName));
-                }
-                codes.add(token);
-            }
-            return codes;
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Error reading IATA codes from file: %s\nError message: %s",
-                    fileName,e.getMessage()),e);
-        }
-    }
-
-    private static Set<String> loadAllCodesFromJson(String fileName) {
-        InputStream is = VerifyTypeLocalImpl.class.getClassLoader().getResourceAsStream(fileName);
-        if (is == null) throw new MissingResourceException(String.format("Required file missing from resources directory: %s",fileName),VerifyTypeLocalImpl.class.getName(),fileName);
-        Scanner scanner = new Scanner(new InputStreamReader(is));
-        scanner.useDelimiter(",");
-        Set<String> codes = new HashSet<>();
-        while (scanner.hasNext()) {
-            String token = scanner.next();
-            codes.add(token.chars().filter(Character::isLetter)
-                    .mapToObj(c -> String.valueOf((char) c))
-                    .collect(Collectors.joining()));
-        }
-        return codes;
-    }
-
-    private static void writeSetToFile(Set<String> airports, String file) {
-        String filePath = VerifyTypeLocalImpl.class.getClassLoader().getResource(file).getFile();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            StringJoiner joiner = new StringJoiner(",");
-            airports.forEach(code -> joiner.add(String.format("'%s'",code)));
-            writer.write(joiner.toString());
-        } catch (IOException e) {
-            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),VerifyTypeLocalImpl.class.getName(),filePath);
         }
     }
 
