@@ -7,25 +7,15 @@ import org.voyager.utils.MapperUtils;
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 public class ResultSearch {
+    String source;
+    String sourceId;
     String name;
-    String adminName;
+    String subdivision;
     String countryCode;
     String countryName;
-    Double southBound;
-    Double westBound;
-    Double northBound;
-    Double eastBound;
-    Double longitude;
     Double latitude;
+    Double longitude;
+//    [west, south, east, north]
+    Double[] bounds;
     String type;
-
-    private static final MapperUtils<ResultSearch> mapper = new MapperUtils<>(ResultSearch.class);
-
-    public String toJson() {
-        return mapper.mapToJson(this);
-    }
-
-    public static ResultSearch fromJson(String jsonString) {
-        return mapper.mapFromJson(jsonString);
-    }
 }
