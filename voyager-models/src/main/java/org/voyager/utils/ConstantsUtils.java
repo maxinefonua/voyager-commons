@@ -22,6 +22,8 @@ public class ConstantsUtils {
     public static final String AIRLINE_PARAM_NAME = "airline";
     public static final String IATA_PARAM_NAME = "iata";
 
+    public static final String SOURCE_PROPERTY_NAME = "source";
+
     public static void validateEnvironVars(List<String> envVarKeys) {
         for (String key : envVarKeys) {
             String envVarVal = System.getenv(key);
