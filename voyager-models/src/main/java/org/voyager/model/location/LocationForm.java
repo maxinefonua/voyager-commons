@@ -2,7 +2,7 @@ package org.voyager.model.location;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.commons.lang3.StringUtils;
 
 @Builder
 @Data
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 @ToString(includeFieldNames = false)
 public class LocationForm {
     @NotBlank
-    String source = "MANUAL";
+    String source = Source.MANUAL.name();
 
     @NotBlank
     String sourceId;
@@ -57,11 +57,7 @@ public class LocationForm {
     Double north;
 
     public void setSource(String source) {
-        if (source == null) {
-            this.source = "MANUAL";
-        } else {
-            this.source = source;
-        }
-
+        this.source = source;
+        if (StringUtils.isEmpty(source)) this.source = Source.MANUAL.name();
     }
 }
