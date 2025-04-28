@@ -1,6 +1,7 @@
 package org.voyager.model.result;
 
 import lombok.*;
+import org.voyager.model.location.Status;
 import org.voyager.utils.MapperUtils;
 
 @Builder @Getter @AllArgsConstructor
@@ -9,6 +10,8 @@ import org.voyager.utils.MapperUtils;
 public class ResultSearch {
     String source;
     String sourceId;
+    @Setter
+    Status status;
     String name;
     String subdivision;
     String countryCode;

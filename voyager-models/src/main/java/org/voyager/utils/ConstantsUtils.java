@@ -23,6 +23,7 @@ public class ConstantsUtils {
     public static final String IATA_PARAM_NAME = "iata";
 
     public static final String SOURCE_PROPERTY_NAME = "source";
+    public static final String SOURCE_ID_PARAM_NAME = "sourceId";
 
     public static void validateEnvironVars(List<String> envVarKeys) {
         for (String key : envVarKeys) {
