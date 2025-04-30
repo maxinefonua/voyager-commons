@@ -3,8 +3,8 @@ package org.voyager.model.location;
 import lombok.Getter;
 
 public enum Status {
-    NEW("Add"),
-    SAVED("Added"),
+    NEW("Save"),
+    SAVED("Saved"),
     ARCHIVED("Archived"),
     DELETED("Deleted");
 
