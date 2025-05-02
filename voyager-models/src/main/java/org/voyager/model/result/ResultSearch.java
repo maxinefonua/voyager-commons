@@ -1,31 +1,23 @@
 package org.voyager.model.result;
 
 import lombok.*;
+import org.voyager.model.location.Status;
 import org.voyager.utils.MapperUtils;
 
 @Builder @Getter @AllArgsConstructor
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 public class ResultSearch {
+    String source;
+    String sourceId;
+    @Setter
+    Status status;
     String name;
-    String adminName;
+    String subdivision;
     String countryCode;
     String countryName;
-    Double southBound;
-    Double westBound;
-    Double northBound;
-    Double eastBound;
-    Double longitude;
     Double latitude;
+    Double longitude;
+    Double[] bounds;
     String type;
-
-    private static final MapperUtils<ResultSearch> mapper = new MapperUtils<>(ResultSearch.class);
-
-    public String toJson() {
-        return mapper.mapToJson(this);
-    }
-
-    public static ResultSearch fromJson(String jsonString) {
-        return mapper.mapFromJson(jsonString);
-    }
 }
