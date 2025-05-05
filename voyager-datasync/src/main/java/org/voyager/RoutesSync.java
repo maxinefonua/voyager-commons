@@ -38,37 +38,49 @@ public class RoutesSync {
 
     public static void main(String[] args) {
         System.out.println("printing from routes sync main");
-        Airline airline = null;
+        Airline airline = extractAirlineFromArgs(args);
+        Integer maxConcurrentRequests = extractMaxConcurrentRequestsFromArgs(args);
+        voyagerAPI = new VoyagerAPIService(maxConcurrentRequests);
+
+        String routesURL = airlineToURLMap.get(airline);
+        Document document = extractDocumentFromURLOrLocal(routesURL,ROUTES_HTML_FILE);
+        Object routesObject = getRoutesObjectFromDocument(document);
+        String routesJson = convertRoutesObjectToRoutesJson(routesObject);
+        List<RouteForm> routeForms = buildRouteFormsFromRoutesJson(routesJson,airline);
+        processRouteForms(routeForms);
+    }
+
+    private static Document extractDocumentFromURLOrLocal(String routesURL, String routesHtmlFile) {
+        Document document = null;
         try {
-            airline = Airline.valueOf(args[0].toUpperCase());
-        } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
-            String errorMessage = "Missing or invalid first argument for airline. Currently available airlines are: 'delta'";
-            LOGGER.error(errorMessage);
-            throw new RuntimeException(errorMessage);
+            document = getDocumentFromURL(routesURL,Map.of());
+            LOGGER.info("Successfully fetched document from url.");
+            saveToResources(document,routesHtmlFile);
+        } catch (RuntimeException e) {
+            LOGGER.info("Error w fetching document from URL. Loading last saved document from resource file.");
+            document = fetchDocumentFromResourceFile(routesHtmlFile);
         }
-        Integer maxConcurrentRequests = null;
+        return document;
+    }
+
+    private static Integer extractMaxConcurrentRequestsFromArgs(String[] args) {
         try {
-            maxConcurrentRequests = Integer.valueOf(args[1].toUpperCase());
+            return Integer.valueOf(args[1].toUpperCase());
         } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
             String errorMessage = "Missing or invalid second argument for maxConcurrentRequests. Provide a valid integer value";
             LOGGER.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
-        voyagerAPI = new VoyagerAPIService(maxConcurrentRequests);
-        String routesURL = airlineToURLMap.get(airline);
-        Document document = null;
+    }
+
+    private static Airline extractAirlineFromArgs(String[] args) {
         try {
-            document = getDocumentFromURL(routesURL,Map.of());
-            LOGGER.info("Successfully fetched document from url.");
-            saveToResources(document,ROUTES_HTML_FILE);
-        } catch (RuntimeException e) {
-            LOGGER.info("Error w fetching document from URL. Loading last saved document from resource file.");
-            document = fetchDocumentFromResourceFile(ROUTES_HTML_FILE);
+            return Airline.valueOf(args[0].toUpperCase());
+        } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+            String errorMessage = "Missing or invalid first argument for airline. Currently available airlines are: 'delta'";
+            LOGGER.error(errorMessage);
+            throw new RuntimeException(errorMessage);
         }
-        Object routesObject = getRoutesObjectFromDocument(document);
-        String routesJson = convertRoutesObjectToRoutesJson(routesObject);
-        List<RouteForm> routeForms = buildRouteFormsFromRoutesJson(routesJson,airline);
-        processRouteForms(routeForms);
     }
 
     private static void saveToResources(Document document,String fileName) {
