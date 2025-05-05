@@ -4,12 +4,15 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
+import static org.voyager.utils.ConstantsUtils.COUNTRY_CODE_REGEX;
+
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(includeFieldNames = false)
 public class LocationForm {
+
     @NotBlank
     String source = Source.MANUAL.name();
 
@@ -23,7 +26,7 @@ public class LocationForm {
     String subdivision;
 
     @NotBlank
-    @Pattern(regexp = "^[a-zA-Z]{2}$", message = "must be a valid two-letter ISO 3166-1 alpha-2 country code")
+    @Pattern(regexp = COUNTRY_CODE_REGEX, message = "must be a valid two-letter ISO 3166-1 alpha-2 country code")
     String countryCode;
 
     @NotNull

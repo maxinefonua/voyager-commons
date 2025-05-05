@@ -20,6 +20,8 @@ public class ConstantsLocal {
     public static final String DELTA_FORMER_DB = "airports/delta-formerDB.txt";
     public static final String DELTA_FUTURE_FILE = "airports/delta-future.txt";
     public static final String DELTA_FOCUS_FILE = "airports/delta-focus.txt";
+    public static final String ROUTES_HTML_FILE = "routes/flightRadar.html";
+
 
     public static final String CIVIL_AIRPORT = "Civil Airport";
     public static final String MILITARY_AIRPORT = "Military Airport";
