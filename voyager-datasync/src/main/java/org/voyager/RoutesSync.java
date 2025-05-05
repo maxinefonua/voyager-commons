@@ -161,7 +161,6 @@ public class RoutesSync {
     private static void processRouteForms(List<RouteForm> routeForms) {
         List<Integer> addedIds = new ArrayList<>();
         List<Integer> existingIds = new ArrayList<>();
-
         AtomicReference<Integer> processedCounter = new AtomicReference<>(0);
         AtomicReference<Integer> non200Counter = new AtomicReference<>(0);
         AtomicReference<Integer> jsonExceptionCounter = new AtomicReference<>(0);
@@ -170,7 +169,7 @@ public class RoutesSync {
         AtomicReference<Integer> createCounter = new AtomicReference<>(0);
         AtomicReference<Integer> existingCounter = new AtomicReference<>(0);
         AtomicReference<Integer> multiCounter = new AtomicReference<>(0);
-        // TODO: limit threads
+
         routeForms.forEach(routeForm -> {
                 try {
                     HttpResponse<String> response = voyagerAPI.getRoute(routeForm.getOrigin(), routeForm.getDestination(), Airline.valueOf(routeForm.getAirline()));
