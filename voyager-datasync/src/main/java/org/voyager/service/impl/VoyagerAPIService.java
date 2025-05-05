@@ -10,24 +10,24 @@ import static org.voyager.utils.ConstantsUtils.*;
 
 public class VoyagerAPIService extends VoyagerAPI {
 
-    public VoyagerAPIService() {
-        super();
+    public VoyagerAPIService(int maxConcurrentRequests) {
+        super(maxConcurrentRequests);
     }
 
     @Override
-    public HttpResponse<String> getAirportByIata(String iata) {
+    public HttpResponse<String> getAirportByIata(String iata) throws InterruptedException {
         String fullURL = getBaseUrl().concat(AIRPORTS_PATH).concat("/").concat(iata);
         return getResponse(fullURL);
     }
 
     @Override
-    public HttpResponse<String> getRoute() {
+    public HttpResponse<String> getRoute() throws InterruptedException {
         String fullURL = getBaseUrl().concat(ROUTES_PATH);
         return getResponse(fullURL);
     }
 
     @Override
-    public HttpResponse<String> getRoute(String origin, String destination, Airline airline) {
+    public HttpResponse<String> getRoute(String origin, String destination, Airline airline) throws InterruptedException {
         StringBuilder sb = new StringBuilder();
         sb.append(getBaseUrl());
         sb.append(ROUTES_PATH);
@@ -47,7 +47,7 @@ public class VoyagerAPIService extends VoyagerAPI {
     }
 
     @Override
-    public HttpResponse<String> addRoute(String jsonBody) {
+    public HttpResponse<String> addRoute(String jsonBody) throws InterruptedException {
         StringBuilder sb = new StringBuilder();
         sb.append(getBaseUrl());
         sb.append(ROUTES_PATH);

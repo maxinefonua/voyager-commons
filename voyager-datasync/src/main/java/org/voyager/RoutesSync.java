@@ -34,23 +34,31 @@ public class RoutesSync {
     private static final Map<Airline,String> airlineToURLMap = Map.of(
             Airline.DELTA, "https://www.flightradar24.com/data/airlines/dl-dal/routes"
     );
-    private static final VoyagerAPI voyagerAPI = new VoyagerAPIService();
+    private static VoyagerAPI voyagerAPI;
 
     public static void main(String[] args) {
         System.out.println("printing from routes sync main");
         Airline airline = null;
         try {
             airline = Airline.valueOf(args[0].toUpperCase());
-        } catch (IllegalArgumentException e) {
-            String errorMessage = String.format("Invalid airline value: %s. Currently available airlines are: 'delta'",args[0]);
+        } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+            String errorMessage = "Missing or invalid first argument for airline. Currently available airlines are: 'delta'";
             LOGGER.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
+        Integer maxConcurrentRequests = null;
+        try {
+            maxConcurrentRequests = Integer.valueOf(args[1].toUpperCase());
+        } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+            String errorMessage = "Missing or invalid second argument for maxConcurrentRequests. Provide a valid integer value";
+            LOGGER.error(errorMessage);
+            throw new RuntimeException(errorMessage);
+        }
+        voyagerAPI = new VoyagerAPIService(maxConcurrentRequests);
         String routesURL = airlineToURLMap.get(airline);
         Document document = null;
         try {
             document = getDocumentFromURL(routesURL,Map.of());
-            // TODO: save document to resource file
             LOGGER.info("Successfully fetched document from url.");
             saveToResources(document,ROUTES_HTML_FILE);
         } catch (RuntimeException e) {
@@ -157,55 +165,58 @@ public class RoutesSync {
         AtomicReference<Integer> processedCounter = new AtomicReference<>(0);
         AtomicReference<Integer> non200Counter = new AtomicReference<>(0);
         AtomicReference<Integer> jsonExceptionCounter = new AtomicReference<>(0);
+        AtomicReference<Integer> interruptedCounter = new AtomicReference<>(0);
         AtomicReference<Integer> skipCounter = new AtomicReference<>(0);
         AtomicReference<Integer> createCounter = new AtomicReference<>(0);
         AtomicReference<Integer> existingCounter = new AtomicReference<>(0);
         AtomicReference<Integer> multiCounter = new AtomicReference<>(0);
         // TODO: limit threads
         routeForms.forEach(routeForm -> {
-            if (processedCounter.get() < 10) {
-                HttpResponse<String> response = voyagerAPI.getRoute(routeForm.getOrigin(),routeForm.getDestination(),Airline.valueOf(routeForm.getAirline()));
-                if (response.statusCode() == 200) {
-                    String json = response.body();
-                    ObjectMapper om = new ObjectMapper();
-                    try {
-                        RouteDisplay[] results = om.readValue(json, RouteDisplay[].class);
-                        if (results.length == 0) {
-                            LOGGER.info(String.format("create new route: %s",routeForm));
-                            String jsonForm = om.writeValueAsString(routeForm);
-                            HttpResponse<String> addResponse = voyagerAPI.addRoute(jsonForm);
-                            if (addResponse.statusCode() == 200) {
-                                String jsonAdded = addResponse.body();
-                                RouteDisplay routeDisplay = om.readValue(jsonAdded,RouteDisplay.class);
-                                addedIds.add(routeDisplay.getId());
-                                createCounter.getAndSet(createCounter.get() + 1);
+                try {
+                    HttpResponse<String> response = voyagerAPI.getRoute(routeForm.getOrigin(), routeForm.getDestination(), Airline.valueOf(routeForm.getAirline()));
+                    if (response.statusCode() == 200) {
+                        String json = response.body();
+                        ObjectMapper om = new ObjectMapper();
+                        try {
+                            RouteDisplay[] results = om.readValue(json, RouteDisplay[].class);
+                            if (results.length == 0) {
+                                LOGGER.debug(String.format("create new route: %s", routeForm));
+                                String jsonForm = om.writeValueAsString(routeForm);
+                                HttpResponse<String> addResponse = voyagerAPI.addRoute(jsonForm);
+                                if (addResponse.statusCode() == 200) {
+                                    String jsonAdded = addResponse.body();
+                                    RouteDisplay routeDisplay = om.readValue(jsonAdded, RouteDisplay.class);
+                                    addedIds.add(routeDisplay.getId());
+                                    createCounter.getAndSet(createCounter.get() + 1);
+                                } else {
+                                    LOGGER.error("Non-200 returned from URI: " + response.uri().toString());
+                                    non200Counter.getAndSet(non200Counter.get() + 1);
+                                }
+                            } else if (results.length == 1) {
+                                LOGGER.debug(String.format("existing route: %s", routeForm));
+                                RouteDisplay routeDisplay = results[0];
+                                existingIds.add(routeDisplay.getId());
+                                existingCounter.getAndSet(existingCounter.get() + 1);
                             } else {
-                                LOGGER.error("Non-200 returned from URI: " + response.uri().toString());
-                                non200Counter.getAndSet(non200Counter.get() + 1);
+                                LOGGER.info(String.format("more than one route returned for routeForm: %s", routeForm));
+                                multiCounter.getAndSet(multiCounter.get() + 1);
                             }
-                        } else if (results.length == 1) {
-                            LOGGER.info(String.format("existing route: %s",routeForm));
-                            RouteDisplay routeDisplay = results[0];
-                            existingIds.add(routeDisplay.getId());
-                            existingCounter.getAndSet(existingCounter.get()+1);
-                        } else {
-                            LOGGER.info(String.format("more than one route returned for routeForm: %s",routeForm));
-                            multiCounter.getAndSet(multiCounter.get()+1);
+                            processedCounter.getAndSet(processedCounter.get() + 1);
+                        } catch (JsonProcessingException e) {
+                            LOGGER.error(String.format("Error reading json: %s. Message: %s", json, e.getMessage()), e);
+                            jsonExceptionCounter.getAndSet(jsonExceptionCounter.get() + 1);
                         }
-                        processedCounter.getAndSet(processedCounter.get() + 1);
-                    } catch (JsonProcessingException e) {
-                        LOGGER.error(String.format("Error reading json: %s. Message: %s",json,e.getMessage()),e);
-                        jsonExceptionCounter.getAndSet(jsonExceptionCounter.get()+1);
+                    } else {
+                        LOGGER.error("Non-200 returned from URI: " + response.uri().toString());
+                        non200Counter.getAndSet(non200Counter.get() + 1);
                     }
-                } else {
-                    LOGGER.error("Non-200 returned from URI: " + response.uri().toString());
-                    non200Counter.getAndSet(non200Counter.get() + 1);
+                } catch (InterruptedException e) {
+                    LOGGER.error(String.format("InterrupedException thrown. Error message: %s",e.getMessage()),e);
+                    interruptedCounter.getAndSet(interruptedCounter.get() + 1);
                 }
-            } else {
-                skipCounter.getAndSet(skipCounter.get()+1);
-            }
         });
-        LOGGER.info("processedCounter: " + processedCounter.get() + ", skipCounter: " + skipCounter.get() + ", non200Counter: " + non200Counter.get() + ", jsonExceptionCounter: " + jsonExceptionCounter.get());
+        LOGGER.info("processedCounter: " + processedCounter.get() + ", skipCounter: " + skipCounter.get());
+        LOGGER.info("non200Counter: " + non200Counter.get() + ", jsonExceptionCounter: " + jsonExceptionCounter.get() + ", interruptedCounter: " + interruptedCounter.get());
         LOGGER.info("createCounter: " + createCounter.get()+ ", existingCounter: " + existingCounter.get() + ", multiCounter: " + multiCounter.get());
         LOGGER.info("addedIds: " + addedIds.size() + ", existingIds: " + existingIds.size());
     }

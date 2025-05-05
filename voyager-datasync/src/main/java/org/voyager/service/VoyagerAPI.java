@@ -13,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import static org.voyager.utils.ConstantsUtils.*;
 
@@ -21,44 +22,54 @@ public abstract class VoyagerAPI {
     @Getter
     private static String baseUrl;
     private static String voyagerAPIKey;
+    private static HttpClient CLIENT;
+    private static Semaphore SEMAPHORE;
 
-    protected VoyagerAPI() {
+    protected VoyagerAPI(int maxConcurrentRequests) {
         validateEnvironVars(List.of(VOYAGER_API_KEY,VOYAGER_BASE_URL));
         baseUrl = System.getenv(VOYAGER_BASE_URL);
         voyagerAPIKey = System.getenv(VOYAGER_API_KEY);
+        CLIENT = HttpClient.newBuilder().build();
+        SEMAPHORE = new Semaphore(maxConcurrentRequests);
     }
 
-    protected HttpResponse<String> getResponse(String fullURL) {
+    protected HttpResponse<String> getResponse(String fullURL) throws InterruptedException {
         LOGGER.debug(String.format("fullURL: %s",fullURL));
+        SEMAPHORE.acquire();
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(fullURL))
                     .headers(AUTH_TOKEN_HEADER_NAME,voyagerAPIKey)
                     .GET()
                     .build();
-            return HttpClient.newBuilder().build().send(request, HttpResponse.BodyHandlers.ofString());
+            return CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (InterruptedException | URISyntaxException | IOException e) {
             LOGGER.error(String.format("Error sending http with fullURL: %s. Message: %s",fullURL,e.getMessage()),e);
             throw new RuntimeException(e);
+        } finally {
+            SEMAPHORE.release();
         }
     }
 
-    protected HttpResponse<String> postResponse(String fullURL,String jsonBody) {
+    protected HttpResponse<String> postResponse(String fullURL,String jsonBody) throws InterruptedException {
         LOGGER.debug(String.format("fullURL: %s",fullURL));
+        SEMAPHORE.acquire();
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(fullURL))
                     .headers(AUTH_TOKEN_HEADER_NAME,voyagerAPIKey,CONTENT_TYPE_HEADER_NAME,JSON_TYPE_VALUE)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
-            return HttpClient.newBuilder().build().send(request, HttpResponse.BodyHandlers.ofString());
+            return CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (InterruptedException | URISyntaxException | IOException e) {
             LOGGER.error(String.format("Error sending http with fullURL: %s. Message: %s",fullURL,e.getMessage()),e);
             throw new RuntimeException(e);
+        } finally {
+            SEMAPHORE.release();
         }
     }
-    public abstract HttpResponse<String> getAirportByIata(String iata);
-    public abstract HttpResponse<String> getRoute();
-    public abstract HttpResponse<String> getRoute(String origin, String destination, Airline airline);
-    public abstract HttpResponse<String> addRoute(String routeJson);
+    public abstract HttpResponse<String> getAirportByIata(String iata) throws InterruptedException;
+    public abstract HttpResponse<String> getRoute() throws InterruptedException;
+    public abstract HttpResponse<String> getRoute(String origin, String destination, Airline airline) throws InterruptedException;
+    public abstract HttpResponse<String> addRoute(String routeJson) throws InterruptedException;
 }
