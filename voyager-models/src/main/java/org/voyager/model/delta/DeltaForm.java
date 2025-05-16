@@ -1,14 +1,9 @@
-package org.voyager.model.route;
+package org.voyager.model.delta;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.voyager.model.Airline;
+import lombok.*;
 
 import static org.voyager.utils.ConstantsUtils.IATA_CODE_REGEX;
 
@@ -17,15 +12,14 @@ import static org.voyager.utils.ConstantsUtils.IATA_CODE_REGEX;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(includeFieldNames = false)
-public class RouteForm {
+public class DeltaForm {
     @NotBlank
     @Pattern(regexp = IATA_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
-    String origin;
+    String iata;
+
     @NotBlank
-    @Pattern(regexp = IATA_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
-    String destination;
-    @NotBlank
-    String airline;
+    String status = DeltaStatus.ACTIVE.name();
+
     @NotNull
-    Boolean isActive = true;
+    Boolean isHub = Boolean.FALSE;
 }

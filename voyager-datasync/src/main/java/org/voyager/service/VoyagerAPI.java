@@ -4,6 +4,12 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.model.Airline;
+import org.voyager.model.delta.DeltaDisplay;
+import org.voyager.model.delta.DeltaForm;
+import org.voyager.model.delta.DeltaPatch;
+import org.voyager.model.route.RouteDisplay;
+import org.voyager.model.route.RouteForm;
+import org.voyager.model.route.RoutePatch;
 import org.voyager.service.impl.VoyagerAPIService;
 
 import java.io.IOException;
@@ -18,7 +24,7 @@ import java.util.concurrent.Semaphore;
 import static org.voyager.utils.ConstantsUtils.*;
 
 public abstract class VoyagerAPI {
-    private static final Logger LOGGER = LoggerFactory.getLogger(VoyagerAPIService.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(VoyagerAPIService.class);
     @Getter
     private static String baseUrl;
     private static String voyagerAPIKey;
@@ -45,7 +51,7 @@ public abstract class VoyagerAPI {
             return CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (InterruptedException | URISyntaxException | IOException e) {
             LOGGER.error(String.format("Error sending http with fullURL: %s. Message: %s",fullURL,e.getMessage()),e);
-            throw new RuntimeException(e);
+            throw new InterruptedException(e.getMessage());
         } finally {
             SEMAPHORE.release();
         }
@@ -63,13 +69,39 @@ public abstract class VoyagerAPI {
             return CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (InterruptedException | URISyntaxException | IOException e) {
             LOGGER.error(String.format("Error sending http with fullURL: %s. Message: %s",fullURL,e.getMessage()),e);
-            throw new RuntimeException(e);
+            throw new InterruptedException(e.getMessage());
+        } finally {
+            SEMAPHORE.release();
+        }
+    }
+
+    protected HttpResponse<String> patchResponse(String fullURL,String jsonBody) throws InterruptedException {
+        LOGGER.debug(String.format("fullURL: %s",fullURL));
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI(fullURL))
+                    .headers(AUTH_TOKEN_HEADER_NAME,voyagerAPIKey,CONTENT_TYPE_HEADER_NAME,JSON_TYPE_VALUE)
+                    .method("PATCH",HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+            SEMAPHORE.acquire();
+            return CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (InterruptedException | URISyntaxException | IOException e) {
+            LOGGER.error(String.format("Error sending http with fullURL: %s. Message: %s",fullURL,e.getMessage()),e);
+            throw new InterruptedException(e.getMessage());
         } finally {
             SEMAPHORE.release();
         }
     }
     public abstract HttpResponse<String> getAirportByIata(String iata) throws InterruptedException;
-    public abstract HttpResponse<String> getRoute() throws InterruptedException;
-    public abstract HttpResponse<String> getRoute(String origin, String destination, Airline airline) throws InterruptedException;
-    public abstract HttpResponse<String> addRoute(String routeJson) throws InterruptedException;
+    public abstract HttpResponse<String> getRoutes() throws InterruptedException;
+    public abstract DeltaDisplay getDelta(String iata);
+    public abstract List<DeltaDisplay> getAllDelta() throws InterruptedException;
+    public abstract DeltaDisplay addDelta(DeltaForm build) throws InterruptedException;
+    public abstract List<String> getAllCivilIata() throws InterruptedException;
+    public abstract Boolean hasActiveRoutesFrom(String origin,Airline airline) throws InterruptedException;
+    public abstract RouteDisplay getRoute(RouteForm routeForm) throws InterruptedException;
+    public abstract RouteDisplay addRoute(RouteForm routeForm) throws InterruptedException;
+    public abstract RouteDisplay patchRoute(RouteDisplay routeDisplay, RoutePatch routePatch) throws InterruptedException;
+    public abstract void printProcessingErrorCounts();
+    public abstract DeltaDisplay patchDelta(String iata, DeltaPatch deltaPatch) throws InterruptedException;
 }

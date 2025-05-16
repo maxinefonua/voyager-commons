@@ -30,12 +30,17 @@ public class ConstantsUtils {
     public static final String ID_PATH_VAR_NAME = "id";
     public static final String ORIGIN_PARAM_NAME = "origin";
     public static final String DESTINATION_PARAM_NAME = "destination";
+    public static final String EXCLUDE_PARAM_NAME = "exclude";
+    public static final String IS_ACTIVE_PARAM_NAME = "isActive";
+    public static final String DELTA_STATUS_PARAM_NAME = "status";
 
     public static final String SOURCE_PROPERTY_NAME = "source";
     public static final String SOURCE_ID_PARAM_NAME = "sourceId";
 
     public static final String ROUTES_PATH = "/routes";
     public static final String AIRPORTS_PATH = "/airports";
+    public static final String IATA_PATH = "/iata";
+    public static final String DELTA_PATH = "/delta";
 
     public static void validateEnvironVars(List<String> envVarKeys) {
         for (String key : envVarKeys) {

@@ -4,16 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.voyager.model.Airline;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class RouteDisplay {
-    Integer id;
-    String origin;
-    String destination;
-    Airline airline;
-    Boolean isActive;
+public class PathDisplay {
+    List<RouteDisplay> routeDisplayList;
 }

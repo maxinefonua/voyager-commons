@@ -20,7 +20,7 @@ public class HttpRequestUtils {
                 .GET();
         headers.forEach(requestBuilder::setHeader);
         HttpResponse<String> response = CLIENT.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) throw new RuntimeException(String.format("Non-200 status returned from endpoint '%s'\nStatus: %d\nResponse: %s",URL,response.statusCode(),response.body()));
+        if (response.statusCode() != 200) throw new RuntimeException(String.format("Non-200 status returned from endpoint '%s'\nDeltaStatus: %d\nResponse: %s",URL,response.statusCode(),response.body()));
         return Jsoup.parse(response.body());
     }
 }

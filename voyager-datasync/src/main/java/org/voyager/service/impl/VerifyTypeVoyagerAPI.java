@@ -85,7 +85,7 @@ public class VerifyTypeVoyagerAPI implements VerifyType {
             HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             int status = response.statusCode();
             if (status != 200) {
-                throw new RuntimeException(String.format("Non-200 status returned from endpoint [%s]\nStatus: %d\nResponse: %s",fullURL,status, response.body()));
+                throw new RuntimeException(String.format("Non-200 status returned from endpoint [%s]\nDeltaStatus: %d\nResponse: %s",fullURL,status, response.body()));
             }
             return parseCodesFromJsonString(response.body());
         } catch (URISyntaxException | InterruptedException | IOException e) {
