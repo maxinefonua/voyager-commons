@@ -21,13 +21,22 @@ public class VoyagerHttpFactory {
         return this.client;
     }
 
-    public HttpRequest getRequest(URI uri) {
+    public HttpRequest request(URI uri,HttpMethod httpMethod,String jsonPayload) {
         return HttpRequest.newBuilder()
                 .uri(uri)
                 .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken)
-                .GET()
+                .method(httpMethod.name(),HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
     }
+
+    public HttpRequest request(URI uri,HttpMethod httpMethod) {
+        return HttpRequest.newBuilder()
+                .uri(uri)
+                .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken)
+                .method(httpMethod.name(),HttpRequest.BodyPublishers.noBody())
+                .build();
+    }
+
 
     public HttpRequest postRequest(URI uri,String jsonPayload) {
         return HttpRequest.newBuilder()

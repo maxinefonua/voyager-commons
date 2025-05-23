@@ -29,16 +29,6 @@ public class ServiceUtils {
         }
     }
 
-    public static Either<ServiceError, Airport[]> responseBody(@NonNull HttpResponse<String> response,
-                                                               @NonNull String requestURL) {
-        if (response.statusCode() != 200) return Either.left(buildServiceError(response,requestURL));
-        try {
-            return Either.right(om.readValue(response.body(),Airport[].class));
-        } catch (JsonProcessingException e) {
-            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, getJsonParseResponseBodyExceptionMessage(requestURL,Airport[].class,response),e));
-        }
-    }
-
     private static ServiceError buildServiceError(HttpResponse<String> response, String requestURL) {
         if (isNotBlank(response.body())) {
             try {
