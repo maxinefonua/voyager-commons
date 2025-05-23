@@ -9,5 +9,7 @@
     <file url="file://$PROJECT_DIR$/voyager-migration/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/voyager-models/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/voyager-models/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/voyager-sdk/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/voyager-sdk/src/main/resources" charset="UTF-8" />
   </component>
 </project>

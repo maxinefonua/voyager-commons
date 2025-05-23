@@ -1,4 +1,4 @@
-package org.voyager.service;
+package org.voyager.service.delta;
 
 public class DeltaService {
 }

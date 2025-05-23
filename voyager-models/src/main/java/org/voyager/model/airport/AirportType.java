@@ -1,4 +1,4 @@
-package org.voyager.model;
+package org.voyager.model.airport;
 
 public enum AirportType {
     CIVIL,

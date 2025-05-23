@@ -2,7 +2,7 @@ package org.voyager.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.voyager.model.AirportType;
+import org.voyager.model.airport.AirportType;
 import org.voyager.service.VerifyType;
 import org.voyager.utils.ConstantsUtils;
 

@@ -1,4 +1,4 @@
-package org.voyager.model;
+package org.voyager.model.airport;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

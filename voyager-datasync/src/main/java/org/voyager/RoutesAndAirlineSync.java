@@ -8,12 +8,12 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.model.Airline;
-import org.voyager.model.RouteJson;
-import org.voyager.model.delta.DeltaDisplay;
+import org.voyager.model.datasync.RouteJson;
+import org.voyager.model.delta.Delta;
 import org.voyager.model.delta.DeltaForm;
 import org.voyager.model.delta.DeltaPatch;
 import org.voyager.model.delta.DeltaStatus;
-import org.voyager.model.route.RouteDisplay;
+import org.voyager.model.route.Route;
 import org.voyager.model.route.RouteForm;
 import org.voyager.model.route.RoutePatch;
 import org.voyager.service.VoyagerAPI;
@@ -32,34 +32,93 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.voyager.utils.ConstantsLocal.ROUTES_HTML_FILE;
-
 public class RoutesAndAirlineSync {
+    private enum Source {
+        FLIGHT_CONNECTIONS,
+        FLIGHT_RADAR
+    }
+    private enum SourceType {
+        ONLINE,
+        LOCAL
+    }
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutesAndAirlineSync.class);
-    private static final Map<Airline,String> airlineToURLMap = Map.of(
+    private static final Map<Airline,String> flightsConnectionSourceLocal = Map.of(
+            Airline.DELTA, "routes/flight-connections.html"
+    );
+    private static final Map<Airline,String> flightRadarSourceLive = Map.of(
             Airline.DELTA, "https://www.flightradar24.com/data/airlines/dl-dal/routes"
     );
     private static VoyagerAPI voyagerAPI;
 
     public static void main(String[] args) {
         System.out.println("printing from routes sync main");
-        Airline airline = extractAirlineFromArgs(args);
-        Integer maxConcurrentRequests = extractMaxConcurrentRequestsFromArgs(args);
+
+        Integer maxConcurrentRequests = extractMaxConcurrentRequests(args[0]);
         voyagerAPI = new VoyagerAPIService(maxConcurrentRequests);
-        String routesURL = airlineToURLMap.get(airline);
-        Document document = extractDocumentFromURLOrLocal(routesURL,ROUTES_HTML_FILE);
+
+        Airline airline = extractAirline(args[1]);
+        Document document = sourceDocFromArgs(airline,args);
+
         Object routesObject = getRoutesObjectFromDocument(document);
         String routesJson = convertRoutesObjectToRoutesJson(routesObject);
         List<RouteForm> routeForms = buildRouteFormsFromRoutesJson(routesJson,airline);
+
         processRouteFormsAndDBRoutes(routeForms,getRoutesFromAPI());
         processAirlineCodes(airline);
+//        TODO: add API call to invalidate all caches using routes and airline services
+    }
+
+    private static Document sourceDocFromArgs(Airline airline, String[] args) {
+        Source source = extractSource(args);
+        SourceType sourceType = extractSourceType(args);
+        String resourcePath = getAirlineFromSource(source,airline);
+        if (sourceType.equals(SourceType.LOCAL)) return fetchDocumentFromResourceFile(resourcePath);
+        else return fetchDocumentFromURL(resourcePath);
+    }
+
+    private static SourceType extractSourceType(String[] args) {
+        try {
+            return SourceType.valueOf(args[3].toUpperCase());
+        } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+            StringJoiner stringJoiner = new StringJoiner(",");
+            Arrays.stream(SourceType.values()).forEach(val -> stringJoiner.add(val.toString()));
+            String errorMessage = String.format("Missing or invalid third argument for source type. Valid type options are: %s",stringJoiner);
+            LOGGER.error(errorMessage);
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
+    private static String getAirlineFromSource(Source source, Airline airline) {
+        switch (source) {
+            case FLIGHT_RADAR -> {
+                return flightRadarSourceLive.get(airline);
+            }
+            case FLIGHT_CONNECTIONS -> {
+                return flightsConnectionSourceLocal.get(airline);
+            }
+            default -> {
+                throw new RuntimeException(String.format("URL map not yet implemented for airline: %s, source: %s",airline.name(),source.name()));
+            }
+        }
+    }
+
+    private static Source extractSource(String[] args) {
+        try {
+            return Source.valueOf(args[2].toUpperCase());
+        } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+            StringJoiner stringJoiner = new StringJoiner(",");
+            Arrays.stream(Source.values()).forEach(val -> stringJoiner.add(val.toString()));
+            String errorMessage = String.format("Missing or invalid third argument for source. Valid source options are: %s",stringJoiner);
+            LOGGER.error(errorMessage);
+            throw new RuntimeException(errorMessage);
+        }
     }
 
     private static void processAirlineCodes(Airline airline) {
         List<String> civilIataCodes =  new ArrayList<>();
-        List<DeltaDisplay> addedDeltas = Collections.synchronizedList(new ArrayList<>());
-        List<DeltaDisplay> patchedDeltasToActive = Collections.synchronizedList(new ArrayList<>());
-        List<DeltaDisplay> patchedDeltasToInactive = Collections.synchronizedList(new ArrayList<>());
+        List<Delta> addedDeltas = Collections.synchronizedList(new ArrayList<>());
+        List<Delta> patchedDeltasToActive = Collections.synchronizedList(new ArrayList<>());
+        List<Delta> patchedDeltasToInactive = Collections.synchronizedList(new ArrayList<>());
         List<String> interruptedIata = Collections.synchronizedList(new ArrayList<>());
 
         try {
@@ -67,31 +126,35 @@ public class RoutesAndAirlineSync {
             civilIataCodes.forEach(iata -> {
                 try {
                     Boolean isActiveAirlineOrigin = voyagerAPI.hasActiveRoutesFrom(iata,airline);
-                    DeltaDisplay deltaDisplay = voyagerAPI.getDelta(iata);
+                    Delta delta = voyagerAPI.getDelta(iata);
                     if (isActiveAirlineOrigin) {
-                        if (deltaDisplay == null) {
+                        if (delta == null) {
                             DeltaForm deltaForm = DeltaForm.builder()
                                     .iata(iata)
                                     .status(DeltaStatus.ACTIVE.name())
                                     .isHub(false)
                                     .build();
                             try {
-                                deltaDisplay = voyagerAPI.addDelta(deltaForm);
-                                addedDeltas.add(deltaDisplay);
-                                LOGGER.debug("added: " + deltaDisplay);
+                                delta = voyagerAPI.addDelta(deltaForm);
+                                addedDeltas.add(delta);
+                                LOGGER.debug("added: " + delta);
                             } catch (Exception e) {
                                 LOGGER.error(String.format("InterrupedException thrown while processing %s. Error message: %s", deltaForm, e.getMessage()), e);
                                 interruptedIata.add(iata);
                             }
-                        } else if (!Set.of(DeltaStatus.ACTIVE,DeltaStatus.SEASONAL).contains(deltaDisplay.getStatus())){
+                        } else if (!Set.of(DeltaStatus.ACTIVE,DeltaStatus.SEASONAL).contains(delta.getStatus())){
                             DeltaPatch deltaPatch = DeltaPatch.builder().isHub(false).status(DeltaStatus.ACTIVE.name()).build();
-                            deltaDisplay = voyagerAPI.patchDelta(iata,deltaPatch);
-                            patchedDeltasToActive.add(deltaDisplay);
+                            delta = voyagerAPI.patchDelta(iata,deltaPatch);
+                            LOGGER.info("patched to active = " + delta);
+                            LOGGER.info("***********");
+                            patchedDeltasToActive.add(delta);
                         }
-                    } else if (deltaDisplay != null && Set.of(DeltaStatus.ACTIVE,DeltaStatus.SEASONAL).contains(deltaDisplay.getStatus())) {
-                        DeltaPatch deltaPatch = DeltaPatch.builder().isHub(deltaDisplay.getIsHub()).status(DeltaStatus.TERMINATED.name()).build();
-                        deltaDisplay = voyagerAPI.patchDelta(iata,deltaPatch);
-                        patchedDeltasToInactive.add(deltaDisplay);
+                    } else if (delta != null && Set.of(DeltaStatus.ACTIVE,DeltaStatus.SEASONAL).contains(delta.getStatus())) {
+                        DeltaPatch deltaPatch = DeltaPatch.builder().isHub(delta.getIsHub()).status(DeltaStatus.TERMINATED.name()).build();
+                        delta = voyagerAPI.patchDelta(iata,deltaPatch);
+                        patchedDeltasToInactive.add(delta);
+                        LOGGER.info("patched to inactive = " + delta);
+                        LOGGER.info("***********");
                     }
                 } catch (InterruptedException e) {
                     LOGGER.error(String.format("InterrupedException thrown while processing %s. Error message: %s", iata, e.getMessage()), e);
@@ -106,15 +169,15 @@ public class RoutesAndAirlineSync {
         LOGGER.info(String.format("total iata civil codes: %d, addedDeltas: %d, patchedDeltasToActive: %d, patchedDeltasToInactive: %d ",civilIataCodes.size(),addedDeltas.size(),patchedDeltasToActive.size(),patchedDeltasToInactive.size()));
     }
 
-    private static List<RouteDisplay> getRoutesFromAPI() {
-        List<RouteDisplay> existing = new ArrayList<>();
+    private static List<Route> getRoutesFromAPI() {
+        List<Route> existing = new ArrayList<>();
         try {
             HttpResponse<String> response = voyagerAPI.getRoutes();
             if (response.statusCode() == 200) {
                 String json = response.body();
                 ObjectMapper om = new ObjectMapper();
                 try {
-                    RouteDisplay[] results = om.readValue(json, RouteDisplay[].class);
+                    Route[] results = om.readValue(json, Route[].class);
                     existing.addAll(Arrays.stream(results).toList());
                 } catch (JsonProcessingException e) {
                     LOGGER.error(String.format("Error reading json of existing routes: %s. Message: %s. Returning empty list for existing routes", json, e.getMessage()), e);
@@ -131,7 +194,7 @@ public class RoutesAndAirlineSync {
     public static Document extractDocumentFromURLOrLocal(String routesURL, String routesHtmlFile) {
         Document document = null;
         try {
-            document = getDocumentFromURL(routesURL,Map.of());
+            document = fetchDocumentFromURL(routesURL);
             LOGGER.info("Successfully fetched document from url.");
             saveToResources(document,routesHtmlFile);
         } catch (RuntimeException e) {
@@ -141,9 +204,9 @@ public class RoutesAndAirlineSync {
         return document;
     }
 
-    private static Integer extractMaxConcurrentRequestsFromArgs(String[] args) {
+    static Integer extractMaxConcurrentRequests(String arg0) {
         try {
-            return Integer.valueOf(args[1].toUpperCase());
+            return Integer.valueOf(arg0.toUpperCase());
         } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
             String errorMessage = "Missing or invalid second argument for maxConcurrentRequests. Provide a valid integer value";
             LOGGER.error(errorMessage);
@@ -151,9 +214,9 @@ public class RoutesAndAirlineSync {
         }
     }
 
-    private static Airline extractAirlineFromArgs(String[] args) {
+    static Airline extractAirline(String arg1) {
         try {
-            return Airline.valueOf(args[0].toUpperCase());
+            return Airline.valueOf(arg1.toUpperCase());
         } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
             String errorMessage = "Missing or invalid first argument for airline. Currently available airlines are: 'delta'";
             LOGGER.error(errorMessage);
@@ -187,7 +250,7 @@ public class RoutesAndAirlineSync {
         }
     }
 
-    private static Document getDocumentFromURL(String routesURL, Map<Object, Object> of) {
+    private static Document fetchDocumentFromURL(String routesURL) {
         try {
             return HttpRequestUtils.getHTMLDocFromURL(routesURL, Map.of());
         } catch (URISyntaxException | IOException | InterruptedException e) {
@@ -249,14 +312,14 @@ public class RoutesAndAirlineSync {
         }
     }
 
-    private static void processRouteFormsAndDBRoutes(List<RouteForm> routeForms, List<RouteDisplay> dbRoutes) {
+    private static void processRouteFormsAndDBRoutes(List<RouteForm> routeForms, List<Route> dbRoutes) {
         List<Integer> addedIds = Collections.synchronizedList(new ArrayList<>());
         List<Integer> patchedToInactiveIds = Collections.synchronizedList(new ArrayList<>());
         List<Integer> existingIds = Collections.synchronizedList(new ArrayList<>());
         List<Integer> skippedActiveIds = Collections.synchronizedList(new ArrayList<>());
         List<Integer> skippedInactiveIds = Collections.synchronizedList(new ArrayList<>());
         List<RouteForm> interruptedRouteFormsOnPatchCreate = Collections.synchronizedList(new ArrayList<>());
-        List<RouteDisplay> interruptedRouteDisplaysOnPatchInactive = Collections.synchronizedList(new ArrayList<>());
+        List<Route> interruptedRouteDisplaysOnPatchInactive = Collections.synchronizedList(new ArrayList<>());
         AtomicReference<Integer> successfullyProcessedForms = new AtomicReference<>(0);
         AtomicReference<Integer> successfullyProcessedDisplays = new AtomicReference<>(0);
         int startingDbRoutes = dbRoutes.size();
@@ -264,13 +327,13 @@ public class RoutesAndAirlineSync {
         List<Integer> patchedToActiveIds = Collections.synchronizedList(new ArrayList<>());
         routeForms.forEach(routeForm -> {
                 try {
-                    RouteDisplay existingRoute = voyagerAPI.getRoute(routeForm);
+                    Route existingRoute = voyagerAPI.getRoute(routeForm);
                     if (existingRoute != null) {
                         if (existingRoute.getIsActive()) {
                             LOGGER.debug("skipping already active: " + existingRoute);
                             skippedActiveIds.add(existingRoute.getId());
                         } else {
-                            RouteDisplay patched = voyagerAPI.patchRoute(existingRoute, RoutePatch.builder().isActive(true).build());
+                            Route patched = voyagerAPI.patchRoute(existingRoute, RoutePatch.builder().isActive(true).build());
                             LOGGER.debug("patched to active: " + patched);
                             patchedToActiveIds.add(patched.getId());
                         }
@@ -278,8 +341,8 @@ public class RoutesAndAirlineSync {
                         dbRoutes.remove(existingRoute);
                         successfullyProcessedDisplays.getAndSet(successfullyProcessedDisplays.get()+1);
                     } else {
-                        RouteDisplay created = voyagerAPI.addRoute(routeForm);
-                        LOGGER.debug("created non-existing route: " + created);
+                        Route created = voyagerAPI.addRoute(routeForm);
+                        LOGGER.info("created non-existing route: " + created);
                         addedIds.add(created.getId());
                     }
                     successfullyProcessedForms.getAndSet(successfullyProcessedForms.get()+1);
@@ -289,21 +352,21 @@ public class RoutesAndAirlineSync {
                 }
         });
 
-        dbRoutes.forEach(routeDisplay -> {
-            if (routeDisplay.getIsActive()) {
-                LOGGER.debug(String.format("Patching as inactive: %s", routeDisplay));
+        dbRoutes.forEach(route -> {
+            if (route.getIsActive()) {
+                LOGGER.debug(String.format("Patching as inactive: %s", route));
                 RoutePatch routePatch = RoutePatch.builder().isActive(false).build();
                 try {
-                    RouteDisplay patchedRoute = voyagerAPI.patchRoute(routeDisplay, routePatch);
+                    Route patchedRoute = voyagerAPI.patchRoute(route, routePatch);
                     LOGGER.debug(String.format("Patched route: %s", patchedRoute.toString()));
                     patchedToInactiveIds.add(patchedRoute.getId());
                 } catch (InterruptedException e) {
-                    LOGGER.error(String.format("InterrupedException thrown while processing %s. Error message: %s", routeDisplay, e.getMessage()), e);
-                    interruptedRouteDisplaysOnPatchInactive.add(routeDisplay);
+                    LOGGER.error(String.format("InterrupedException thrown while processing %s. Error message: %s", route, e.getMessage()), e);
+                    interruptedRouteDisplaysOnPatchInactive.add(route);
                 }
             } else {
-                LOGGER.debug(String.format("Skipping patch to inactive, since already inactive: %s", routeDisplay));
-                skippedInactiveIds.add(routeDisplay.getId());
+                LOGGER.debug(String.format("Skipping patch to inactive, since already inactive: %s", route));
+                skippedInactiveIds.add(route.getId());
             }
         });
 

@@ -12,12 +12,11 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AirportForm {
+public class AirportPatch {
     String name;
     String city;
     String subdivision;
-    String countryCode;
     Double latitude;
     Double longitude;
-    AirportType type;
+    String type;
 }

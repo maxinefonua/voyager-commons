@@ -1,4 +1,4 @@
-package org.voyager.model;
+package org.voyager.model.datasync;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

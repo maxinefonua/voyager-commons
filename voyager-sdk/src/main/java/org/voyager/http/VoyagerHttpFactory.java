@@ -2,20 +2,16 @@ package org.voyager.http;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
 
-import static org.voyager.utils.ConstantsUtils.AUTH_TOKEN_HEADER_NAME;
+import static org.voyager.utils.ConstantsUtils.*;
 
-public class VoyagerHttpClientFactory {
+public class VoyagerHttpFactory {
     private VoyagerHttpClient client;
     private final int maxConcurrentRequests;
     private final String authorizationToken;
 
-    public VoyagerHttpClientFactory(int maxConcurrentRequests,String authorizationToken) {
+    public VoyagerHttpFactory(int maxConcurrentRequests, String authorizationToken) {
         this.maxConcurrentRequests = maxConcurrentRequests;
         this.authorizationToken = authorizationToken;
     }
@@ -25,10 +21,20 @@ public class VoyagerHttpClientFactory {
         return this.client;
     }
 
-    public HttpRequest buildRequest(URI uri,) throws URISyntaxException {
+    public HttpRequest getRequest(URI uri) {
         return HttpRequest.newBuilder()
                 .uri(uri)
                 .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken)
+                .GET()
+                .build();
+    }
+
+    public HttpRequest postRequest(URI uri,String jsonPayload) {
+        return HttpRequest.newBuilder()
+                .uri(uri)
+                .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken,
+                        CONTENT_TYPE_HEADER_NAME,JSON_TYPE_VALUE)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
     }
 

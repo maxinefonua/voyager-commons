@@ -3,11 +3,11 @@ package org.voyager.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.voyager.model.Airline;
-import org.voyager.model.AirportType;
-import org.voyager.model.delta.DeltaDisplay;
+import org.voyager.model.airport.AirportType;
+import org.voyager.model.delta.Delta;
 import org.voyager.model.delta.DeltaForm;
 import org.voyager.model.delta.DeltaPatch;
-import org.voyager.model.route.RouteDisplay;
+import org.voyager.model.route.Route;
 import org.voyager.model.route.RouteForm;
 import org.voyager.model.route.RoutePatch;
 import org.voyager.service.VoyagerAPI;
@@ -41,14 +41,14 @@ public class VoyagerAPIService extends VoyagerAPI {
     }
 
     @Override
-    public DeltaDisplay getDelta(String iata){
+    public Delta getDelta(String iata){
         StringBuilder sb = new StringBuilder();
         sb.append(getBaseUrl());
         sb.append(DELTA_PATH);
         sb.append("/");
         sb.append(iata);
         try {
-            return processGetResponse(getResponse(sb.toString()), DeltaDisplay.class);
+            return processGetResponse(getResponse(sb.toString()), Delta.class);
         } catch (InterruptedException e) {
             LOGGER.debug(String.format("InterruptedException thrown when getting delta with iata %s. Returning null. Error: %s",iata,e.getMessage()),e);
             return null;
@@ -56,21 +56,21 @@ public class VoyagerAPIService extends VoyagerAPI {
     }
 
     @Override
-    public List<DeltaDisplay> getAllDelta() throws InterruptedException {
+    public List<Delta> getAllDelta() throws InterruptedException {
         StringBuilder sb = new StringBuilder();
         sb.append(getBaseUrl());
         sb.append(DELTA_PATH);
-        return Arrays.stream(processGetResponse(getResponse(sb.toString()),DeltaDisplay[].class)).toList();
+        return Arrays.stream(processGetResponse(getResponse(sb.toString()), Delta[].class)).toList();
     }
 
     @Override
-    public DeltaDisplay addDelta(DeltaForm deltaForm) throws InterruptedException {
+    public Delta addDelta(DeltaForm deltaForm) throws InterruptedException {
         StringBuilder sb = new StringBuilder();
         sb.append(getBaseUrl());
         sb.append(DELTA_PATH);
         try {
             String jsonBody = om.writeValueAsString(deltaForm);
-            return processPostResponse(postResponse(sb.toString(),jsonBody),DeltaDisplay.class);
+            return processPostResponse(postResponse(sb.toString(),jsonBody), Delta.class);
         } catch (JsonProcessingException e) {
             String message = String.format("Error writing json from deltaForm: %s. Message: %s", deltaForm, e.getMessage());
             LOGGER.error(message,e);
@@ -108,7 +108,8 @@ public class VoyagerAPIService extends VoyagerAPI {
         sb.append(IS_ACTIVE_PARAM_NAME);
         sb.append("=");
         sb.append(true);
-        return processGetResponse(getResponse(sb.toString()),RouteDisplay[].class).length > 0;
+        Route[] results = processGetResponse(getResponse(sb.toString()), Route[].class);
+        return (results != null && results.length > 0);
     }
 
     private <T> T processGetResponse(HttpResponse<String> response, Class<T> valueType) throws InterruptedException {
@@ -134,7 +135,7 @@ public class VoyagerAPIService extends VoyagerAPI {
     }
 
     @Override
-    public RouteDisplay getRoute(RouteForm routeForm) throws InterruptedException {
+    public Route getRoute(RouteForm routeForm) throws InterruptedException {
         StringBuilder sb = new StringBuilder();
         sb.append(getBaseUrl());
         sb.append(ROUTES_PATH);
@@ -150,8 +151,8 @@ public class VoyagerAPIService extends VoyagerAPI {
         sb.append(AIRLINE_PARAM_NAME);
         sb.append("=");
         sb.append(routeForm.getAirline());
-        RouteDisplay[] results = processGetResponse(getResponse(sb.toString()),RouteDisplay[].class);
-        if (results.length == 0) return null;
+        Route[] results = processGetResponse(getResponse(sb.toString()), Route[].class);
+        if (results == null || results.length == 0) return null;
         else if (results.length == 1) {
             LOGGER.debug(String.format("existing route: %s", results[0]));
             return results[0];
@@ -163,13 +164,13 @@ public class VoyagerAPIService extends VoyagerAPI {
     }
 
     @Override
-    public RouteDisplay addRoute(RouteForm routeForm) throws InterruptedException {
+    public Route addRoute(RouteForm routeForm) throws InterruptedException {
         StringBuilder sb = new StringBuilder();
         sb.append(getBaseUrl());
         sb.append(ROUTES_PATH);
         try {
             String jsonBody = om.writeValueAsString(routeForm);
-            return processPostResponse(postResponse(sb.toString(),jsonBody),RouteDisplay.class);
+            return processPostResponse(postResponse(sb.toString(),jsonBody), Route.class);
         } catch (JsonProcessingException e) {
             String message = String.format("JsonProcessingException thrown when writing json from routeForm: %s. Message: %s", routeForm, e.getMessage());
             LOGGER.error(message,e);
@@ -198,15 +199,15 @@ public class VoyagerAPIService extends VoyagerAPI {
     }
 
     @Override
-    public RouteDisplay patchRoute(RouteDisplay routeDisplay, RoutePatch routePatch) throws InterruptedException {
+    public Route patchRoute(Route route, RoutePatch routePatch) throws InterruptedException {
         try {
             String patchJson = om.writeValueAsString(routePatch);
             StringBuilder sb = new StringBuilder();
             sb.append(getBaseUrl());
             sb.append(ROUTES_PATH);
             sb.append("/");
-            sb.append(routeDisplay.getId());
-            return processPatchResponse(patchResponse(sb.toString(),patchJson),RouteDisplay.class);
+            sb.append(route.getId());
+            return processPatchResponse(patchResponse(sb.toString(),patchJson), Route.class);
         } catch (JsonProcessingException e) {
             String message = String.format("JsonProcessingException thrown when writing json from routePatch: %s. Message: %s", routePatch, e.getMessage());
             LOGGER.error(message,e);
@@ -222,7 +223,7 @@ public class VoyagerAPIService extends VoyagerAPI {
     }
 
     @Override
-    public DeltaDisplay patchDelta(String iata, DeltaPatch deltaPatch) throws InterruptedException {
+    public Delta patchDelta(String iata, DeltaPatch deltaPatch) throws InterruptedException {
         try {
             String patchJson = om.writeValueAsString(deltaPatch);
             StringBuilder sb = new StringBuilder();
@@ -230,7 +231,7 @@ public class VoyagerAPIService extends VoyagerAPI {
             sb.append(DELTA_PATH);
             sb.append("/");
             sb.append(iata);
-            return processPatchResponse(patchResponse(sb.toString(),patchJson),DeltaDisplay.class);
+            return processPatchResponse(patchResponse(sb.toString(),patchJson), Delta.class);
         } catch (JsonProcessingException e) {
             String message = String.format("JsonProcessingException thrown when writing json from deltaPatch: %s. Message: %s", deltaPatch, e.getMessage());
             LOGGER.error(message,e);

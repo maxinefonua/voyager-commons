@@ -4,10 +4,10 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.model.Airline;
-import org.voyager.model.delta.DeltaDisplay;
+import org.voyager.model.delta.Delta;
 import org.voyager.model.delta.DeltaForm;
 import org.voyager.model.delta.DeltaPatch;
-import org.voyager.model.route.RouteDisplay;
+import org.voyager.model.route.Route;
 import org.voyager.model.route.RouteForm;
 import org.voyager.model.route.RoutePatch;
 import org.voyager.service.impl.VoyagerAPIService;
@@ -94,14 +94,14 @@ public abstract class VoyagerAPI {
     }
     public abstract HttpResponse<String> getAirportByIata(String iata) throws InterruptedException;
     public abstract HttpResponse<String> getRoutes() throws InterruptedException;
-    public abstract DeltaDisplay getDelta(String iata);
-    public abstract List<DeltaDisplay> getAllDelta() throws InterruptedException;
-    public abstract DeltaDisplay addDelta(DeltaForm build) throws InterruptedException;
+    public abstract Delta getDelta(String iata);
+    public abstract List<Delta> getAllDelta() throws InterruptedException;
+    public abstract Delta addDelta(DeltaForm build) throws InterruptedException;
     public abstract List<String> getAllCivilIata() throws InterruptedException;
     public abstract Boolean hasActiveRoutesFrom(String origin,Airline airline) throws InterruptedException;
-    public abstract RouteDisplay getRoute(RouteForm routeForm) throws InterruptedException;
-    public abstract RouteDisplay addRoute(RouteForm routeForm) throws InterruptedException;
-    public abstract RouteDisplay patchRoute(RouteDisplay routeDisplay, RoutePatch routePatch) throws InterruptedException;
+    public abstract Route getRoute(RouteForm routeForm) throws InterruptedException;
+    public abstract Route addRoute(RouteForm routeForm) throws InterruptedException;
+    public abstract Route patchRoute(Route route, RoutePatch routePatch) throws InterruptedException;
     public abstract void printProcessingErrorCounts();
-    public abstract DeltaDisplay patchDelta(String iata, DeltaPatch deltaPatch) throws InterruptedException;
+    public abstract Delta patchDelta(String iata, DeltaPatch deltaPatch) throws InterruptedException;
 }
