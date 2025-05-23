@@ -128,7 +128,7 @@ public class RoutesAndAirlineSync {
         return existing;
     }
 
-    private static Document extractDocumentFromURLOrLocal(String routesURL, String routesHtmlFile) {
+    public static Document extractDocumentFromURLOrLocal(String routesURL, String routesHtmlFile) {
         Document document = null;
         try {
             document = getDocumentFromURL(routesURL,Map.of());
@@ -174,7 +174,7 @@ public class RoutesAndAirlineSync {
 
     }
 
-    private static Document fetchDocumentFromResourceFile(String fileName) {
+    public static Document fetchDocumentFromResourceFile(String fileName) {
         try (InputStream inputStream = ConstantsUtils.class.getClassLoader().getResourceAsStream(fileName)) {
             if (inputStream == null) {
                 LOGGER.info(String.format("InputStream returned null with fileName: %s",fileName));
