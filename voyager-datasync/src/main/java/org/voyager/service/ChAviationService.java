@@ -40,7 +40,8 @@ public class ChAviationService {
                     .cookies(Map.of(SSSID_NAME,SSSID_VALUE,GUEST_SESS_ID,GUEST_SESS_VALUE))
                     .get();
             String dataUrl  = doc.getElementsByAttributeValue("href","#overview").first().attr("data-url");
-            return extractAirportInfo(dataUrl,iata);
+            String airportName = doc.select(".section__heading").text();
+            return extractAirportDetails(dataUrl,iata,airportName);
         } catch (IOException e) {
             return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
                     String.format("Exception thrown while sending GET request '%s'",baseURL.concat(airportsPath).concat(iata)),
@@ -48,13 +49,13 @@ public class ChAviationService {
         }
     }
 
-    private static Either<ServiceError,AirportCH> extractAirportInfo(String dataUrl, String iata) {
+    private static Either<ServiceError,AirportCH> extractAirportDetails(String dataUrl, String iata, String airportName) {
         try {
             Document doc = Jsoup.connect(baseURL.concat(dataUrl)).timeout(0)
                     .cookies(Map.of(SSSID_NAME,SSSID_VALUE,GUEST_SESS_ID,GUEST_SESS_VALUE))
                     .get();
             Elements elements = doc.select(".data-label");
-            AirportCH airportCH = AirportCH.builder().iata(iata).build();
+            AirportCH airportCH = AirportCH.builder().iata(iata).name(airportName).build();
             elements.forEach(element -> {
                 Element parent = element.parent();
                 Element value = parent.selectFirst(".data-value");
@@ -65,8 +66,10 @@ public class ChAviationService {
                         else if (type.contains("Military")) airportCH.setType(AirportType.MILITARY);
                         else if (type.contains("Airport no longer in use")) airportCH.setType(AirportType.HISTORICAL);
                         else {
+                            System.out.println("*****************");
                             System.out.println(value);
                             airportCH.setType(AirportType.OTHER);
+                            System.out.println("*****************");
                         }
                         break;
                     }

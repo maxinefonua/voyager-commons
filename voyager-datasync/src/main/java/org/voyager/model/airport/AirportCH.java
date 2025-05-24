@@ -4,9 +4,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 
-@Builder @Data @ToString(includeFieldNames = false)
+@Builder @Data @ToString
 public class AirportCH {
     String iata;
+    String name;
     String countryCode;
     Double longitude;
     Double latitude;

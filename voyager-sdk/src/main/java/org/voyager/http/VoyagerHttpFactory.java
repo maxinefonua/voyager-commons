@@ -24,7 +24,7 @@ public class VoyagerHttpFactory {
     public HttpRequest request(URI uri,HttpMethod httpMethod,String jsonPayload) {
         return HttpRequest.newBuilder()
                 .uri(uri)
-                .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken)
+                .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken,CONTENT_TYPE_HEADER_NAME,JSON_TYPE_VALUE)
                 .method(httpMethod.name(),HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
     }

@@ -6,7 +6,7 @@ import org.voyager.utils.MapperUtils;
 
 @Builder(toBuilder = true) @Data
 @AllArgsConstructor @NoArgsConstructor
-@ToString(includeFieldNames = false)
+@ToString
 @EqualsAndHashCode(exclude = "distance")
 public class Airport {
     @NonNull
