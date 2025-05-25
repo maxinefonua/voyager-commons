@@ -1,32 +1,23 @@
 package org.voyager.http;
 
+import lombok.NonNull;
+
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 
 import static org.voyager.utils.ConstantsUtils.*;
 
 public class VoyagerHttpFactory {
     private VoyagerHttpClient client;
-    private final int maxConcurrentRequests;
     private final String authorizationToken;
 
-    public VoyagerHttpFactory(int maxConcurrentRequests, String authorizationToken) {
-        this.maxConcurrentRequests = maxConcurrentRequests;
+    public VoyagerHttpFactory(String authorizationToken) {
         this.authorizationToken = authorizationToken;
     }
 
     public VoyagerHttpClient getClient() {
         if (client == null) this.client = createClient();
         return this.client;
-    }
-
-    public HttpRequest request(URI uri,HttpMethod httpMethod,String jsonPayload) {
-        return HttpRequest.newBuilder()
-                .uri(uri)
-                .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken,CONTENT_TYPE_HEADER_NAME,JSON_TYPE_VALUE)
-                .method(httpMethod.name(),HttpRequest.BodyPublishers.ofString(jsonPayload))
-                .build();
     }
 
     public HttpRequest request(URI uri,HttpMethod httpMethod) {
@@ -37,17 +28,15 @@ public class VoyagerHttpFactory {
                 .build();
     }
 
-
-    public HttpRequest postRequest(URI uri,String jsonPayload) {
+    public HttpRequest request(URI uri,HttpMethod httpMethod,String jsonPayload) {
         return HttpRequest.newBuilder()
                 .uri(uri)
-                .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken,
-                        CONTENT_TYPE_HEADER_NAME,JSON_TYPE_VALUE)
-                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken,CONTENT_TYPE_HEADER_NAME,JSON_TYPE_VALUE)
+                .method(httpMethod.name(),HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
     }
 
     private VoyagerHttpClient createClient() {
-        return new VoyagerHttpClient(maxConcurrentRequests);
+        return new VoyagerHttpClient();
     }
 }

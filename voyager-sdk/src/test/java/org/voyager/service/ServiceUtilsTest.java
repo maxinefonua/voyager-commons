@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.ParameterizedTypeReference;
 import org.voyager.error.HttpException;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
@@ -18,6 +19,7 @@ import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
 import org.voyager.model.location.Location;
 
+import java.lang.reflect.Type;
 import java.net.http.HttpResponse;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -151,8 +153,8 @@ class ServiceUtilsTest {
     @DisplayName("null args for responseBody")
     void responseBodyNullArgs() {
         assertThrows(NullPointerException.class,() -> ServiceUtils.responseBody(httpResponse, Airport.class,null));
-        assertThrows(NullPointerException.class,() -> ServiceUtils.responseBody(httpResponse, null,REQUEST_URL));
+        assertThrows(NullPointerException.class,() -> ServiceUtils.responseBody(httpResponse, null, REQUEST_URL));
         assertThrows(NullPointerException.class,() -> ServiceUtils.responseBody(null, Airport.class,REQUEST_URL));
-        assertThrows(NullPointerException.class,() -> ServiceUtils.responseBody(null, null,null));
+        assertThrows(NullPointerException.class,() -> ServiceUtils.responseBodyList(null, null,null));
     }
 }

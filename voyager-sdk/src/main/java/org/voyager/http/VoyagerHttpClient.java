@@ -14,12 +14,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
 
 public class VoyagerHttpClient {
-    private final Semaphore semaphore;
     private final HttpClient httpClient;
     private static final Logger LOGGER = LoggerFactory.getLogger(VoyagerHttpClient.class);
 
-    public VoyagerHttpClient(int maxConcurrentRequests) {
-        this.semaphore = new Semaphore(maxConcurrentRequests);
+    public VoyagerHttpClient() {
         this.httpClient = HttpClient.newBuilder().build();
     }
 
@@ -31,14 +29,11 @@ public class VoyagerHttpClient {
     public Either<ServiceError,HttpResponse<String>> send(HttpRequest httpRequest) {
         LOGGER.debug(String.format("get: %s",httpRequest.toString()));
         try {
-            semaphore.acquire();
             return Either.right(httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()));
         } catch (IOException | InterruptedException e) {
             return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
                     String.format("Exception thrown while sending HttpRequest '%s'",httpRequest),
                     e));
-        } finally {
-            semaphore.release();
         }
     }
 }

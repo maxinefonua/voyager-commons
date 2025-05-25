@@ -7,6 +7,7 @@ import java.net.URL;
 
 public class VoyagerConfig {
     private static final String AIRPORTS_PATH = "/airports";
+    private static final String ROUTES_PATH = "/routes";
 
     @Getter
     private final int maxThreads;
@@ -34,6 +35,10 @@ public class VoyagerConfig {
 
     public String getAirportsServicePath() {
         return baseURL.concat(AIRPORTS_PATH);
+    }
+
+    public String getRoutesServicePath() {
+        return baseURL.concat(ROUTES_PATH);
     }
 
     private String buildBaseURL(String protocol, String host, int port) {

@@ -1,4 +1,4 @@
-package org.voyager.service.airport;
+package org.voyager.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +10,6 @@ import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
-import org.voyager.http.HttpMethod;
 import org.voyager.http.VoyagerHttpClient;
 import org.voyager.http.VoyagerHttpFactory;
 import org.voyager.model.airport.Airport;
@@ -80,7 +79,7 @@ class AirportServiceTest {
         eitherLeft = Either.left(serviceError);
         assertNotNull(eitherLeft.getLeft());
 
-        airportService = new AirportService(voyagerConfig,voyagerHttpFactory);
+        airportService = new AirportService(voyagerConfig);
     }
 
     @AfterEach
@@ -96,12 +95,12 @@ class AirportServiceTest {
     @Test
     @DisplayName("invalid constructor args")
     void testInvalidConstructor() {
-        assertThrows(NullPointerException.class,() -> new AirportService(null,null));
-        assertThrows(NullPointerException.class,() -> new AirportService(null,voyagerHttpFactory));
-        assertThrows(NullPointerException.class,() -> new AirportService(voyagerConfig,null));
+        assertThrows(NullPointerException.class,() -> new AirportService(null));
+        assertThrows(NullPointerException.class,() -> new AirportService(null));
+        assertThrows(NullPointerException.class,() -> new AirportService(voyagerConfig));
 
         VoyagerConfig invalidConfig = new VoyagerConfig(VoyagerConfig.Protocol.HTTP,"invalid host",PORT,MAX_THREADS,AUTH_TOKEN);
-        assertThrows(IllegalArgumentException.class,() -> new AirportService(invalidConfig,voyagerHttpFactory));
+        assertThrows(IllegalArgumentException.class,() -> new AirportService(invalidConfig));
     }
 
     @Test

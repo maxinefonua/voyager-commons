@@ -6,7 +6,7 @@ import lombok.ToString;
 
 @Data @NoArgsConstructor
 @ToString(includeFieldNames = false)
-public class RouteJson {
-    Airport airport1;
-    Airport airport2;
+public class RouteFR {
+    AirportFR airport1;
+    AirportFR airport2;
 }

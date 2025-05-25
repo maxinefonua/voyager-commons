@@ -1,5 +1,7 @@
 package org.voyager;
 
+import org.voyager.service.Voyager;
+
 public class AirlineSync {
     private static Voyager voyager;
 
