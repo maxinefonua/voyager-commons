@@ -9,6 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.voyager.config.Protocol;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.model.Airline;
@@ -50,7 +51,7 @@ public class RoutesByAirlineSync {
         String voyagerAuthorizationToken = datasyncProgramArguments.getAccessToken();
         int processLimit = datasyncProgramArguments.getProcessLimit();
 
-        VoyagerConfig voyagerConfig = new VoyagerConfig(VoyagerConfig.Protocol.HTTP,host,port,maxConcurrentRequests,voyagerAuthorizationToken);
+        VoyagerConfig voyagerConfig = new VoyagerConfig(Protocol.HTTP,host,port,maxConcurrentRequests,voyagerAuthorizationToken);
         voyager = new Voyager(voyagerConfig);
         routeService = voyager.getRouteService();
 

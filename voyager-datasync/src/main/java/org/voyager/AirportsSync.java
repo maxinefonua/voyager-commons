@@ -3,6 +3,7 @@ package org.voyager;
 import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.voyager.config.Protocol;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.model.airport.Airport;
@@ -34,7 +35,7 @@ public class AirportsSync {
         String voyagerAuthorizationToken = datasyncProgramArguments.getAccessToken();
         int processLimit = datasyncProgramArguments.getProcessLimit();
 
-        VoyagerConfig voyagerConfig = new VoyagerConfig(VoyagerConfig.Protocol.HTTP,host,port,maxConcurrentRequests,voyagerAuthorizationToken);
+        VoyagerConfig voyagerConfig = new VoyagerConfig(Protocol.HTTP,host,port,maxConcurrentRequests,voyagerAuthorizationToken);
 
         executorService = Executors.newFixedThreadPool(maxConcurrentRequests);
         voyager = new Voyager(voyagerConfig);

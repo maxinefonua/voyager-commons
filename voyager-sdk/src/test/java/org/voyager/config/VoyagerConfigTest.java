@@ -18,7 +18,7 @@ class VoyagerConfigTest {
 
     @BeforeAll
     public static void init() {
-        validVoyagerConfig = new VoyagerConfig(VoyagerConfig.Protocol.HTTP,HOST,PORT,MAX_THREADS,AUTH_TOKEN);
+        validVoyagerConfig = new VoyagerConfig(Protocol.HTTP,HOST,PORT,MAX_THREADS,AUTH_TOKEN);
     }
 
     @Test
@@ -42,11 +42,11 @@ class VoyagerConfigTest {
         expected = "protocol is marked non-null but is null";
         assertEquals(expected,exception.getMessage());
 
-        exception = assertThrows(NullPointerException.class,() -> new VoyagerConfig(VoyagerConfig.Protocol.HTTP,null,PORT,MAX_THREADS,AUTH_TOKEN));
+        exception = assertThrows(NullPointerException.class,() -> new VoyagerConfig(Protocol.HTTP,null,PORT,MAX_THREADS,AUTH_TOKEN));
         expected = "host is marked non-null but is null";
         assertEquals(expected,exception.getMessage());
 
-        exception = assertThrows(NullPointerException.class,() -> new VoyagerConfig(VoyagerConfig.Protocol.HTTP,HOST,PORT,MAX_THREADS,null));
+        exception = assertThrows(NullPointerException.class,() -> new VoyagerConfig(Protocol.HTTP,HOST,PORT,MAX_THREADS,null));
         expected = "authorizationToken is marked non-null but is null";
         assertEquals(expected,exception.getMessage());
     }
@@ -55,7 +55,7 @@ class VoyagerConfigTest {
     @DisplayName("invalid args")
     public void testInvalidProtocol() {
         String invalidHost = "invalid/";
-        Exception exception = assertThrows(Exception.class, () -> new VoyagerConfig(VoyagerConfig.Protocol.HTTP,invalidHost,PORT,MAX_THREADS,AUTH_TOKEN));
+        Exception exception = assertThrows(Exception.class, () -> new VoyagerConfig(Protocol.HTTP,invalidHost,PORT,MAX_THREADS,AUTH_TOKEN));
         String expected = "Illegal character found in host: '/'";
         assertEquals(expected, exception.getMessage());
     }

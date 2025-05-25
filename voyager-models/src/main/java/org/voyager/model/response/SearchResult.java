@@ -9,7 +9,7 @@ import java.util.List;
 
 @Builder @NoArgsConstructor
 @AllArgsConstructor @Getter
-public class VoyagerListResponse<T> {
+public class SearchResult<T> {
     Integer resultCount;
     List<T> results;
 }

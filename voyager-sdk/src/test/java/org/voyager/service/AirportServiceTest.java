@@ -6,6 +6,7 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.voyager.config.Protocol;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
@@ -31,7 +32,7 @@ class AirportServiceTest {
     private static final int MAX_THREADS = 50;
     private static final String AUTH_TOKEN = "test-token";
     private static final String SERVICE_ERROR_MESSAGE = "test message for service error";
-    private static final VoyagerConfig voyagerConfig = new VoyagerConfig(VoyagerConfig.Protocol.HTTP,HOST,PORT,MAX_THREADS,AUTH_TOKEN);
+    private static final VoyagerConfig voyagerConfig = new VoyagerConfig(Protocol.HTTP,HOST,PORT,MAX_THREADS,AUTH_TOKEN);
     private static final ServiceError serviceError = new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
             new ServiceException(SERVICE_ERROR_MESSAGE));
     private static final ObjectMapper om = new ObjectMapper();
@@ -99,7 +100,7 @@ class AirportServiceTest {
         assertThrows(NullPointerException.class,() -> new AirportService(null));
         assertThrows(NullPointerException.class,() -> new AirportService(voyagerConfig));
 
-        VoyagerConfig invalidConfig = new VoyagerConfig(VoyagerConfig.Protocol.HTTP,"invalid host",PORT,MAX_THREADS,AUTH_TOKEN);
+        VoyagerConfig invalidConfig = new VoyagerConfig(Protocol.HTTP,"invalid host",PORT,MAX_THREADS,AUTH_TOKEN);
         assertThrows(IllegalArgumentException.class,() -> new AirportService(invalidConfig));
     }
 

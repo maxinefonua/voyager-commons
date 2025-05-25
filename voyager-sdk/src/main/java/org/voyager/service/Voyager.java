@@ -22,10 +22,12 @@ import static org.voyager.service.ServiceUtils.responseBody;
 import static org.voyager.service.ServiceUtils.responseBodyList;
 
 public class Voyager {
+    private static VoyagerHttpFactory voyagerHttpFactory;
     private static VoyagerConfig voyagerConfig;
     private static AirportService airportService;
     private static RouteService routeService;
-    private static VoyagerHttpFactory voyagerHttpFactory;
+    private static SearchService searchService;
+    private static LocationService locationService;
     private static final Logger LOGGER = LoggerFactory.getLogger(Voyager.class);
     private static final ObjectMapper om = new ObjectMapper();
 
@@ -34,14 +36,24 @@ public class Voyager {
         this.voyagerHttpFactory = new VoyagerHttpFactory(voyagerConfig.getAuthorizationToken());
     }
 
+    public LocationService getLocationService() {
+        if (locationService == null) locationService = new LocationService(voyagerConfig);
+        return locationService;
+    }
+
     public AirportService getAirportService() {
         if (airportService == null) airportService = new AirportService(voyagerConfig);
         return airportService;
     }
 
     public RouteService getRouteService() {
-        if (routeService == null) routeService = new RouteService(voyagerConfig, voyagerHttpFactory);
+        if (routeService == null) routeService = new RouteService(voyagerConfig);
         return routeService;
+    }
+
+    public SearchService getSearchService() {
+        if (searchService == null) searchService = new SearchService(voyagerConfig);
+        return searchService;
     }
 
     static  <T> Either<ServiceError, T> fetch(String requestURL,HttpMethod httpMethod,TypeReference<T> typeReference) {
@@ -72,7 +84,7 @@ public class Voyager {
         }
     }
 
-    static <T> Either<ServiceError, T> fetchWithPayload(String requestURL,HttpMethod httpMethod,Class<T> responseType,Object requestBody) {
+    static <T> Either<ServiceError, T> fetchWithRequestBody(String requestURL, HttpMethod httpMethod, Class<T> responseType, Object requestBody) {
         try {
             URI uri = new URI(requestURL);
             String jsonPayload = om.writeValueAsString(requestBody);

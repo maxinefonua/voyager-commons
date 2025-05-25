@@ -7,7 +7,12 @@ import java.net.URL;
 
 public class VoyagerConfig {
     private static final String AIRPORTS_PATH = "/airports";
+    private static final String NEARBY_PATH = "/nearby-airports";
     private static final String ROUTES_PATH = "/routes";
+    private static final String PATH_PATH = "/path";
+    private static final String SEARCH_PATH = "/search";
+    private static final String ATTRIBUTION_PATH = "/search-attribution";
+    private static final String LOCATIONS_PATH = "/locations";
 
     @Getter
     private final int maxThreads;
@@ -16,20 +21,9 @@ public class VoyagerConfig {
     @Getter
     private final String authorizationToken;
 
-    public enum Protocol {
-        HTTP("http");
-        private String value;
-        Protocol(String value) {
-            this.value = value;
-        }
-        String getValue() {
-            return this.value;
-        }
-    }
-
     public VoyagerConfig(@NonNull Protocol protocol, @NonNull String host, int port, int maxThreads, @NonNull String authorizationToken) {
         this.maxThreads = maxThreads;
-        this.baseURL = buildBaseURL(protocol.value,host,port);
+        this.baseURL = buildBaseURL(protocol.getValue(),host,port);
         this.authorizationToken = authorizationToken;
     }
 
@@ -39,6 +33,26 @@ public class VoyagerConfig {
 
     public String getRoutesServicePath() {
         return baseURL.concat(ROUTES_PATH);
+    }
+
+    public String getPath() {
+        return baseURL.concat(PATH_PATH);
+    }
+
+    public String getSearchPath() {
+        return baseURL.concat(SEARCH_PATH);
+    }
+
+    public String getAttributionPath() {
+        return baseURL.concat(ATTRIBUTION_PATH);
+    }
+
+    public String getLocationsPath() {
+        return baseURL.concat(LOCATIONS_PATH);
+    }
+
+    public String getNearbyPath() {
+        return baseURL.concat(NEARBY_PATH);
     }
 
     private String buildBaseURL(String protocol, String host, int port) {

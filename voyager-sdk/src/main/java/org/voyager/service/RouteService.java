@@ -1,45 +1,31 @@
 package org.voyager.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import lombok.NonNull;
 import org.voyager.config.VoyagerConfig;
-import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
-import org.voyager.http.VoyagerHttpFactory;
+import org.voyager.model.route.Path;
 import org.voyager.model.route.Route;
 import org.voyager.model.route.RouteForm;
 import org.voyager.model.route.RoutePatch;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
 
-import static org.voyager.service.ServiceUtils.responseBody;
 import static org.voyager.service.Voyager.fetch;
-import static org.voyager.service.Voyager.fetchWithPayload;
+import static org.voyager.service.Voyager.fetchWithRequestBody;
 import static org.voyager.utils.ConstantsUtils.*;
 
 public class RouteService {
     private final String servicePath;
-    private final VoyagerHttpFactory voyagerHttpFactory;
-    private final ObjectMapper om = new ObjectMapper();
-    private final URI serviceURI;
+    private final String pathPath;
 
-    RouteService(@NonNull VoyagerConfig voyagerConfig, @NonNull VoyagerHttpFactory voyagerHttpFactory) {
+    RouteService(@NonNull VoyagerConfig voyagerConfig) {
         this.servicePath = voyagerConfig.getRoutesServicePath();
-        this.voyagerHttpFactory = voyagerHttpFactory;
-        try {
-            this.serviceURI = new URI(servicePath);
-        } catch (URISyntaxException e) { // TODO: correct exception to throw here?
-            throw new IllegalArgumentException(String.format("Exception thrown while building URI of service path '%s'",servicePath),e);
-        }
+        this.pathPath = voyagerConfig.getPath();
     }
 
     public Either<ServiceError, List<Route>> getRoutes() {
@@ -47,7 +33,7 @@ public class RouteService {
     }
 
     public Either<ServiceError,Route> createRoute(RouteForm routeForm) {
-        return fetchWithPayload(servicePath,HttpMethod.POST,Route.class,routeForm);
+        return fetchWithRequestBody(servicePath,HttpMethod.POST,Route.class,routeForm);
     }
 
     public Either<ServiceError,List<Route>> getRoutes(String origin,String destination,String airline) {
@@ -63,6 +49,19 @@ public class RouteService {
 
     public Either<ServiceError,Route> patchRoute(Route route, RoutePatch routePatch) {
         String requestURL = servicePath.concat(String.format("/%d",route.getId()));
-        return fetchWithPayload(requestURL,HttpMethod.PATCH,Route.class,routePatch);
+        return fetchWithRequestBody(requestURL,HttpMethod.PATCH,Route.class,routePatch);
+    }
+
+    public Either<ServiceError, Path> getPath(String origin, String destination) {
+        String requestURL = pathPath.concat(String.format("/%s/to/%s",origin,destination));
+        return fetch(requestURL,HttpMethod.GET,Path.class);
+    }
+
+    public Either<ServiceError, Path> getPath(String origin, String destination, Set<String> exclusions) {
+        StringJoiner stringJoiner = new StringJoiner(",");
+        exclusions.forEach(stringJoiner::add);
+        String requestURL = pathPath.concat(String.format("/%s/to/%s" + "?%s=%s",
+                origin,destination,EXCLUDE_PARAM_NAME,stringJoiner));
+        return fetch(requestURL,HttpMethod.GET,Path.class);
     }
 }
