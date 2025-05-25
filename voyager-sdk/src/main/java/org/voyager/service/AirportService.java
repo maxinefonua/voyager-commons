@@ -35,6 +35,18 @@ public class AirportService {
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 
+    public Either<ServiceError,List<Airport>> getAirports(@NonNull AirportType airportType) {
+        String requestURL = servicePath.concat(String.format("?%s=%s",TYPE_PARAM_NAME,airportType.name()));
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+    }
+
+    public Either<ServiceError,List<Airport>> getAirports(@NonNull AirportType airportType,
+                                                          @NonNull Airline airline) {
+        String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s",
+                TYPE_PARAM_NAME,airportType.name(),AIRLINE_PARAM_NAME,airline.name()));
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+    }
+
     public Either<ServiceError,Airport> getAirport(@NonNull String iata) {
         String requestURL = servicePath.concat(String.format("/%s",iata));
         return fetch(requestURL,HttpMethod.GET,Airport.class);
@@ -74,6 +86,21 @@ public class AirportService {
                 LIMIT_PARAM_NAME,limit,
                 AIRLINE_PARAM_NAME,airline.name()));
        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+    }
+
+    public Either<ServiceError,List<Airport>> getNearbyAirports(@NonNull Double longitude,
+                                                                @NonNull Double latitude,
+                                                                @NonNull Integer limit,
+                                                                @NonNull AirportType airportType,
+                                                                @NonNull Airline airline) {
+        String requestURL = servicePath.concat(String.format("?%s=%f" + "&%s=%f" + "&%s=%d" + "&%s=%s" + "&%s=%s",
+                LONGITUDE_PARAM_NAME,longitude,
+                LATITUDE_PARAM_NAME,latitude,
+                LIMIT_PARAM_NAME,limit,
+                TYPE_PARAM_NAME,airportType.name(),
+                AIRLINE_PARAM_NAME,airline.name())
+        );
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 
     public Either<ServiceError,Airport> patchAirport(@NonNull String iata, @NonNull AirportPatch airportPatch) {
