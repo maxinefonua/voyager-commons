@@ -1,28 +1,17 @@
 package org.voyager.model.location;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.voyager.model.validate.ValidPatch;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
+@Data @NoArgsConstructor
 @Builder @ToString(includeFieldNames = false)
-@AllArgsConstructor
+@AllArgsConstructor @ValidPatch
 public class LocationPatch {
-    @NotNull  // can be empty
-    List<String> airports = new ArrayList<>();
+    List<String> airports;
     Status status;
-
-    public void addAirport(String iata) {
-        if (airports == null) airports = new ArrayList<>();
-        else if (!airports.contains(iata.toUpperCase())) airports.add(iata.toUpperCase());
-    }
-
-    public void removeAirport(String iata) {
-        if (airports != null) airports.remove(iata.toUpperCase());
-    }
 }

@@ -6,13 +6,13 @@ import com.fasterxml.jackson.databind.deser.std.NumberDeserializers;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.voyager.model.validate.ValidPatch;
 
 @Builder
-@Data
+@Data @ValidPatch
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(includeFieldNames = false)
 public class RoutePatch {
-    @NotNull
     Boolean isActive;
 }

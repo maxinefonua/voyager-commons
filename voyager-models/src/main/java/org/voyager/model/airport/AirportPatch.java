@@ -6,10 +6,11 @@ import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.voyager.model.validate.ValidPatch;
 
 @Builder @Data
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor @ValidPatch
 @ToString(includeFieldNames = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AirportPatch {
