@@ -4,6 +4,9 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.voyager.utils.ConstantsUtils.COUNTRY_CODE_REGEX;
 
 @Builder
@@ -58,6 +61,9 @@ public class LocationForm {
     @DecimalMin(value = "-90.0")
     @DecimalMax(value = "90.0")
     Double north;
+
+    @NotNull
+    Set<String> airports = new HashSet<>();
 
     public void setSource(String source) {
         this.source = source;

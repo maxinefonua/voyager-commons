@@ -19,6 +19,7 @@ public class ConstantsUtils {
     public static final String IATA_CODE_REGEX = "^[a-zA-Z]{3}$";
 
     public static final String QUERY_PARAM_NAME = "q";
+    public static final String SOURCE_PARAM_NAME = "source";
     public static final String SKIP_ROW_PARAM_NAME = "skipRowCount";
     public static final String LATITUDE_PARAM_NAME = "latitude";
     public static final String LONGITUDE_PARAM_NAME = "longitude";
@@ -34,8 +35,10 @@ public class ConstantsUtils {
     public static final String IS_ACTIVE_PARAM_NAME = "isActive";
     public static final String DELTA_STATUS_PARAM_NAME = "status";
 
-    public static final String SOURCE_PROPERTY_NAME = "source";
+    public static final String SOURCE_PROPERTY_NAME = SOURCE_PARAM_NAME;
     public static final String SOURCE_ID_PARAM_NAME = "sourceId";
+
+    public static final String AIRPORTS_PROPERTY_NAME = "airports";
 
     public static final String ROUTES_PATH = "/routes";
     public static final String AIRPORTS_PATH = "/airports";
