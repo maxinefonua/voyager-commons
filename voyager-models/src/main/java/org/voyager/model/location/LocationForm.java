@@ -4,8 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.voyager.utils.ConstantsUtils.COUNTRY_CODE_REGEX;
 
@@ -16,8 +16,8 @@ import static org.voyager.utils.ConstantsUtils.COUNTRY_CODE_REGEX;
 @ToString(includeFieldNames = false)
 public class LocationForm {
 
-    @NotBlank
-    String source = Source.MANUAL.name();
+    @NotNull
+    Source source = Source.MANUAL;
 
     @NotBlank
     String sourceId;
@@ -63,10 +63,10 @@ public class LocationForm {
     Double north;
 
     @NotNull
-    Set<String> airports = new HashSet<>();
+    List<String> airports = new ArrayList<>();
 
-    public void setSource(String source) {
+    public void setSource(Source source) {
         this.source = source;
-        if (StringUtils.isEmpty(source)) this.source = Source.MANUAL.name();
+        if (source == null) this.source = Source.MANUAL;
     }
 }

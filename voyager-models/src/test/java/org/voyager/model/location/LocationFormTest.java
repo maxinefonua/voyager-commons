@@ -18,9 +18,9 @@ class LocationFormTest {
     @DisplayName("default source")
     void setSource() {
         assertNull(locationForm.getSource());
-        locationForm.setSource("");
+        locationForm.setSource(null);
         assertNotNull(locationForm.getSource());
-        assertEquals(Source.MANUAL.name(),locationForm.getSource());
+        assertEquals(Source.MANUAL,locationForm.getSource());
     }
 
     @Test

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,19 +26,19 @@ public class Location {
     private Status status;
     private Source source;
     private String sourceId;
-    private Set<String> airports;
+    private List<String> airports;
 
     public boolean hasAirport(String iata) {
         if (airports == null) return false;
-        return airports.contains(iata);
+        return airports.contains(iata.toUpperCase());
     }
 
     public void addAirport(String iata) {
-        if (airports == null) airports = new HashSet<>();
-        airports.add(iata);
+        if (airports == null) airports = new ArrayList<>();
+        else if (!airports.contains(iata.toUpperCase())) airports.add(iata.toUpperCase());
     }
 
     public void removeAirport(String iata) {
-        if (airports != null) airports.remove(iata);
+        if (airports != null) airports.remove(iata.toUpperCase());
     }
 }
