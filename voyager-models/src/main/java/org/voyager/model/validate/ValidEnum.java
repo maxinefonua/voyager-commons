@@ -8,11 +8,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
+@Constraint(validatedBy = EnumValidator.class)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = PatchValidator.class)
-public @interface ValidPatch {
-    String message() default "Must include at least one valid field";
+public @interface ValidEnum {
+    String message() default "marked as enum";
+    Class<? extends Enum<?>> enumClass();
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

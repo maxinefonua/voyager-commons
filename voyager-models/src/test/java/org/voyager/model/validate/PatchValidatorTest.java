@@ -10,11 +10,11 @@ import org.mockito.MockitoAnnotations;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class NonNullFieldValidatorTest {
+class PatchValidatorTest {
     @Mock
     private ConstraintValidatorContext context;
 
-    private ValidPatchValidator validPatchValidator;
+    private PatchValidator patchValidator;
 
     @Builder
     private static class TestClass {
@@ -27,18 +27,18 @@ class NonNullFieldValidatorTest {
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-        validPatchValidator = new ValidPatchValidator();
+        patchValidator = new PatchValidator();
     }
 
     @Test
     void isValid() {
         TestClass validObject = TestClass.builder().field1(new Object()).build();
-        assertTrue(validPatchValidator.isValid(validObject,context));
+        assertTrue(patchValidator.isValid(validObject,context));
     }
 
     @Test
     void isNotValid() {
         TestClass invalidObject = TestClass.builder().build();
-        assertFalse(validPatchValidator.isValid(invalidObject,context));
+        assertFalse(patchValidator.isValid(invalidObject,context));
     }
 }

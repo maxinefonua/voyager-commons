@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.voyager.model.Airline;
+import org.voyager.model.validate.ValidEnum;
 
 import static org.voyager.utils.ConstantsUtils.IATA_CODE_REGEX;
 
@@ -21,11 +22,15 @@ public class RouteForm {
     @NotBlank
     @Pattern(regexp = IATA_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
     String origin;
+
     @NotBlank
     @Pattern(regexp = IATA_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
     String destination;
+
     @NotBlank
+    @ValidEnum(enumClass = Airline.class)
     String airline;
+
     @NotNull
     Boolean isActive = true;
 }

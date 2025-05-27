@@ -2,7 +2,7 @@ package org.voyager.model.location;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.apache.commons.lang3.StringUtils;
+import org.voyager.model.validate.ValidEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,8 @@ import static org.voyager.utils.ConstantsUtils.COUNTRY_CODE_REGEX;
 public class LocationForm {
 
     @NotNull
-    Source source = Source.MANUAL;
+    @ValidEnum(enumClass = Source.class)
+    String source = Source.MANUAL.name();
 
     @NotBlank
     String sourceId;
@@ -65,8 +66,8 @@ public class LocationForm {
     @NotNull
     List<String> airports = new ArrayList<>();
 
-    public void setSource(Source source) {
+    public void setSource(String source) {
         this.source = source;
-        if (source == null) this.source = Source.MANUAL;
+        if (source == null) this.source = Source.MANUAL.name();
     }
 }

@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 
 import static org.voyager.utils.MessageUtils.getIllegalAccessValidatorMessage;
 
-public class ValidPatchValidator implements ConstraintValidator<ValidPatch,Object> {
+public class PatchValidator implements ConstraintValidator<ValidPatch,Object> {
     @Override
     public boolean isValid(Object object, ConstraintValidatorContext constraintValidatorContext) {
         if (object.getClass().getFields().length > object.getClass().getDeclaredFields().length) return false;
