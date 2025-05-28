@@ -6,17 +6,13 @@ import lombok.NonNull;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
-import org.voyager.model.location.Location;
-import org.voyager.model.location.LocationForm;
-import org.voyager.model.location.LocationPatch;
-import org.voyager.model.location.Source;
+import org.voyager.model.location.*;
 
 import java.util.List;
 
 import static org.voyager.service.Voyager.fetch;
 import static org.voyager.service.Voyager.fetchWithRequestBody;
-import static org.voyager.utils.ConstantsUtils.SOURCE_ID_PARAM_NAME;
-import static org.voyager.utils.ConstantsUtils.SOURCE_PARAM_NAME;
+import static org.voyager.utils.ConstantsUtils.*;
 
 public class LocationService {
     private final String servicePath;
@@ -32,6 +28,12 @@ public class LocationService {
     public Either<ServiceError,List<Location>> getLocations(Source source, String sourceId) {
         String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s",
                 SOURCE_PARAM_NAME,source.name(),SOURCE_ID_PARAM_NAME,sourceId));
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
+    }
+
+    public Either<ServiceError,List<Location>> getLocations(Status status) {
+        String requestURL = servicePath.concat(String.format("?%s=%s",
+                LOCATION_STATUS_PARAM_NAME,status.name()));
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
     }
 

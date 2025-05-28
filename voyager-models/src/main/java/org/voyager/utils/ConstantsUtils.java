@@ -34,6 +34,7 @@ public class ConstantsUtils {
     public static final String EXCLUDE_PARAM_NAME = "exclude";
     public static final String IS_ACTIVE_PARAM_NAME = "isActive";
     public static final String DELTA_STATUS_PARAM_NAME = "status";
+    public static final String LOCATION_STATUS_PARAM_NAME = "status";
 
     public static final String SOURCE_PROPERTY_NAME = SOURCE_PARAM_NAME;
     public static final String SOURCE_ID_PARAM_NAME = "sourceId";
