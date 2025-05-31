@@ -58,10 +58,13 @@ public class AirportsSync {
         AtomicReference<Integer> skippedMatches = new AtomicReference<>(0);
         AtomicReference<Integer> skippedFromChError = new AtomicReference<>(0);
         patchAirportsUsingChAviation(iataList,patchesMade,skippedMatches,skippedFromChError);
-        LOGGER.info(String.format("patch duration: %d seconds for %d patches made, " +
+        long seconds = (System.currentTimeMillis()-prepatch)/1000;
+        long minutes = seconds/60;
+        seconds %= 60;
+        LOGGER.info(String.format("job duration: %d minutes %d seconds for %d patches made, " +
                         "%d matching airports skipped, and " +
                         "%d airports skipped due to errors out of %d codes processed",
-                (System.currentTimeMillis()-prepatch)/1000,
+                minutes,seconds,
                 patchesMade.get(),skippedMatches.get(),skippedFromChError.get(),
                 iataList.size()));
     }
