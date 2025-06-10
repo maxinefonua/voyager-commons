@@ -57,11 +57,22 @@ public class RouteService {
         return fetch(requestURL,HttpMethod.GET,Path.class);
     }
 
-    public Either<ServiceError, Path> getPath(String origin, String destination, Set<String> exclusions) {
+    public Either<ServiceError, Path> getPath(String origin, String destination, List<String> excludeAirportList) {
         StringJoiner stringJoiner = new StringJoiner(",");
-        exclusions.forEach(stringJoiner::add);
+        excludeAirportList.forEach(stringJoiner::add);
         String requestURL = pathPath.concat(String.format("/%s/to/%s" + "?%s=%s",
                 origin,destination,EXCLUDE_PARAM_NAME,stringJoiner));
+        return fetch(requestURL,HttpMethod.GET,Path.class);
+    }
+
+    public Either<ServiceError, Path> getPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
+        StringJoiner stringJoinerAirports = new StringJoiner(",");
+        excludeAirportList.forEach(stringJoinerAirports::add);
+        StringJoiner stringJoinerRouteIds = new StringJoiner(",");
+        excludeRouteIdList.forEach(routeId -> stringJoinerRouteIds.add(String.valueOf(routeId)));
+        String requestURL = pathPath.concat(String.format("/%s/to/%s" + "?%s=%s" + "&%s=%s",
+                origin,destination,EXCLUDE_PARAM_NAME,stringJoinerAirports,
+                EXCLUDE_ROUTE_PARAM_NAME,stringJoinerRouteIds));
         return fetch(requestURL,HttpMethod.GET,Path.class);
     }
 }
