@@ -16,7 +16,7 @@ public enum HttpStatus {
     INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
     NOT_IMPLEMENTED(501, "Not Implemented"),
     BAD_GATEWAY(502, "Bad Gateway"),
-    UNKNOWN(-1, "Unknown Status");
+    UNKNOWN(-1, "Unknown DeltaStatus");
 
     private final int code;
     private final String description;

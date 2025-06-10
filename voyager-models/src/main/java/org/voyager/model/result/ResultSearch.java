@@ -1,14 +1,19 @@
 package org.voyager.model.result;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.voyager.model.location.Location;
+import org.voyager.model.location.Source;
 import org.voyager.model.location.Status;
 import org.voyager.utils.MapperUtils;
+
+import java.util.List;
 
 @Builder @Getter @AllArgsConstructor
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 public class ResultSearch {
-    String source;
+    Source source;
     String sourceId;
     @Setter
     Status status;

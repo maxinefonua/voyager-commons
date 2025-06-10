@@ -5,8 +5,7 @@ import lombok.Getter;
 public enum Status {
     NEW("Save"),
     SAVED("Saved"),
-    ARCHIVED("Archived"),
-    DELETED("Deleted");
+    ARCHIVED("Archived");
 
     @Getter
     String display;
