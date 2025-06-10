@@ -10,7 +10,7 @@ A personal project I took on to relearn full-cycle development, and to better or
     - standalone backend services
     - caching, request limits, auth tokens
 
-### Project Modules:
+## Project Modules:
 #### <i>voyager-datasync</i>
 - bash scripts and executable jars to fetch/update db entries
 - buildable jars as standalone CronJobs for syncing data
@@ -18,6 +18,12 @@ A personal project I took on to relearn full-cycle development, and to better or
 - shared data models and utils to centralize edits
 #### <i>voyager-sdk</i>
 - an SDK with no Spring dependencies for Voyager API services
+
+### Modules Tech Stack:
+- Bash
+- Lombok
+- JSoup
+- Spring Validation
 
 
 Full README and LICENSE coming soon.
