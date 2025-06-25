@@ -28,12 +28,18 @@ public class Voyager {
     private static RouteService routeService;
     private static SearchService searchService;
     private static LocationService locationService;
+    private static FlightService flightService;
     private static final Logger LOGGER = LoggerFactory.getLogger(Voyager.class);
     private static final ObjectMapper om = new ObjectMapper();
 
     public Voyager(VoyagerConfig voyagerConfig) {
         this.voyagerConfig = voyagerConfig;
         this.voyagerHttpFactory = new VoyagerHttpFactory(voyagerConfig.getAuthorizationToken());
+    }
+
+    public FlightService getFlightService() {
+        if (flightService == null) flightService = new FlightService(voyagerConfig);
+        return flightService;
     }
 
     public LocationService getLocationService() {

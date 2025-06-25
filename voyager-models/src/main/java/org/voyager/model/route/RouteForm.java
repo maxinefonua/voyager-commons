@@ -11,6 +11,9 @@ import lombok.ToString;
 import org.voyager.model.Airline;
 import org.voyager.model.validate.ValidEnum;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.voyager.utils.ConstantsUtils.IATA_CODE_REGEX;
 
 @Builder
@@ -27,10 +30,7 @@ public class RouteForm {
     @Pattern(regexp = IATA_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
     String destination;
 
-    @NotBlank
-    @ValidEnum(enumClass = Airline.class)
-    String airline;
-
     @NotNull
-    Boolean isActive = true;
+    @Builder.Default
+    List<Integer> flightIds = new ArrayList<>();
 }

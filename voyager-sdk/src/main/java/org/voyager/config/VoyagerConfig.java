@@ -13,6 +13,7 @@ public class VoyagerConfig {
     private static final String SEARCH_PATH = "/search";
     private static final String ATTRIBUTION_PATH = "/search-attribution";
     private static final String LOCATIONS_PATH = "/locations";
+    private static final String FLIGHTS_PATH = "/flights";
 
     @Getter
     private final int maxThreads;
@@ -49,6 +50,10 @@ public class VoyagerConfig {
 
     public String getLocationsPath() {
         return baseURL.concat(LOCATIONS_PATH);
+    }
+
+    public String getFlightsPath() {
+        return baseURL.concat(FLIGHTS_PATH);
     }
 
     public String getNearbyPath() {

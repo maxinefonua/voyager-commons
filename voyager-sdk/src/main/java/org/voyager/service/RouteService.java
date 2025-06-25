@@ -12,7 +12,6 @@ import org.voyager.model.route.RouteForm;
 import org.voyager.model.route.RoutePatch;
 
 import java.util.List;
-import java.util.Set;
 import java.util.StringJoiner;
 
 import static org.voyager.service.Voyager.fetch;
@@ -36,9 +35,9 @@ public class RouteService {
         return fetchWithRequestBody(servicePath,HttpMethod.POST,Route.class,routeForm);
     }
 
-    public Either<ServiceError,List<Route>> getRoutes(String origin,String destination,String airline) {
-        String requestURL = servicePath.concat(String.format("?%s=%s&%s=%s&%s=%s",
-                ORIGIN_PARAM_NAME,origin,DESTINATION_PARAM_NAME,destination,AIRLINE_PARAM_NAME,airline));
+    public Either<ServiceError,List<Route>> getRoutes(String origin,String destination) {
+        String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s",
+                ORIGIN_PARAM_NAME,origin,DESTINATION_PARAM_NAME,destination));
         return fetch(requestURL, HttpMethod.GET, new TypeReference<List<Route>>(){});
     }
 

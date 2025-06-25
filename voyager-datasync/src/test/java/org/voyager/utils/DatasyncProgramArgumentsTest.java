@@ -2,6 +2,7 @@ package org.voyager.utils;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.voyager.model.Airline;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.voyager.utils.DatasyncProgramArguments.*;
@@ -30,14 +31,18 @@ class DatasyncProgramArgumentsTest {
         String expectedToken = "accessToken";
         String atArg = String.format("%s=%s", AUTH_TOKEN_FLAG,expectedToken);
 
+        Airline expectedAirline = Airline.DELTA;
+        String aArg = String.format("%s=%s",AIRLINE_FLAG,"delta");
+
         DatasyncProgramArguments datasynced = new DatasyncProgramArguments(new String[]{
-                tcArg,hArg,pArg,atArg,lArg});
+                tcArg,hArg,pArg,atArg,lArg,aArg});
 
         assertEquals(expectedThreadCount,datasynced.getThreadCount());
         assertEquals(expectedHost,datasynced.getHostname());
         assertEquals(expectedPort,datasynced.getPort());
         assertEquals(expectedToken,datasynced.getAccessToken());
         assertEquals(expectedLimit,datasynced.getProcessLimit());
+        assertEquals(expectedAirline,datasynced.getAirline());
     }
 
     @Test
@@ -48,7 +53,8 @@ class DatasyncProgramArgumentsTest {
         });
         assertEquals(100,datasynced.getThreadCount());
         assertEquals(3000,datasynced.getPort());
-        assertEquals(100,datasynced.getProcessLimit());
+        assertEquals(1000,datasynced.getProcessLimit());
+        assertEquals(Airline.DELTA,datasynced.getAirline());
     }
 
     @Test
@@ -143,6 +149,19 @@ class DatasyncProgramArgumentsTest {
             new DatasyncProgramArguments(new String[]{invalidArg2,VALID_HOST_ARG});
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains(THREAD_COUNT_FLAG));
+        }
+    }
+
+    @Test
+    @DisplayName("invalid airline")
+    void airlineInvalid() {
+        String invalid = "invalid";
+        String aArg = String.format("%s=%s",AIRLINE_FLAG,invalid);
+        assertThrows(RuntimeException.class,() -> new DatasyncProgramArguments(new String[]{aArg,VALID_HOST_ARG}));
+        try {
+            new DatasyncProgramArguments(new String[]{aArg,VALID_HOST_ARG});
+        } catch (RuntimeException e) {
+            assertTrue(e.getMessage().contains(AIRLINE_FLAG));
         }
     }
 

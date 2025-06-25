@@ -7,11 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.ToString;
 import org.voyager.model.validate.ValidPatch;
 
+import java.util.List;
+
 @Builder
 @Data @ValidPatch
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(includeFieldNames = false)
 public class RoutePatch {
-    Boolean isActive;
+    List<Integer> flightIds;
 }

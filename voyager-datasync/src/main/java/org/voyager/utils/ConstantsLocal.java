@@ -1,5 +1,7 @@
 package org.voyager.utils;
 
+import org.voyager.model.Airline;
+
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,6 +19,11 @@ public class ConstantsLocal {
     public static final String DELTA_HUB_FILE = "airports/delta-hub.txt";
     public static final String DELTA_SEASONAL_FILE = "airports/delta-seasonal.txt";
     public static final String DELTA_FORMER_FILE = "airports/delta-former.txt";
+    public static final String AIRLINE_PROCESSED_FILE = "airline/airline-processed.txt";
+    public static final String NON_AIRLINE_PROCESSED_FILE = "airline/non-airline-processed.txt";
+    public static final String ROUTE_AIRPORTS_FILE = "airline/route-airports.txt";
+    public static final String FAILED_FLIGHT_NUMS_FILE = "airline/failed-flights.txt";
+    public static final String FLIGHT_AIRPORTS_FILE = "airline/flight-airports.txt";
     public static final String DELTA_FORMER_DB = "airports/delta-formerDB.txt";
     public static final String DELTA_FUTURE_FILE = "airports/delta-future.txt";
     public static final String DELTA_FOCUS_FILE = "airports/delta-focus.txt";
@@ -90,6 +97,17 @@ public class ConstantsLocal {
         return codes;
     }
 
+    public static void writeSetLineByLine(Set<String> airports, String file) {
+        String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            StringJoiner joiner = new StringJoiner("\n");
+            airports.forEach(code -> joiner.add(String.format("%s",code)));
+            writer.write(joiner.toString());
+        } catch (IOException e) {
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
+        }
+    }
+
     public static void writeSetToFile(Set<String> airports, String file) {
         String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
@@ -107,6 +125,17 @@ public class ConstantsLocal {
             StringJoiner joiner = new StringJoiner(",");
             airports.forEach(code -> joiner.add(String.format("('%s')",code)));
             writer.write(joiner.toString());
+        } catch (IOException e) {
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
+        }
+    }
+
+    public static void writeSetToFileForDBInsertionWithAirline(Set<String> airports, Airline airline, boolean isActive, String file) {
+        String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            StringJoiner joiner = new StringJoiner(",");
+            airports.forEach(code -> joiner.add(String.format("('%s','%s',%s)",code,airline.name(),isActive)));
+            writer.write("INSERT INTO airline_airports(iata,airline,active) VALUES ".concat(joiner.toString()));
         } catch (IOException e) {
             throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
         }

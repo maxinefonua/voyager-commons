@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.voyager.model.Airline;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @Builder
@@ -14,6 +16,5 @@ public class Route {
     Integer id;
     String origin;
     String destination;
-    Airline airline;
-    Boolean isActive;
+    List<Integer> flightIds;
 }

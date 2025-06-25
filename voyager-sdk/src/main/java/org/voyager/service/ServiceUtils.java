@@ -3,6 +3,8 @@ package org.voyager.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vavr.control.Either;
 import lombok.NonNull;
 import org.springframework.core.ParameterizedTypeReference;
@@ -19,7 +21,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.voyager.constants.MessageConstants.*;
 
 public class ServiceUtils {
-    private static final ObjectMapper om = new ObjectMapper();
+    private static final ObjectMapper om = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     static <T> Either<ServiceError,T> responseBody(@NonNull HttpResponse<String> response,
                                                           @NonNull Class<T> valueType,

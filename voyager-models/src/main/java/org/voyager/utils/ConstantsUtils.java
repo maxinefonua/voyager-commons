@@ -2,9 +2,7 @@ package org.voyager.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ConstantsUtils {
     public static final String GEONAMES_API_USERNAME = "GEONAMES_API_USERNAME";
@@ -27,14 +25,16 @@ public class ConstantsUtils {
     public static final String COUNTRY_CODE_PARAM_NAME = "countryCode";
     public static final String TYPE_PARAM_NAME = "type";
     public static final String AIRLINE_PARAM_NAME = "airline";
+    public static final String ROUTE_ID_PARAM_NAME = "routeId";
     public static final String IATA_PARAM_NAME = "iata";
     public static final String ID_PATH_VAR_NAME = "id";
+    public static final String FLIGHT_NUMBER_PARAM_NAME = "flightNumber";
     public static final String ORIGIN_PARAM_NAME = "origin";
     public static final String DESTINATION_PARAM_NAME = "destination";
     public static final String EXCLUDE_PARAM_NAME = "exclude";
     public static final String EXCLUDE_ROUTE_PARAM_NAME = "excludeRoute";
     public static final String IS_ACTIVE_PARAM_NAME = "isActive";
-    public static final String DELTA_STATUS_PARAM_NAME = "status";
+    public static final String DELTA_STATUS_PARAM_NAME = "deltaStatus";
     public static final String LOCATION_STATUS_PARAM_NAME = "status";
 
     public static final String SOURCE_PROPERTY_NAME = SOURCE_PARAM_NAME;

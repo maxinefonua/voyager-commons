@@ -2,6 +2,7 @@ package org.voyager.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.voyager.model.Airline;
 
 import java.util.*;
 
@@ -11,18 +12,21 @@ public class DatasyncProgramArguments {
     private static final int THREAD_COUNT_DEFAULT = 100;
     private static final int THREAD_COUNT_MAX = 1000;
     private static final int LIMIT_DEFAULT = 1000;
+    private static final Airline AIRLINE_DEFAULT = Airline.DELTA;
 
     public static final String THREAD_COUNT_FLAG = "-tc";
     public static final String HOSTNAME_FLAG = "-h";
     public static final String PORT_FLAG = "-p";
     public static final String AUTH_TOKEN_FLAG = "-at";
     public static final String LIMIT_FLAG = "-l";
+    public static final String AIRLINE_FLAG = "-a";
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasyncProgramArguments.class);
 
     private Map<String,Object> flagMap = new HashMap<>(Map.of(
             THREAD_COUNT_FLAG,THREAD_COUNT_DEFAULT,
             PORT_FLAG,PORT_DEFAULT,
-            LIMIT_FLAG,LIMIT_DEFAULT
+            LIMIT_FLAG,LIMIT_DEFAULT,
+            AIRLINE_FLAG,AIRLINE_DEFAULT
     ));
 
     private Set<String> requiredFlags = Set.of(
@@ -76,6 +80,10 @@ public class DatasyncProgramArguments {
         return (int) flagMap.get(LIMIT_FLAG);
     }
 
+    public Airline getAirline() {
+        return (Airline) flagMap.get(AIRLINE_FLAG);
+    }
+
     private void processFlag(String flag, String token) {
         switch (flag) {
             case THREAD_COUNT_FLAG -> {
@@ -96,6 +104,18 @@ public class DatasyncProgramArguments {
                 int value = extractProcessLimit(token);
                 flagMap.put(LIMIT_FLAG,value);
             }
+            case AIRLINE_FLAG -> {
+                Airline airline = extractAirline(token);
+                flagMap.put(AIRLINE_FLAG,airline);
+            }
+        }
+    }
+
+    private Airline extractAirline(String token) {
+        try {
+            return Airline.valueOf(token.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(String.format("Invalid value '%s' for airline flag '%s'",token,AIRLINE_FLAG));
         }
     }
 
