@@ -147,10 +147,6 @@ public class VoyagerAPIService extends VoyagerAPI {
         sb.append(DESTINATION_PARAM_NAME);
         sb.append("=");
         sb.append(routeForm.getDestination());
-        sb.append("&");
-        sb.append(AIRLINE_PARAM_NAME);
-        sb.append("=");
-        sb.append(routeForm.getAirline());
         Route[] results = processGetResponse(getResponse(sb.toString()), Route[].class);
         if (results == null || results.length == 0) return null;
         else if (results.length == 1) {

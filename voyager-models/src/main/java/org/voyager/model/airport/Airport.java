@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.voyager.utils.MapperUtils;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.TimeZone;
+
 @Builder(toBuilder = true) @Data
 @AllArgsConstructor @NoArgsConstructor
 @ToString
@@ -23,6 +27,7 @@ public class Airport {
     Double longitude;
     @NonNull
     AirportType type;
+    ZoneId zoneId;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Double distance;
 

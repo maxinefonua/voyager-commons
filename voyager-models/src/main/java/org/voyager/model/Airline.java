@@ -1,5 +1,7 @@
 package org.voyager.model;
 
 public enum Airline {
-    DELTA
+    DELTA,
+    JAPAN,
+    NORWEGIAN
 }
