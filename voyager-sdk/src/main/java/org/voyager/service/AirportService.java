@@ -10,6 +10,7 @@ import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportPatch;
 import org.voyager.model.airport.AirportType;
 import java.util.List;
+import java.util.StringJoiner;
 
 import static org.voyager.service.Voyager.fetch;
 import static org.voyager.service.Voyager.fetchWithRequestBody;
@@ -37,6 +38,14 @@ public class AirportService {
     public Either<ServiceError,List<Airport>> getAirports(@NonNull AirportType airportType) {
         String requestURL = String.format("%s" + "?%s=%s",
                 servicePath,TYPE_PARAM_NAME,airportType.name());
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+    }
+
+    public Either<ServiceError,List<Airport>> getAirports(@NonNull List<AirportType> airportTypeList) {
+        StringJoiner stringJoiner = new StringJoiner(",");
+        airportTypeList.forEach(airportType -> stringJoiner.add(airportType.name()));
+        String requestURL = String.format("%s" + "?%s=%s",
+                servicePath,TYPE_PARAM_NAME,stringJoiner);
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 

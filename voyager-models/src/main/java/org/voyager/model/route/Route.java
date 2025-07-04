@@ -16,5 +16,4 @@ public class Route {
     Integer id;
     String origin;
     String destination;
-    List<Integer> flightIds;
 }

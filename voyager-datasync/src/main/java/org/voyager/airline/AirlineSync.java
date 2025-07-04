@@ -1,9 +1,8 @@
-package org.voyager;
+package org.voyager.airline;
 
 import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.voyager.config.Protocol;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.model.Airline;
@@ -28,13 +27,8 @@ public class AirlineSync {
     public static void main(String[] args) {
         System.out.println("printing from airline sync main");
         DatasyncProgramArguments datasyncProgramArguments = new DatasyncProgramArguments(args);
-        Integer maxConcurrentRequests = datasyncProgramArguments.getThreadCount();
-        String host = datasyncProgramArguments.getHostname();
-        int port = datasyncProgramArguments.getPort();
-        String voyagerAuthorizationToken = datasyncProgramArguments.getAccessToken();
         Airline airline = datasyncProgramArguments.getAirline();
-        VoyagerConfig voyagerConfig = new VoyagerConfig(Protocol.HTTP,host,port,
-                maxConcurrentRequests,voyagerAuthorizationToken);
+        VoyagerConfig voyagerConfig = datasyncProgramArguments.getVoyagerConfig();
         Voyager voyager = new Voyager(voyagerConfig);
         flightService = voyager.getFlightService();
         routeService = voyager.getRouteService();

@@ -29,8 +29,4 @@ public class RouteForm {
     @NotBlank
     @Pattern(regexp = IATA_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
     String destination;
-
-    @NotNull
-    @Builder.Default
-    List<Integer> flightIds = new ArrayList<>();
 }

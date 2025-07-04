@@ -4,6 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.voyager.model.Airline;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.voyager.utils.DatasyncProgramArguments.*;
 
@@ -165,8 +169,6 @@ class DatasyncProgramArgumentsTest {
         }
     }
 
-
-
     @Test
     @DisplayName("invalid port")
     void portInvalid() {
@@ -187,5 +189,18 @@ class DatasyncProgramArgumentsTest {
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains(PORT_FLAG));
         }
+    }
+
+    @Test
+    @DisplayName("back to args")
+    void convertBackToArgs() {
+        DatasyncProgramArguments datasynced = new DatasyncProgramArguments(new String[]{
+                VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG
+        });
+        String[] actual = datasynced.toArgs();
+        assertTrue(Arrays.stream(actual).anyMatch(arg -> arg.equals(THREAD_COUNT_FLAG.concat("=").concat("100"))));
+        datasynced.setThreadCountMax(1);
+
+        Arrays.stream(actual).forEach(System.out::println);
     }
 }

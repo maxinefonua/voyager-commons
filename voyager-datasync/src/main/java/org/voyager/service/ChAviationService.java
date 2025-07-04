@@ -16,11 +16,10 @@ import java.util.Map;
 public class ChAviationService {
     private static final String baseURL = "https://www.ch-aviation.com";
     private static final String airportsPath = "/airports/";
-    private static final ObjectMapper om = new ObjectMapper();
     private static final String SSSID_NAME = "CHASESSID";
-    private static final String SSSID_VALUE = "9c25e2cc6377ba481ec2efcad3448065";
+    private static final String SSSID_VALUE = "38d2dfdbb29532455f26cb3945e44606";
     private static final String GUEST_SESS_ID = "GUEST_SESSION_ID";
-    private static final String GUEST_SESS_VALUE = "311829f32d46d3e78c6a582655a63418";
+    private static final String GUEST_SESS_VALUE = "ab33a85d87dfd9ec26cddd6593fc244f";
     private final int maxThreads;
 
     public ChAviationService(int maxThreads) {
