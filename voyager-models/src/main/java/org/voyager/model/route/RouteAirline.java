@@ -9,8 +9,10 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
-public class PathRoute {
-    Route route;
+public class RouteAirline {
+    Integer routeId;
+    String origin;
+    String destination;
     @Builder.Default
-    List<Airline> airlineList = new ArrayList<>();
+    List<Airline> airlines = new ArrayList<>();
 }

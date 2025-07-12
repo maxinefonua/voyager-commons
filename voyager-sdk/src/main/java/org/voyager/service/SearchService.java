@@ -10,6 +10,7 @@ import org.voyager.http.HttpMethod;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
+import org.voyager.model.result.ResultSearchFull;
 import org.voyager.model.route.Route;
 
 import java.net.URLEncoder;
@@ -22,10 +23,12 @@ import static org.voyager.utils.ConstantsUtils.*;
 public class SearchService {
     private final String servicePath;
     private final String attributionPath;
+    private final String fetchPath;
 
     SearchService(@NonNull VoyagerConfig voyagerConfig) {
         this.servicePath = voyagerConfig.getSearchPath();
         this.attributionPath = voyagerConfig.getAttributionPath();
+        this.fetchPath = voyagerConfig.getfetchPath();
     }
 
     public Either<ServiceError, LookupAttribution> attribution() {
@@ -36,6 +39,11 @@ public class SearchService {
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
         String requestURL = servicePath.concat(String.format("?%s=%s", QUERY_PARAM_NAME,query));
         return fetch(requestURL, HttpMethod.GET,new TypeReference<SearchResult<ResultSearch>>(){});
+    }
+
+    public Either<ServiceError, ResultSearchFull> fetchResultSearchFull(String sourceId) {
+        String requestURL = fetchPath.concat(String.format("/%s",sourceId));
+        return fetch(requestURL, HttpMethod.GET,ResultSearchFull.class);
     }
 
     public Either<ServiceError, SearchResult<ResultSearch>> search(String query,int limit) {

@@ -27,6 +27,7 @@ public class Voyager {
     private static AirportService airportService;
     private static RouteService routeService;
     private static SearchService searchService;
+    private static PathService pathService;
     private static LocationService locationService;
     private static FlightService flightService;
     private static final Logger LOGGER = LoggerFactory.getLogger(Voyager.class);
@@ -60,6 +61,11 @@ public class Voyager {
     public SearchService getSearchService() {
         if (searchService == null) searchService = new SearchService(voyagerConfig);
         return searchService;
+    }
+
+    public PathService getPathService() {
+        if (pathService == null) pathService = new PathService(voyagerConfig);
+        return pathService;
     }
 
     static  <T> Either<ServiceError, T> fetch(String requestURL,HttpMethod httpMethod,TypeReference<T> typeReference) {
