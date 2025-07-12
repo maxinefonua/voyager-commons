@@ -7,9 +7,10 @@ import org.voyager.model.Airline;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data @Builder(toBuilder = true)
-public class Path {
+@Data
+@Builder(toBuilder = true)
+public class PathRoute {
+    Route route;
     @Builder.Default
-    List<Route> routeList = new ArrayList<>();
-    Airline airline;
+    List<Airline> airlineList = new ArrayList<>();
 }
