@@ -1,8 +1,6 @@
 package org.voyager.model.route;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,4 +27,8 @@ public class RouteForm {
     @NotBlank
     @Pattern(regexp = IATA_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
     String destination;
+
+    @NotNull
+    @DecimalMin(value = "0.0")
+    Double distanceKm;
 }

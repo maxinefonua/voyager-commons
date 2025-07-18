@@ -29,6 +29,7 @@ import org.voyager.service.Voyager;
 import org.voyager.utils.ConstantsLocal;
 import org.voyager.utils.DatasyncProgramArguments;
 
+import java.time.Duration;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -202,7 +203,7 @@ public class FlightsSync {
             origin = airportCode;
             destination = iata;
         }
-        Either<ServiceError, Route> routeEither = fetchOrCreateRoute(origin,destination,routeService,flightNumber);
+        Either<ServiceError, Route> routeEither = fetchOrCreateRoute(origin,destination,routeService);
         if (routeEither.isLeft()) {
             Exception exception = routeEither.getLeft().getException();
             LOGGER.error(exception.getMessage(),exception);
@@ -305,16 +306,19 @@ public class FlightsSync {
 
     private static Either<ServiceError,Route> fetchOrCreateRoute(String origin,
                                                     String destination,
-                                                    RouteService routeService,
-                                                    String flightNumber) {
-        Either<ServiceError, List<Route>> routesEither = routeService.getRoutes(origin,destination);
+                                                    RouteService routeService) {
+        Either<ServiceError, List<Route>> routesEither = routeService.getRoutes(origin, destination);
         if (routesEither.isLeft())
             return Either.left(routesEither.getLeft());
         List<Route> routeList = routesEither.get();
-        if (routeList.isEmpty()) { // create new route
+        if (routeList.isEmpty()) { // return exception
+            Airport startAirport = airportService.getAirport(origin).get();
+            Airport endAirport = airportService.getAirport(destination).get();
+            Double distanceKm = Airport.calculateDistanceKm(startAirport.getLatitude(),startAirport.getLongitude(),endAirport.getLatitude(),endAirport.getLongitude());
             RouteForm routeForm = RouteForm.builder()
                     .origin(origin)
                     .destination(destination)
+                    .distanceKm(distanceKm)
                     .build();
             return routeService.createRoute(routeForm);
         }

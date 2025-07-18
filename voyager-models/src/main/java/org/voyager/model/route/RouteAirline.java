@@ -14,5 +14,7 @@ public class RouteAirline {
     String origin;
     String destination;
     @Builder.Default
+    Double distanceKm = 0.0;
+    @Builder.Default
     List<Airline> airlines = new ArrayList<>();
 }

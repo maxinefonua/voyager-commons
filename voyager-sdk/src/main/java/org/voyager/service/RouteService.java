@@ -6,8 +6,10 @@ import lombok.NonNull;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
+import org.voyager.model.location.Location;
 import org.voyager.model.route.Route;
 import org.voyager.model.route.RouteForm;
+import org.voyager.model.route.RoutePatch;
 
 import java.util.List;
 
@@ -39,5 +41,10 @@ public class RouteService {
     public Either<ServiceError,Route> getRoute(Integer id) {
         String requestURL = servicePath.concat(String.format("/%d",id));
         return fetch(requestURL,HttpMethod.GET,Route.class);
+    }
+
+    public Either<ServiceError,Route> patchRoute(Integer id, RoutePatch routePatch) {
+        String requestURL = servicePath.concat(String.format("/%d",id));
+        return fetchWithRequestBody(requestURL,HttpMethod.PATCH,Route.class,routePatch);
     }
 }

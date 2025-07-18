@@ -4,14 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.voyager.utils.MapperUtils;
 
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.TimeZone;
 
 @Builder(toBuilder = true) @Data
 @AllArgsConstructor @NoArgsConstructor
 @ToString
-@EqualsAndHashCode(exclude = "distance")
+@EqualsAndHashCode(exclude = "distanceKm")
 public class Airport {
     @NonNull
     String iata;
@@ -38,7 +36,7 @@ public class Airport {
         return Math.pow(Math.sin(val / 2), 2);
     }
 
-    public static double calculateDistance(double startLat,double startLong, double endLat, double endLong) {
+    public static double calculateDistanceKm(double startLat, double startLong, double endLat, double endLong) {
         double dLat = Math.toRadians((endLat - startLat));
         double dLong = Math.toRadians((endLong - startLong));
 

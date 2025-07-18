@@ -1,6 +1,7 @@
 package org.voyager.airline;
 
 import io.vavr.control.Either;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.config.VoyagerConfig;
@@ -11,6 +12,7 @@ import org.voyager.model.datasync.AirportFR;
 import org.voyager.model.datasync.RouteFR;
 import org.voyager.model.route.Route;
 import org.voyager.model.route.RouteForm;
+import org.voyager.model.route.RoutePatch;
 import org.voyager.service.AirportService;
 import org.voyager.service.FlightRadarService;
 import org.voyager.service.RouteService;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.voyager.utils.ConstantsLocal.ROUTE_AIRPORTS_FILE;
@@ -68,7 +71,7 @@ public class RoutesSync {
         Map<String,Route> exists = new HashMap<>();
         existingRoutes.forEach(route ->
                 exists.put(String.format("%s:%s",route.getOrigin(),route.getDestination()),route));
-        AtomicReference<Integer> created = new AtomicReference<>(0);
+        AtomicInteger created = new AtomicInteger(0);
         docRoutes.forEach(routeFR ->
                 processRouteFR(routeFR,exists,created,failedRouteStrings,failedFetchAirports));
         LOGGER.info(String.format("completed with existingRoutes count: %d and created count: %d",
@@ -80,42 +83,60 @@ public class RoutesSync {
     }
 
     private static void processRouteFR(RouteFR routeFR, Map<String,Route> exists,
-                                       AtomicReference<Integer> created,
+                                       AtomicInteger created,
                                        List<String> failedRouteStrings, List<AirportFR> failedFetchAirports) {
         String origin = routeFR.getAirport1().getIata();
         String destination = routeFR.getAirport2().getIata();
         String key = String.format("%s:%s",origin,destination);
+        if (StringUtils.isBlank(origin) || StringUtils.isBlank(destination)) {
+            failedRouteStrings.add(key);
+            return;
+        }
+        Either<ServiceError, Airport> originEither = airportService.getAirport(origin);
+        if (originEither.isLeft()) {
+            Exception exception = originEither.getLeft().getException();
+            LOGGER.error(exception.getMessage(), exception);
+            failedFetchAirports.add(routeFR.getAirport1());
+            return;
+        }
+        Either<ServiceError, Airport> destinationEither = airportService.getAirport(destination);
+        if (destinationEither.isLeft()) {
+            Exception exception = destinationEither.getLeft().getException();
+            LOGGER.error(exception.getMessage(), exception);
+            failedFetchAirports.add(routeFR.getAirport2());
+            return;
+        }
+        Airport originAirport = originEither.get();
+        Airport destinationAirport = destinationEither.get();
+        Double distanceKm = Airport.calculateDistanceKm(originAirport.getLatitude(),originAirport.getLongitude(),
+                destinationAirport.getLatitude(),destinationAirport.getLongitude());
         if (exists.containsKey(key)) {
-            LOGGER.info("skipped existing route: " + exists.get(key));
+            Route route = exists.get(key);
+            if (route.getDistanceKm() == null || !route.getDistanceKm().equals(distanceKm)) {
+                // patch route
+                Either<ServiceError, Route> either = routeService.patchRoute(route.getId(),RoutePatch.builder().distanceKm(distanceKm).build());
+                if (either.isLeft()) {
+                    Exception exception = either.getLeft().getException();
+                    LOGGER.error(String.format("patch route's distanceKm failed, added to failedRouteStrings. error: %s",exception.getMessage()),exception);
+                    failedRouteStrings.add(key);
+                } else {
+                    LOGGER.info("successfully patched existing route: " + either.get());
+                }
+            } else LOGGER.info("skipped matching route: " + exists.get(key));
         } else {
-            Either<ServiceError, Airport> originEither = airportService.getAirport(origin);
-            if (originEither.isLeft()) {
-                Exception exception = originEither.getLeft().getException();
-                LOGGER.error(exception.getMessage(),exception);
-                failedFetchAirports.add(routeFR.getAirport1());
-                return;
-            }
-
-            Either<ServiceError, Airport> destinationEither = airportService.getAirport(destination);
-            if (destinationEither.isLeft()) {
-                Exception exception = destinationEither.getLeft().getException();
-                LOGGER.error(exception.getMessage(),exception);
-                failedFetchAirports.add(routeFR.getAirport2());
-                return;
-            }
-
             RouteForm routeForm = RouteForm.builder()
                     .origin(origin)
                     .destination(destination)
+                    .distanceKm(distanceKm)
                     .build();
-            Either<ServiceError,Route> createEither = routeService.createRoute(routeForm);
+            Either<ServiceError, Route> createEither = routeService.createRoute(routeForm);
             if (createEither.isLeft()) {
                 Exception exception = createEither.getLeft().getException();
-                LOGGER.error(exception.getMessage(),exception);
+                LOGGER.error(exception.getMessage(), exception);
                 failedRouteStrings.add(key);
             } else {
                 LOGGER.info("successfully created route: " + createEither.get());
-                created.getAndSet(created.get() + 1);
+                created.getAndIncrement();
             }
         }
     }

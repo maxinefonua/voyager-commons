@@ -10,5 +10,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class Path {
     @Builder.Default
+    Double totalDistanceKm = 0.0;
+    @Builder.Default
     List<RouteAirline> path = new ArrayList<>();
 }
