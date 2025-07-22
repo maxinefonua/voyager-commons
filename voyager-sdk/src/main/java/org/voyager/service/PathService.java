@@ -9,6 +9,7 @@ import org.voyager.http.HttpMethod;
 import org.voyager.model.Airline;
 import org.voyager.model.route.Path;
 import org.voyager.model.route.PathAirline;
+import org.voyager.model.route.PathResponse;
 
 import java.util.List;
 import java.util.StringJoiner;
@@ -25,79 +26,101 @@ public class PathService {
         this.servicePath = voyagerConfig.getPathServicePath();
     }
 
-    public Either<ServiceError, List<PathAirline>> getPathAirlineList(String origin, String destination) {
-        String requestURL = serviceAirlinePath.concat(String.format("/%s/to/%s",origin,destination));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<PathAirline>>(){});
+    public Either<ServiceError,List<Path>> getPathList(List<String> originList, List<String> destinationList) {
+        StringJoiner originJoiner = new StringJoiner(",");
+        originList.forEach(originJoiner::add);
+        StringJoiner destinationJoiner = new StringJoiner(",");
+        destinationList.forEach(destinationJoiner::add);
+        String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s",
+                ORIGIN_PARAM_NAME,originJoiner,DESTINATION_PARAM_NAME,destinationJoiner));
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Path>>(){});
     }
 
-    public Either<ServiceError,List<PathAirline>> getPathAirlineList(String origin, String destination, Airline airline) {
-        String requestURL = serviceAirlinePath.concat(String.format("/%s/to/%s" + "?%s=%s",
-                origin,destination,AIRLINE_PARAM_NAME,airline));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<PathAirline>>(){});
+    public Either<ServiceError, PathResponse<PathAirline>> getPathAirlineList(List<String> originList, List<String> destinationList) {
+        StringJoiner originJoiner = new StringJoiner(",");
+        originList.forEach(originJoiner::add);
+        StringJoiner destinationJoiner = new StringJoiner(",");
+        destinationList.forEach(destinationJoiner::add);
+        String requestURL = serviceAirlinePath.concat(String.format("?%s=%s" + "&%s=%s",
+                ORIGIN_PARAM_NAME,originJoiner,DESTINATION_PARAM_NAME,destinationJoiner));
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<PathResponse<PathAirline>>(){});
     }
 
-    public Either<ServiceError,List<PathAirline>> getPathAirlineList(String origin, String destination,
+    public Either<ServiceError,PathResponse<PathAirline>> getPathAirlineList(List<String> originList, List<String> destinationList, Airline airline) {
+        StringJoiner originJoiner = new StringJoiner(",");
+        originList.forEach(originJoiner::add);
+        StringJoiner destinationJoiner = new StringJoiner(",");
+        destinationList.forEach(destinationJoiner::add);
+        String requestURL = serviceAirlinePath.concat(String.format("?%s=%s" + "&%s=%s" + "&%s=%s",
+                ORIGIN_PARAM_NAME,originJoiner,DESTINATION_PARAM_NAME,destinationJoiner,AIRLINE_PARAM_NAME,airline.name()));
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<PathResponse<PathAirline>>(){});
+    }
+
+    public Either<ServiceError,List<PathAirline>> getPathAirlineList(List<String> originList, List<String> destinationList,
                                                                      Airline airline, List<String> excludeAirportCodeList) {
-        StringJoiner stringJoiner = new StringJoiner(",");
-        excludeAirportCodeList.forEach(stringJoiner::add);
-        String requestURL = serviceAirlinePath.concat(String.format("/%s/to/%s" + "?%s=%s" + "&%s=%s",
-                origin,destination,AIRLINE_PARAM_NAME,airline,EXCLUDE_PARAM_NAME,stringJoiner));
+        StringJoiner originJoiner = new StringJoiner(",");
+        originList.forEach(originJoiner::add);
+        StringJoiner destinationJoiner = new StringJoiner(",");
+        destinationList.forEach(destinationJoiner::add);
+        StringJoiner excludeAirportJoiner = new StringJoiner(",");
+        excludeAirportCodeList.forEach(excludeAirportJoiner::add);
+        String requestURL = serviceAirlinePath.concat(String.format("?%s=%s" + "&%s=%s" + "&%s=%s" + "&%s=%s",
+                ORIGIN_PARAM_NAME,originJoiner,DESTINATION_PARAM_NAME,destinationJoiner,AIRLINE_PARAM_NAME,airline.name(),
+                EXCLUDE_PARAM_NAME,excludeAirportJoiner));
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<PathAirline>>(){});
     }
 
-    public Either<ServiceError,List<PathAirline>> getPathAirlineList(String origin, String destination,
-                                                                     List<String> excludeAirportCodeList) {
-        StringJoiner stringJoiner = new StringJoiner(",");
-        excludeAirportCodeList.forEach(stringJoiner::add);
-        String requestURL = serviceAirlinePath.concat(String.format("/%s/to/%s" + "?%s=%s",
-                origin,destination,EXCLUDE_PARAM_NAME,stringJoiner));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<PathAirline>>(){});
-    }
-
-    public Either<ServiceError,List<PathAirline>> getPathAirlineList(String origin, String destination,
-                                                                     List<String> excludeAirportCodeList,
-                                                                     List<Integer> excludeRouteIdList) {
-        StringJoiner stringJoinerAirports = new StringJoiner(",");
-        excludeAirportCodeList.forEach(stringJoinerAirports::add);
-        StringJoiner stringJoinerRouteIds = new StringJoiner(",");
-        excludeRouteIdList.forEach(routeId -> stringJoinerRouteIds.add(String.valueOf(routeId)));
-        String requestURL = serviceAirlinePath.concat(String.format("/%s/to/%s" + "?%s=%s" + "&%s=%s",
-                origin,destination,EXCLUDE_PARAM_NAME,stringJoinerAirports,
-                EXCLUDE_ROUTE_PARAM_NAME,stringJoinerRouteIds));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<PathAirline>>(){});
-    }
-
-    public Either<ServiceError,List<Path>> getPathList(String origin, String destination,
+    public Either<ServiceError,List<Path>> getPathList(List<String> originList, List<String> destinationList,
                                                        List<String> excludeAirportCodeList,
                                                        List<Integer> excludeRouteIdList) {
+        StringJoiner originJoiner = new StringJoiner(",");
+        originList.forEach(originJoiner::add);
+        StringJoiner destinationJoiner = new StringJoiner(",");
+        destinationList.forEach(destinationJoiner::add);
         StringJoiner stringJoinerAirports = new StringJoiner(",");
         excludeAirportCodeList.forEach(stringJoinerAirports::add);
         StringJoiner stringJoinerRouteIds = new StringJoiner(",");
         excludeRouteIdList.forEach(routeId -> stringJoinerRouteIds.add(String.valueOf(routeId)));
-        String requestURL = servicePath.concat(String.format("/%s/to/%s" + "?%s=%s" + "&%s=%s",
-                origin,destination,EXCLUDE_PARAM_NAME,stringJoinerAirports,
-                EXCLUDE_ROUTE_PARAM_NAME,stringJoinerRouteIds));
+        String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s" + "&%s=%s" + "&%s=%s",
+                ORIGIN_PARAM_NAME,originJoiner,DESTINATION_PARAM_NAME,destinationJoiner,
+                EXCLUDE_PARAM_NAME,stringJoinerAirports, EXCLUDE_ROUTE_PARAM_NAME,stringJoinerRouteIds));
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Path>>(){});
     }
 
-    public Either<ServiceError,List<Path>> getPathList(String origin, String destination) {
-        String requestURL = servicePath.concat(String.format("/%s/to/%s", origin,destination));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Path>>(){});
+    public Either<ServiceError,PathResponse<PathAirline>> getPathAirlineList(List<String> originList, List<String> destinationList,
+                                                                     List<String> excludeAirportCodeList,
+                                                                     List<Integer> excludeRouteIdList) {
+        StringJoiner originJoiner = new StringJoiner(",");
+        originList.forEach(originJoiner::add);
+        StringJoiner destinationJoiner = new StringJoiner(",");
+        destinationList.forEach(destinationJoiner::add);
+        StringJoiner stringJoinerAirports = new StringJoiner(",");
+        excludeAirportCodeList.forEach(stringJoinerAirports::add);
+        StringJoiner stringJoinerRouteIds = new StringJoiner(",");
+        excludeRouteIdList.forEach(routeId -> stringJoinerRouteIds.add(String.valueOf(routeId)));
+        String requestURL = serviceAirlinePath.concat(String.format("?%s=%s" + "&%s=%s" + "&%s=%s" + "&%s=%s",
+                ORIGIN_PARAM_NAME,originJoiner,DESTINATION_PARAM_NAME,destinationJoiner,
+                EXCLUDE_PARAM_NAME,stringJoinerAirports,EXCLUDE_ROUTE_PARAM_NAME,stringJoinerRouteIds));
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<PathResponse<PathAirline>>(){});
     }
 
 
-    public Either<ServiceError,List<PathAirline>> getPathAirlineList(String origin, String destination,
-                                                                     List<String> excludeAirportList,
-                                                                     List<Integer> excludeRouteIdList,
-                                                                     Airline airline) {
+    public Either<ServiceError, PathResponse<PathAirline>> getPathAirlineList(List<String> originList, List<String> destinationList,
+                                                                              List<String> excludeAirportList,
+                                                                              List<Integer> excludeRouteIdList,
+                                                                              Airline airline) {
+        StringJoiner originJoiner = new StringJoiner(",");
+        originList.forEach(originJoiner::add);
+        StringJoiner destinationJoiner = new StringJoiner(",");
+        destinationList.forEach(destinationJoiner::add);
         StringJoiner stringJoinerAirports = new StringJoiner(",");
         excludeAirportList.forEach(stringJoinerAirports::add);
         StringJoiner stringJoinerRouteIds = new StringJoiner(",");
         excludeRouteIdList.forEach(routeId -> stringJoinerRouteIds.add(String.valueOf(routeId)));
-        String requestURL = serviceAirlinePath.concat(String.format("/%s/to/%s" + "?%s=%s" + "&%s=%s" + "&%s=%s",
-                origin,destination,EXCLUDE_PARAM_NAME,stringJoinerAirports,
-                EXCLUDE_ROUTE_PARAM_NAME,stringJoinerRouteIds,
+        String requestURL = serviceAirlinePath.concat(String.format("?%s=%s" + "&%s=%s" + "&%s=%s" + "&%s=%s" + "&%s=%s",
+                ORIGIN_PARAM_NAME,originJoiner,DESTINATION_PARAM_NAME,destinationJoiner,
+                EXCLUDE_PARAM_NAME,stringJoinerAirports, EXCLUDE_ROUTE_PARAM_NAME,stringJoinerRouteIds,
                 AIRLINE_PARAM_NAME,airline));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<PathAirline>>(){});
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<PathResponse<PathAirline>>(){});
     }
 }

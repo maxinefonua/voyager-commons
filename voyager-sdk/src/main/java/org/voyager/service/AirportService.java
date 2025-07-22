@@ -19,10 +19,12 @@ import static org.voyager.utils.ConstantsUtils.*;
 public class AirportService {
     private final String servicePath;
     private final String nearbyPath;
+    private final String airlinesPath;
 
     AirportService(@NonNull VoyagerConfig voyagerConfig) {
         this.servicePath = voyagerConfig.getAirportsServicePath();
         this.nearbyPath = voyagerConfig.getNearbyPath();
+        this.airlinesPath = voyagerConfig.getAirlinesPath();
     }
 
     public Either<ServiceError,List<Airport>> getAirports() {
@@ -33,6 +35,14 @@ public class AirportService {
         String requestURL = String.format("%s" + "?%s=%s",
                 servicePath,AIRLINE_PARAM_NAME,airline.name());
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+    }
+
+    public Either<ServiceError,List<Airline>> getAirlines(@NonNull List<String> iataList) {
+        StringJoiner iataJoiner = new StringJoiner(",");
+        iataList.forEach(iataJoiner::add);
+        String requestURL = String.format("%s" + "?%s=%s",
+                airlinesPath,IATA_PARAM_NAME,iataJoiner);
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airline>>(){});
     }
 
     public Either<ServiceError,List<Airport>> getAirports(@NonNull AirportType airportType) {

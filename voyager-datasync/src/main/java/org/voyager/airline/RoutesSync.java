@@ -5,21 +5,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.config.VoyagerConfig;
+import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.model.Airline;
 import org.voyager.model.airport.Airport;
+import org.voyager.model.airport.AirportCH;
 import org.voyager.model.datasync.AirportFR;
 import org.voyager.model.datasync.RouteFR;
+import org.voyager.model.geoname.GeoName;
+import org.voyager.model.geoname.Timezone;
 import org.voyager.model.route.Route;
 import org.voyager.model.route.RouteForm;
 import org.voyager.model.route.RoutePatch;
-import org.voyager.service.AirportService;
-import org.voyager.service.FlightRadarService;
-import org.voyager.service.RouteService;
-import org.voyager.service.Voyager;
+import org.voyager.service.*;
 import org.voyager.utils.ConstantsLocal;
 import org.voyager.utils.DatasyncProgramArguments;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -27,8 +29,8 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
+import static org.voyager.utils.ConstantsLocal.MISSING_AIRPORTS_FILE;
 import static org.voyager.utils.ConstantsLocal.ROUTE_AIRPORTS_FILE;
 
 public class RoutesSync {
@@ -50,15 +52,17 @@ public class RoutesSync {
             Exception exception = either.getLeft().getException();
             LOGGER.error(exception.getMessage(),exception);
         } else {
+            Set<Airport> missingAirports = new HashSet<>();
             List<RouteFR> docRoutes = either.get();
-            processRoutes(docRoutes);
+            processRoutes(docRoutes,missingAirports);
             Set<String> airlineAirports = new HashSet<>();
             docRoutes.forEach(routeFR -> airlineAirports.add(routeFR.getAirport1().getIata()));
-            ConstantsLocal.writeSetLineByLine(airlineAirports, ROUTE_AIRPORTS_FILE);
+            ConstantsLocal.writeSetLineByLine(airlineAirports,ROUTE_AIRPORTS_FILE);
+            if (!missingAirports.isEmpty()) ConstantsLocal.writeSetToFileForDBInsertionAirports(missingAirports,MISSING_AIRPORTS_FILE);
         }
     }
 
-    private static void processRoutes(List<RouteFR> docRoutes) {
+    private static void processRoutes(List<RouteFR> docRoutes, Set<Airport> missingAirports) {
         Either<ServiceError,List<Route>> getEither = routeService.getRoutes();
         if (getEither.isLeft()) {
             Exception exception = getEither.getLeft().getException();
@@ -73,7 +77,7 @@ public class RoutesSync {
                 exists.put(String.format("%s:%s",route.getOrigin(),route.getDestination()),route));
         AtomicInteger created = new AtomicInteger(0);
         docRoutes.forEach(routeFR ->
-                processRouteFR(routeFR,exists,created,failedRouteStrings,failedFetchAirports));
+                processRouteFR(routeFR,exists,created,failedRouteStrings,failedFetchAirports,missingAirports));
         LOGGER.info(String.format("completed with existingRoutes count: %d and created count: %d",
                 existingRoutes.size(),created.get()));
         failedFetchAirports.forEach(airportFR ->
@@ -84,7 +88,8 @@ public class RoutesSync {
 
     private static void processRouteFR(RouteFR routeFR, Map<String,Route> exists,
                                        AtomicInteger created,
-                                       List<String> failedRouteStrings, List<AirportFR> failedFetchAirports) {
+                                       List<String> failedRouteStrings, List<AirportFR> failedFetchAirports,
+                                       Set<Airport> missingAirports) {
         String origin = routeFR.getAirport1().getIata();
         String destination = routeFR.getAirport2().getIata();
         String key = String.format("%s:%s",origin,destination);
@@ -94,15 +99,83 @@ public class RoutesSync {
         }
         Either<ServiceError, Airport> originEither = airportService.getAirport(origin);
         if (originEither.isLeft()) {
-            Exception exception = originEither.getLeft().getException();
-            LOGGER.error(exception.getMessage(), exception);
+            if (missingAirports.stream().anyMatch(airport -> airport.getIata().equals(origin))) return;
+            if (originEither.getLeft().getHttpStatus().equals(HttpStatus.NOT_FOUND)) {
+                Either<ServiceError, AirportCH> airportEither = ChAviationService.getAirportCH(origin);
+                if (airportEither.isLeft()) {
+                    Exception exception = airportEither.getLeft().getException();
+                    LOGGER.error(exception.getMessage(), exception);
+                } else {
+                    AirportCH airportCH = airportEither.get();
+                    AirportFR airportFR = routeFR.getAirport1();
+                    Either<ServiceError, List<GeoName>> either = GeoNamesService.findNearbyPlaces(airportFR.getLat(), airportFR.getLon());
+                    if (either.isLeft()) {
+                        Exception exception = either.getLeft().getException();
+                        LOGGER.error(exception.getMessage(), exception);
+                    } else {
+                        Airport airport = Airport.builder()
+                                .name(airportFR.getName())
+                                .countryCode(airportCH.getCountryCode())
+                                .iata(airportCH.getIata())
+                                .type(airportCH.getType())
+                                .longitude(airportFR.getLon())
+                                .latitude(airportFR.getLat())
+                                .build();
+                        if (either.get().isEmpty()) {
+                            LOGGER.error(String.format("Missing airport: %s from ChAviationService: %s, from FlightRadar: %s",
+                                    airport, airportCH, airportFR));
+                        } else {
+                            GeoName geoName = either.get().get(0);
+                            airport.setCity(geoName.getName());
+                            airport.setSubdivision(geoName.getAdminName1());
+                            Either<ServiceError, Timezone> timezoneEither = GeoNamesService.getTimezone(
+                                    airport.getLatitude(), airport.getLongitude());
+                            if (timezoneEither.isLeft()) {
+                                Exception exception = timezoneEither.getLeft().getException();
+                                LOGGER.error(exception.getMessage(), exception);
+                            } else {
+                                Timezone timezone = timezoneEither.get();
+                                airport.setZoneId(ZoneId.of(timezone.getTimezoneId()));
+                                missingAirports.add(airport);
+                                LOGGER.error(String.format("Missing airport: %s from ChAviationService: %s, from FlightRadar: %s",
+                                        airport, airportCH, airportFR));
+                            }
+                        }
+                    }
+                }
+            } else {
+                Exception exception = originEither.getLeft().getException();
+                LOGGER.error(exception.getMessage(), exception);
+            }
             failedFetchAirports.add(routeFR.getAirport1());
             return;
         }
         Either<ServiceError, Airport> destinationEither = airportService.getAirport(destination);
         if (destinationEither.isLeft()) {
-            Exception exception = destinationEither.getLeft().getException();
-            LOGGER.error(exception.getMessage(), exception);
+            if (missingAirports.stream().anyMatch(airport -> airport.getIata().equals(destination))) return;
+            if (destinationEither.getLeft().getHttpStatus().equals(HttpStatus.NOT_FOUND)) {
+                Either<ServiceError, AirportCH> airportEither = ChAviationService.getAirportCH(destination);
+                if (airportEither.isLeft()) {
+                    Exception exception = airportEither.getLeft().getException();
+                    LOGGER.error(exception.getMessage(),exception);
+                } else {
+                    AirportCH airportCH = airportEither.get();
+                    AirportFR airportFR = routeFR.getAirport2();
+                    Airport airport = Airport.builder()
+                            .name(airportFR.getName())
+                            .countryCode(airportCH.getCountryCode())
+                            .iata(airportCH.getIata())
+                            .type(airportCH.getType())
+                            .longitude(airportFR.getLon())
+                            .latitude(airportFR.getLat())
+                            .build();
+                    LOGGER.error(String.format("Missing airport: %s from ChAviationService: %s, from FlightRadar: %s",
+                            airport,airportCH,airportFR));
+                }
+            } else {
+                Exception exception = destinationEither.getLeft().getException();
+                LOGGER.error(exception.getMessage(), exception);
+            }
             failedFetchAirports.add(routeFR.getAirport2());
             return;
         }

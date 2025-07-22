@@ -7,6 +7,7 @@ import java.net.URL;
 
 public class VoyagerConfig {
     private static final String AIRPORTS_PATH = "/airports";
+    private static final String AIRLINES_PATH = "/airport-airlines";
     private static final String NEARBY_PATH = "/nearby-airports";
     private static final String ROUTES_PATH = "/routes";
     private static final String PATH_AIRLINE_PATH = "/path-airline";
@@ -64,6 +65,10 @@ public class VoyagerConfig {
 
     public String getNearbyPath() {
         return baseURL.concat(NEARBY_PATH);
+    }
+
+    public String getAirlinesPath() {
+        return baseURL.concat(AIRLINES_PATH);
     }
 
     private String buildBaseURL(String protocol, String host, int port) {

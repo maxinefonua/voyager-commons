@@ -2,10 +2,13 @@
 ### As of July 3, 2025:
 
 Pre-syncing Checklist
-- Update enum <strong>[Airline.java]</strong> with intended airline
-- Update PostgreSQL table <strong>[airline]</strong> with intended airline
-- Build and publish <strong>voyager-commons</strong> to .m2
+- Update enum <strong>[Airline.java]</strong> with intended airline and code 
+- Update PostgreSQL table <strong>[airline]</strong> with intended with query:
+  -     INSERT INTO airline(name) VALUES ('AIRLINE_NAME')
+- Build and publish <strong>voyager-commons</strong> to .m2 with command:
+  -     mvn clean install -U
 - Clean, compile, start <strong>voyager-api</strong> to pull airline enum updates
+  -     mvn clean compile
 
 ### 1. RoutesSync
     - pulls airports of routes for intended airline

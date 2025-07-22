@@ -3,20 +3,36 @@ package org.voyager.model;
 import lombok.Getter;
 
 public enum Airline {
-    DELTA("dl-dal"),
-    JAPAN("jl-jal"),
-    NORWEGIAN("dy-noz"),
-    SOUTHWEST("wn-swa"),
-    FINNAIR("ay-fin"),
-    AIRNZ("nz-anz"),
-    HAWAIIAN("ha-hal"),
-    ALASKA("as-asa"),
-    UNITED("ua-ual");
+    DELTA("Delta","dl-dal"),
+    JAPAN("Japan","jl-jal"),
+    NORWEGIAN("Norwegian","dy-noz"),
+    SOUTHWEST("Southwest","wn-swa"),
+    FINNAIR("Finnair","ay-fin"),
+    AIRNZ("Air New Zealand","nz-anz"),
+    HAWAIIAN("Hawaiian","ha-hal"),
+    ALASKA("Alaska","as-asa"),
+    UNITED("United","ua-ual"),
+    ADVANCED("Advanced","an-wsn"),
+    AEGEAN("Aegean","a3-aee"),
+    AMERICAN("American","aa-aal"),
+    FRONTIER("Frontier","f9-fft"),
+    SPIRIT("Spirit","nk-nks"),
+    VOLARIS("Volaris","y4-voi"),
+    ZIPAIR("Zipair","zg-tzp"),
+    AERLINGUS("Aer Lingus","ei-ein"),
+    AEROMEXICO("Aeromexico","am-amx"),
+    AIRCANADA("Air Canada","ac-aca"),
+    AIRCHINA("Air China","ca-cca"),
+    AIRFRANCE("Air France","af-afr");
 
     @Getter
     private String pathVariableFR;
 
-    Airline(String pathVariableFR) {
+    @Getter
+    private String displayText;
+
+    Airline(String displayText, String pathVariableFR) {
+        this.displayText = displayText;
         this.pathVariableFR = pathVariableFR;
     }
 }

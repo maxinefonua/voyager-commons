@@ -1,6 +1,7 @@
 package org.voyager.utils;
 
 import org.voyager.model.Airline;
+import org.voyager.model.airport.Airport;
 
 import java.io.IOException;
 import java.io.BufferedReader;
@@ -33,6 +34,7 @@ public class ConstantsLocal {
     public static final String ROUTE_AIRPORTS_FILE = "airline/route-airports.txt";
     public static final String FAILED_FLIGHT_NUMS_FILE = "airline/failed-flights.txt";
     public static final String FLIGHT_AIRPORTS_FILE = "airline/flight-airports.sql";
+    public static final String MISSING_AIRPORTS_FILE = "airline/missing-airports.sql";
     public static final String DELTA_FORMER_DB = "airports/delta-formerDB.txt";
     public static final String DELTA_FUTURE_FILE = "airports/delta-future.txt";
     public static final String DELTA_FOCUS_FILE = "airports/delta-focus.txt";
@@ -132,6 +134,21 @@ public class ConstantsLocal {
             StringJoiner joiner = new StringJoiner(",");
             airports.forEach(code -> joiner.add(String.format("('%s')",code)));
             writer.write(joiner.toString());
+        } catch (IOException e) {
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
+        }
+    }
+
+    public static void writeSetToFileForDBInsertionAirports(Set<Airport> missingAirports, String file) {
+        String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            StringJoiner joiner = new StringJoiner(",");
+            missingAirports.forEach(airport -> joiner.add(String.format("('%s','%s',%f,%f,'%s','%s','%s','%s','%s')",
+                    airport.getIata(),airport.getCountryCode(), airport.getLongitude(),airport.getLatitude(),
+                    airport.getZoneId(),airport.getName().replace("'","''"),
+                    airport.getCity().replace("'","''"),
+                    airport.getSubdivision().replace("'","''"),airport.getType())));
+            writer.write(String.format("INSERT INTO airports(iata,country,lon,lat,tz,name,city,subd,type) VALUES %s",joiner));
         } catch (IOException e) {
             throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
         }
