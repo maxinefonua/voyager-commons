@@ -4,7 +4,7 @@ import lombok.Getter;
 
 public enum Airline {
     DELTA("Delta","dl-dal"),
-    JAPAN("Japan","jl-jal"),
+    JAPAN("Japan Airlines","jl-jal"),
     NORWEGIAN("Norwegian","dy-noz"),
     SOUTHWEST("Southwest","wn-swa"),
     FINNAIR("Finnair","ay-fin"),
@@ -23,7 +23,10 @@ public enum Airline {
     AEROMEXICO("Aeromexico","am-amx"),
     AIRCANADA("Air Canada","ac-aca"),
     AIRCHINA("Air China","ca-cca"),
-    AIRFRANCE("Air France","af-afr");
+    AIRFRANCE("Air France","af-afr"),
+    ANA("All Nippon Airways","nh-ana"),
+    ASIANA("Asiana","oz-aar"),
+    EMIRATES("Emirates","ek-uae");
 
     @Getter
     private String pathVariableFR;
