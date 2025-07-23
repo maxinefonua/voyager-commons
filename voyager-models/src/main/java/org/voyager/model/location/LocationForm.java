@@ -18,6 +18,7 @@ public class LocationForm {
 
     @NotNull
     @ValidEnum(enumClass = Source.class)
+    @Builder.Default
     String source = Source.MANUAL.name();
 
     @NotBlank
@@ -64,6 +65,7 @@ public class LocationForm {
     Double north;
 
     @NotNull
+    @Builder.Default
     List<String> airports = new ArrayList<>();
 
     public void setSource(String source) {

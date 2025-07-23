@@ -2,9 +2,18 @@ package org.voyager.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.voyager.config.Protocol;
+import org.voyager.config.VoyagerConfig;
 import org.voyager.model.Airline;
+import org.voyager.model.SyncStep;
 
-import java.util.*;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class DatasyncProgramArguments {
     private static final int PORT_DEFAULT = 3000;
@@ -18,15 +27,18 @@ public class DatasyncProgramArguments {
     public static final String HOSTNAME_FLAG = "-h";
     public static final String PORT_FLAG = "-p";
     public static final String AUTH_TOKEN_FLAG = "-at";
+    public static final String STEP_FLAG = "-st";
     public static final String LIMIT_FLAG = "-l";
     public static final String AIRLINE_FLAG = "-a";
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasyncProgramArguments.class);
+    private static final List<SyncStep> STEP_LIST_DEFAULT = List.of(SyncStep.ROUTES_SYNC,SyncStep.FLIGHTS_SYNC,SyncStep.AIRLINE_SYNC);
 
     private Map<String,Object> flagMap = new HashMap<>(Map.of(
             THREAD_COUNT_FLAG,THREAD_COUNT_DEFAULT,
             PORT_FLAG,PORT_DEFAULT,
             LIMIT_FLAG,LIMIT_DEFAULT,
-            AIRLINE_FLAG,AIRLINE_DEFAULT
+            AIRLINE_FLAG,AIRLINE_DEFAULT,
+            STEP_FLAG,STEP_LIST_DEFAULT
     ));
 
     private Set<String> requiredFlags = Set.of(
@@ -84,6 +96,33 @@ public class DatasyncProgramArguments {
         return (Airline) flagMap.get(AIRLINE_FLAG);
     }
 
+    public void setThreadCountMax(int threadCountMax) {
+        flagMap.put(THREAD_COUNT_FLAG,threadCountMax);
+    }
+
+    public List<SyncStep> getStepList() {
+        return ((List<SyncStep>) flagMap.get(STEP_FLAG));
+    }
+
+    public String[] toArgs() {
+        List<String> argsList = new ArrayList<>();
+        flagMap.forEach((flagKey,objectValue) -> {
+            if (flagKey.equals(STEP_FLAG)) {
+                StringJoiner stringJoiner = new StringJoiner(",");
+                ((List<SyncStep>)flagMap.get(STEP_FLAG)).forEach(syncStep -> stringJoiner.add(syncStep.name()));
+                argsList.add(flagKey.concat("=").concat(stringJoiner.toString()));
+            } else {
+                argsList.add(flagKey.concat("=").concat(objectValue.toString()));
+            }
+        });
+        return argsList.toArray(new String[0]);
+    }
+
+    public VoyagerConfig getVoyagerConfig() {
+        return new VoyagerConfig(Protocol.HTTP,this.getHostname(),this.getPort(),
+                this.getThreadCount(),this.getAccessToken());
+    }
+
     private void processFlag(String flag, String token) {
         switch (flag) {
             case THREAD_COUNT_FLAG -> {
@@ -107,6 +146,11 @@ public class DatasyncProgramArguments {
             case AIRLINE_FLAG -> {
                 Airline airline = extractAirline(token);
                 flagMap.put(AIRLINE_FLAG,airline);
+            }
+            case STEP_FLAG -> {
+                List<SyncStep> stepList = Arrays.stream(token.split(","))
+                        .map(step -> SyncStep.valueOf(step.toUpperCase())).toList();
+                flagMap.put(STEP_FLAG,stepList);
             }
         }
     }

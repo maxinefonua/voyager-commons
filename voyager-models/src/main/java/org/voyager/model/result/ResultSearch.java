@@ -1,15 +1,18 @@
 package org.voyager.model.result;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
-import org.voyager.model.location.Location;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.voyager.model.location.Source;
 import org.voyager.model.location.Status;
-import org.voyager.utils.MapperUtils;
 
 import java.util.List;
 
-@Builder @Getter @AllArgsConstructor
+@Builder
+@Getter @AllArgsConstructor
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 public class ResultSearch {
@@ -23,6 +26,5 @@ public class ResultSearch {
     String countryName;
     Double latitude;
     Double longitude;
-    Double[] bounds;
     String type;
 }

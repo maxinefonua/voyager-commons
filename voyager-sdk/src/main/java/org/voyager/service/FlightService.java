@@ -6,19 +6,16 @@ import lombok.NonNull;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
+import org.voyager.model.Airline;
 import org.voyager.model.flight.Flight;
 import org.voyager.model.flight.FlightForm;
 import org.voyager.model.flight.FlightPatch;
-import org.voyager.model.route.Route;
-import org.voyager.model.route.RoutePatch;
-
-import static org.voyager.utils.ConstantsUtils.FLIGHT_NUMBER_PARAM_NAME;
-import static org.voyager.utils.ConstantsUtils.ROUTE_ID_PARAM_NAME;
 
 import java.util.List;
 
 import static org.voyager.service.Voyager.fetch;
 import static org.voyager.service.Voyager.fetchWithRequestBody;
+import static org.voyager.utils.ConstantsUtils.*;
 
 public class FlightService {
     private final String servicePath;
@@ -30,14 +27,33 @@ public class FlightService {
         return fetch(servicePath, HttpMethod.GET,new TypeReference<List<Flight>>(){});
     }
 
+    public Either<ServiceError, List<Flight>> getFlights(Airline airline,boolean isActive) {
+        String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s",
+                AIRLINE_PARAM_NAME,airline.name(),IS_ACTIVE_PARAM_NAME,isActive));
+        return fetch(requestURL, HttpMethod.GET,new TypeReference<List<Flight>>(){});
+    }
+
+    public Either<ServiceError, List<Flight>> getFlights(Integer routeId, boolean isActive) {
+        String requestURL = servicePath.concat(String.format("?%s=%d" + "&%s=%s",
+                ROUTE_ID_PARAM_NAME,routeId,IS_ACTIVE_PARAM_NAME,isActive));
+        return fetch(requestURL, HttpMethod.GET,new TypeReference<List<Flight>>(){});
+    }
+
+    public Either<ServiceError, List<Flight>> getFlights(Integer routeId,boolean isActive,Airline airline) {
+        String requestURL = servicePath.concat(String.format("?%s=%d" + "&%s=%s" + "&%s=%s",
+                ROUTE_ID_PARAM_NAME,routeId,IS_ACTIVE_PARAM_NAME,isActive,AIRLINE_PARAM_NAME,airline.name()));
+        return fetch(requestURL, HttpMethod.GET,new TypeReference<List<Flight>>(){});
+    }
+
+
     public Either<ServiceError, List<Flight>> getFlights(Integer routeId,String flightNumber) {
         String requestURL = servicePath.concat(String.format("?%s=%d" + "&%s=%s",
                 ROUTE_ID_PARAM_NAME,routeId,FLIGHT_NUMBER_PARAM_NAME,flightNumber));
         return fetch(requestURL, HttpMethod.GET,new TypeReference<List<Flight>>(){});
     }
 
-    public Either<ServiceError, Flight> getFlight(Integer routeId) {
-        String requestURL = servicePath.concat(String.format("/%d",routeId));
+    public Either<ServiceError, Flight> getFlight(Integer id) {
+        String requestURL = servicePath.concat(String.format("/%d",id));
         return fetch(requestURL, HttpMethod.GET, Flight.class);
     }
 

@@ -10,6 +10,7 @@ import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportPatch;
 import org.voyager.model.airport.AirportType;
 import java.util.List;
+import java.util.StringJoiner;
 
 import static org.voyager.service.Voyager.fetch;
 import static org.voyager.service.Voyager.fetchWithRequestBody;
@@ -18,10 +19,12 @@ import static org.voyager.utils.ConstantsUtils.*;
 public class AirportService {
     private final String servicePath;
     private final String nearbyPath;
+    private final String airlinesPath;
 
     AirportService(@NonNull VoyagerConfig voyagerConfig) {
         this.servicePath = voyagerConfig.getAirportsServicePath();
         this.nearbyPath = voyagerConfig.getNearbyPath();
+        this.airlinesPath = voyagerConfig.getAirlinesPath();
     }
 
     public Either<ServiceError,List<Airport>> getAirports() {
@@ -34,14 +37,29 @@ public class AirportService {
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 
+    public Either<ServiceError,List<Airline>> getAirlines(@NonNull List<String> iataList) {
+        StringJoiner iataJoiner = new StringJoiner(",");
+        iataList.forEach(iataJoiner::add);
+        String requestURL = String.format("%s" + "?%s=%s",
+                airlinesPath,IATA_PARAM_NAME,iataJoiner);
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airline>>(){});
+    }
+
     public Either<ServiceError,List<Airport>> getAirports(@NonNull AirportType airportType) {
         String requestURL = String.format("%s" + "?%s=%s",
                 servicePath,TYPE_PARAM_NAME,airportType.name());
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 
-    public Either<ServiceError,List<Airport>> getAirports(@NonNull AirportType airportType,
-                                                          @NonNull Airline airline) {
+    public Either<ServiceError,List<Airport>> getAirports(@NonNull List<AirportType> airportTypeList) {
+        StringJoiner stringJoiner = new StringJoiner(",");
+        airportTypeList.forEach(airportType -> stringJoiner.add(airportType.name()));
+        String requestURL = String.format("%s" + "?%s=%s",
+                servicePath,TYPE_PARAM_NAME,stringJoiner);
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+    }
+
+    public Either<ServiceError,List<Airport>> getAirports(@NonNull AirportType airportType, @NonNull Airline airline) {
         String requestURL = String.format("%s" + "?%s=%s" + "&%s=%s",
                 servicePath, TYPE_PARAM_NAME,airportType.name(),AIRLINE_PARAM_NAME,airline.name());
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
@@ -91,6 +109,23 @@ public class AirportService {
         );
        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
+
+    public Either<ServiceError,List<Airport>> getNearbyAirports(@NonNull Double longitude,
+                                                                @NonNull Double latitude,
+                                                                @NonNull Integer limit,
+                                                                @NonNull List<Airline> airlineList) {
+        StringJoiner stringJoiner = new StringJoiner(",");
+        airlineList.forEach(airline -> stringJoiner.add(airline.name()));
+        String requestURL = String.format("%s" + "?%s=%f" + "&%s=%f" + "&%s=%d" + "&%s=%s",
+                nearbyPath,
+                LONGITUDE_PARAM_NAME,longitude,
+                LATITUDE_PARAM_NAME,latitude,
+                LIMIT_PARAM_NAME,limit,
+                AIRLINE_PARAM_NAME,stringJoiner
+        );
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+    }
+
 
     public Either<ServiceError,List<Airport>> getNearbyAirports(@NonNull Double longitude,
                                                                 @NonNull Double latitude,

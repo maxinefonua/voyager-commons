@@ -1,19 +1,16 @@
 package org.voyager.model.route;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.ToString;
+import jakarta.validation.constraints.DecimalMin;
+import lombok.*;
 import org.voyager.model.validate.ValidPatch;
 
-import java.util.List;
-
-@Builder
-@Data @ValidPatch
+@Data
 @NoArgsConstructor
-@AllArgsConstructor
+@Builder
 @ToString(includeFieldNames = false)
+@AllArgsConstructor
+@ValidPatch
 public class RoutePatch {
-    List<Integer> flightIds;
+    @DecimalMin(value = "0.0")
+    Double distanceKm;
 }

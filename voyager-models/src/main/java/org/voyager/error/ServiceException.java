@@ -4,7 +4,7 @@ import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor @RequiredArgsConstructor
-@Data
+@Data @EqualsAndHashCode(callSuper = false)
 @Builder
 public class ServiceException extends Exception {
     int status;

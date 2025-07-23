@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @AllArgsConstructor @NoArgsConstructor
-@Data @Builder
+@Data @Builder @EqualsAndHashCode(callSuper = false)
 public class HttpException extends RuntimeException {
     String timestamp;
     int status;

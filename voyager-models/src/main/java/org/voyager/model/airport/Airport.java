@@ -1,17 +1,18 @@
 package org.voyager.model.airport;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
-import org.voyager.utils.MapperUtils;
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.TimeZone;
 
 @Builder(toBuilder = true) @Data
 @AllArgsConstructor @NoArgsConstructor
 @ToString
-@EqualsAndHashCode(exclude = "distance")
 public class Airport {
     @NonNull
     String iata;
@@ -31,14 +32,13 @@ public class Airport {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Double distance;
 
-    private static final MapperUtils<Airport> mapper = new MapperUtils<>(Airport.class);
     private static final int EARTH_RADIUS = 6371;
 
     private static double haversine(double val) {
         return Math.pow(Math.sin(val / 2), 2);
     }
 
-    public static double calculateDistance(double startLat,double startLong, double endLat, double endLong) {
+    public static double calculateDistanceKm(double startLat, double startLong, double endLat, double endLong) {
         double dLat = Math.toRadians((endLat - startLat));
         double dLong = Math.toRadians((endLong - startLong));
 
@@ -49,9 +49,5 @@ public class Airport {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return EARTH_RADIUS * c;
-    }
-
-    public String toJson() {
-        return mapper.mapToJson(this);
     }
 }

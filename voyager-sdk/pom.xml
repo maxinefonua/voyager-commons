@@ -20,7 +20,7 @@
         <dependency>
             <groupId>org.voyager</groupId>
             <artifactId>voyager-models</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vavr</groupId>
@@ -37,11 +37,6 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.asynchttpclient</groupId>
-            <artifactId>async-http-client</artifactId>
-            <version>2.12.4</version>
         </dependency>
     </dependencies>
 </project>

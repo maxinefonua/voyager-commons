@@ -1,17 +1,14 @@
-package org.voyager;
+package org.voyager.airline;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.voyager.config.Protocol;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
-import org.voyager.http.RetryHttpClient;
 import org.voyager.model.Airline;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
@@ -24,13 +21,19 @@ import org.voyager.model.flight.FlightForm;
 import org.voyager.model.flight.FlightPatch;
 import org.voyager.model.route.Route;
 import org.voyager.model.route.RouteForm;
-import org.voyager.model.route.RoutePatch;
-import org.voyager.service.*;
+import org.voyager.service.AirportService;
+import org.voyager.service.RouteService;
+import org.voyager.service.FlightService;
+import org.voyager.service.FlightRadarService;
+import org.voyager.service.Voyager;
 import org.voyager.utils.ConstantsLocal;
 import org.voyager.utils.DatasyncProgramArguments;
 
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.time.Duration;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -45,14 +48,8 @@ public class FlightsSync {
     public static void main(String[] args) {
         System.out.println("printing from routes sync main");
         DatasyncProgramArguments datasyncProgramArguments = new DatasyncProgramArguments(args);
-        Integer maxConcurrentRequests = datasyncProgramArguments.getThreadCount();
-        String host = datasyncProgramArguments.getHostname();
-        int port = datasyncProgramArguments.getPort();
-        String voyagerAuthorizationToken = datasyncProgramArguments.getAccessToken();
         Airline airline = datasyncProgramArguments.getAirline();
-
-        VoyagerConfig voyagerConfig = new VoyagerConfig(Protocol.HTTP,host,port,
-                maxConcurrentRequests,voyagerAuthorizationToken);
+        VoyagerConfig voyagerConfig = datasyncProgramArguments.getVoyagerConfig();
         Voyager voyager = new Voyager(voyagerConfig);
         routeService = voyager.getRouteService();
         flightService = voyager.getFlightService();
@@ -70,7 +67,7 @@ public class FlightsSync {
     private static void processSychronously(Airline airline, List<Airport> airports, boolean fromVoyagerAPI) {
         Set<String> airlineAirports = ConstantsLocal.loadCodesFromListFile(AIRLINE_PROCESSED_FILE);
         Set<String> nonAirlineAirports = ConstantsLocal.loadCodesFromListFile(NON_AIRLINE_PROCESSED_FILE);
-        Set<String> toProcess = null;
+        Set<String> toProcess;
         if (fromVoyagerAPI) {
             toProcess = airports.stream().map(Airport::getIata)
                     .filter(iata -> !airlineAirports.contains(iata) && !nonAirlineAirports.contains(iata))
@@ -87,7 +84,6 @@ public class FlightsSync {
         Set<String> fetchAirportErrors = new HashSet<>();
         Set<String> flightNumberErrors = new HashSet<>();
         int processed = 0;
-        ObjectMapper om = new ObjectMapper();
         boolean requestRateLimited = false;
         int totalFlightCreates = 0;
         int totalFlightPatches = 0;
@@ -95,51 +91,45 @@ public class FlightsSync {
         for (String iata : toProcess) {
             processed++;
             LOGGER.info(String.format("processing %d/%d airports",processed,toProcess.size()));
-            Either<ServiceError,String> either = FlightRadarService.fetchAirportResponse(iata,airline);
+            Either<ServiceError, Option<AirportScheduleFR>> either = FlightRadarService.extractAirportResponse(iata,airline);
             if (either.isLeft()) {
-                Exception exception = either.getLeft().getException();
-                LOGGER.error(String.format("failed to fetch %s airport, error: %s",
-                        iata,exception.getMessage()));
-                if (exception instanceof RetryHttpClient.RetryLimitExceededException) {
+                if (either.getLeft().getHttpStatus().equals(HttpStatus.TOO_MANY_REQUESTS)) {
                     requestRateLimited = true;
                     break;
                 }
+                Exception exception = either.getLeft().getException();
+                LOGGER.error(String.format("failed to fetch %s airport, error: %s",
+                        iata,exception.getMessage()));
                 fetchAirportErrors.add(iata);
             } else {
-                String jsonBody = either.get();
-                if (StringUtils.isBlank(jsonBody) || jsonBody.equals("[]")) {
+                Option<AirportScheduleFR> airportScheduleFROption = either.get();
+                if (airportScheduleFROption.isEmpty()) {
                     LOGGER.info(String.format("%s airport returns no flights for airline %s",
                             iata,airline.name()));
                     nonAirlineAirports.add(iata);
                 } else {
-                    try {
-                        AirportScheduleFR airportScheduleFR = om.readValue(jsonBody, AirportScheduleFR.class);
-                        AtomicInteger patchedFlights = new AtomicInteger();
-                        AtomicInteger createdFlights = new AtomicInteger();
-                        AtomicInteger skippedFlights = new AtomicInteger();
-                        LOGGER.info(String.format("successful conversion of airportScheduleFR for %s airport: %s",
-                                iata, airportScheduleFR));
-                        if (airportScheduleFR.getDepartures() != null) {
-                            airportScheduleFR.getDepartures().forEach((countryName,countryFR) -> {
-                                processCountryFlights(patchedFlights,createdFlights,skippedFlights,flightNumberErrors,
-                                        countryName,countryFR,iata,airline,true,routeService,flightService);
-                            });
-                        }
-                        if (airportScheduleFR.getArrivals() != null) {
-                            airportScheduleFR.getArrivals().forEach((countryName,countryFR) -> {
-                                processCountryFlights(patchedFlights,createdFlights,skippedFlights,flightNumberErrors,
-                                        countryName,countryFR,iata,airline,false,routeService,flightService);
-                            });
-                        }
-                        totalFlightCreates += createdFlights.get();
-                        totalFlightPatches += patchedFlights.get();
-                        totalFlightSkips += skippedFlights.get();
-                        airlineAirports.add(iata);
-                    } catch (JsonProcessingException e) {
-                        LOGGER.error(String.format("failed to map %s airport with error: %s, schedule: %s",
-                                iata, e.getMessage(), jsonBody), e);
-                        throw new RuntimeException(e);
+                    AirportScheduleFR airportScheduleFR = airportScheduleFROption.get();
+                    AtomicInteger patchedFlights = new AtomicInteger();
+                    AtomicInteger createdFlights = new AtomicInteger();
+                    AtomicInteger skippedFlights = new AtomicInteger();
+                    LOGGER.info(String.format("successful conversion of airportScheduleFR for %s airport: %s",
+                            iata, airportScheduleFR));
+                    if (airportScheduleFR.getDepartures() != null) {
+                        airportScheduleFR.getDepartures().forEach((countryName,countryFR) -> {
+                            processCountryFlights(patchedFlights,createdFlights,skippedFlights,flightNumberErrors,
+                                    countryName,countryFR,iata,airline,true,routeService,flightService);
+                        });
                     }
+                    if (airportScheduleFR.getArrivals() != null) {
+                        airportScheduleFR.getArrivals().forEach((countryName,countryFR) -> {
+                            processCountryFlights(patchedFlights,createdFlights,skippedFlights,flightNumberErrors,
+                                    countryName,countryFR,iata,airline,false,routeService,flightService);
+                        });
+                    }
+                    totalFlightCreates += createdFlights.get();
+                    totalFlightPatches += patchedFlights.get();
+                    totalFlightSkips += skippedFlights.get();
+                    airlineAirports.add(iata);
                 }
             }
         }
@@ -213,14 +203,13 @@ public class FlightsSync {
             origin = airportCode;
             destination = iata;
         }
-        Either<ServiceError, Route> routeEither = fetchOrCreateRoute(origin,destination,routeService,flightNumber);
+        Either<ServiceError, Route> routeEither = fetchOrCreateRoute(origin,destination,routeService);
         if (routeEither.isLeft()) {
             Exception exception = routeEither.getLeft().getException();
             LOGGER.error(exception.getMessage(),exception);
             return Either.left(flightNumber);
         }
-        Route route = routeEither.get();
-        Integer routeId = route.getId();
+        Integer routeId = routeEither.get().getId();
 
         String latestDate = plannedFR.getDateToTimeMap().keySet()
                 .stream().max(Comparator.naturalOrder()).orElse(null);
@@ -230,44 +219,10 @@ public class FlightsSync {
             return Either.left(flightNumber);
         }
 
-        String time = plannedFR.getDateToTimeMap().get(latestDate).getTime();
-        String departureDateString = null;
-        String departureTimeString = null;
-        String arrivalDateString = null;
-        String arrivalTimeString = null;
-        if (isOrigin) {
-            departureDateString = latestDate;
-            departureTimeString = time;
-        } else {
-            arrivalDateString = latestDate;
-            arrivalTimeString = time;
-        }
-
         AtomicInteger createValue = new AtomicInteger(0);
         Either<String,Flight> flightEither = fetchOrCreateFlight(flightService,routeId,flightNumber,airline,
                 plannedFR.getDateToTimeMap().get(latestDate),createValue,isOrigin);
         if (flightEither.isLeft()) return Either.left(flightEither.getLeft());
-
-        Flight flight = flightEither.get();
-        if (createValue.get() > 0)
-            LOGGER.info(String.format("successfully created flight %s",flight));
-        else if (createValue.get() < 0)
-            LOGGER.info(String.format("successfully patched flight %s",flight));
-        else
-            LOGGER.info(String.format("successfully skipped existing flight %s",flight));
-
-        if (route.getFlightIds().contains(flight.getId())) {
-            LOGGER.info(String.format("skipping route %d patch, already contains flight id %d",
-                    route.getId(),flight.getId()));
-        } else {
-            List<Integer> flightIds = route.getFlightIds();
-            flightIds.add(flight.getId());
-            RoutePatch routePatch = RoutePatch.builder().flightIds(flightIds).build();
-            Either<ServiceError,Route> patchEither = routeService.patchRoute(route,routePatch);
-            if (patchEither.isLeft()) return Either.left(flightNumber);
-            LOGGER.info(String.format("successfully patched route %d, added flight id %d",
-                    route.getId(),flight.getId()));
-        }
         return Either.right(createValue.get());
     }
 
@@ -351,16 +306,19 @@ public class FlightsSync {
 
     private static Either<ServiceError,Route> fetchOrCreateRoute(String origin,
                                                     String destination,
-                                                    RouteService routeService,
-                                                    String flightNumber) {
-        Either<ServiceError, List<Route>> routesEither = routeService.getRoutes(origin,destination);
+                                                    RouteService routeService) {
+        Either<ServiceError, List<Route>> routesEither = routeService.getRoutes(origin, destination);
         if (routesEither.isLeft())
             return Either.left(routesEither.getLeft());
         List<Route> routeList = routesEither.get();
-        if (routeList.isEmpty()) { // create new route
+        if (routeList.isEmpty()) { // return exception
+            Airport startAirport = airportService.getAirport(origin).get();
+            Airport endAirport = airportService.getAirport(destination).get();
+            Double distanceKm = Airport.calculateDistanceKm(startAirport.getLatitude(),startAirport.getLongitude(),endAirport.getLatitude(),endAirport.getLongitude());
             RouteForm routeForm = RouteForm.builder()
                     .origin(origin)
                     .destination(destination)
+                    .distanceKm(distanceKm)
                     .build();
             return routeService.createRoute(routeForm);
         }

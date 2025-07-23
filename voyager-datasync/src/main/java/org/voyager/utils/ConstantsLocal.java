@@ -1,9 +1,19 @@
 package org.voyager.utils;
 
 import org.voyager.model.Airline;
+import org.voyager.model.airport.Airport;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.FileWriter;
+import java.util.Scanner;
+import java.util.StringJoiner;
+import java.util.Set;
+import java.util.MissingResourceException;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class ConstantsLocal {
@@ -23,12 +33,11 @@ public class ConstantsLocal {
     public static final String NON_AIRLINE_PROCESSED_FILE = "airline/non-airline-processed.txt";
     public static final String ROUTE_AIRPORTS_FILE = "airline/route-airports.txt";
     public static final String FAILED_FLIGHT_NUMS_FILE = "airline/failed-flights.txt";
-    public static final String FLIGHT_AIRPORTS_FILE = "airline/flight-airports.txt";
+    public static final String FLIGHT_AIRPORTS_FILE = "airline/flight-airports.sql";
+    public static final String MISSING_AIRPORTS_FILE = "airline/missing-airports.sql";
     public static final String DELTA_FORMER_DB = "airports/delta-formerDB.txt";
     public static final String DELTA_FUTURE_FILE = "airports/delta-future.txt";
     public static final String DELTA_FOCUS_FILE = "airports/delta-focus.txt";
-    public static final String ROUTES_HTML_FILE = "routes/flight-radar.html";
-    public static final String AIRPORTS_CSV_FILE = "airports/airports-saved.csv";
 
 
     public static final String CIVIL_AIRPORT = "Civil Airport";
@@ -130,12 +139,30 @@ public class ConstantsLocal {
         }
     }
 
+    public static void writeSetToFileForDBInsertionAirports(Set<Airport> missingAirports, String file) {
+        String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            StringJoiner joiner = new StringJoiner(",");
+            missingAirports.forEach(airport -> joiner.add(String.format("('%s','%s',%f,%f,'%s','%s','%s','%s','%s')",
+                    airport.getIata(),airport.getCountryCode(), airport.getLongitude(),airport.getLatitude(),
+                    airport.getZoneId(),airport.getName().replace("'","''"),
+                    airport.getCity().replace("'","''"),
+                    airport.getSubdivision().replace("'","''"),airport.getType())));
+            writer.write(String.format("INSERT INTO airports(iata,country,lon,lat,tz,name,city,subd,type) VALUES %s",joiner));
+        } catch (IOException e) {
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
+        }
+    }
+
     public static void writeSetToFileForDBInsertionWithAirline(Set<String> airports, Airline airline, boolean isActive, String file) {
         String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             StringJoiner joiner = new StringJoiner(",");
             airports.forEach(code -> joiner.add(String.format("('%s','%s',%s)",code,airline.name(),isActive)));
-            writer.write("INSERT INTO airline_airports(iata,airline,active) VALUES ".concat(joiner.toString()));
+            writer.write(String.format("DELETE FROM airline_airports WHERE airline = '%s';\n",airline.name()));
+            writer.write(String.format("INSERT INTO airline_airports(iata,airline,active) VALUES %s;\n",joiner));
+            writer.write("SELECT orgn,dstn FROM flights INNER JOIN routes ON flights.route_id = routes.id WHERE (flights.departure_zdt IS NULL OR flights.arrival_zdt IS NULL) AND flights.active = true;\n");
+            writer.write("-- UPDATE flights SET active = false WHERE (flights.departure_zdt IS NULL OR flights.arrival_zdt IS NULL) AND flights.active = true;");
         } catch (IOException e) {
             throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
         }
