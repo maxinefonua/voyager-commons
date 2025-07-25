@@ -6,6 +6,7 @@ import lombok.NonNull;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
+import org.voyager.model.country.Continent;
 import org.voyager.model.location.*;
 
 import java.util.List;
@@ -28,6 +29,12 @@ public class LocationService {
     public Either<ServiceError,List<Location>> getLocations(Source source, String sourceId) {
         String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s",
                 SOURCE_PARAM_NAME,source.name(),SOURCE_ID_PARAM_NAME,sourceId));
+        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
+    }
+
+    public Either<ServiceError,List<Location>> getLocations(Source source, Continent continent) {
+        String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s",
+                SOURCE_PARAM_NAME,source.name(), CONTINENT_PARAM_NAME,continent.name()));
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
     }
 

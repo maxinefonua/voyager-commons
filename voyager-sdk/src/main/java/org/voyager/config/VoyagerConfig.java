@@ -17,6 +17,7 @@ public class VoyagerConfig {
     private static final String LOCATIONS_PATH = "/locations";
     private static final String FLIGHTS_PATH = "/flights";
     private static final String FETCH_PATH = "/fetch";
+    private static final String COUNTRY_PATH = "/countries";
 
     @Getter
     private final int maxThreads;
@@ -81,5 +82,9 @@ public class VoyagerConfig {
 
     public String getfetchPath() {
         return baseURL.concat(FETCH_PATH);
+    }
+
+    public String getCountryPath() {
+        return baseURL.concat(COUNTRY_PATH);
     }
 }

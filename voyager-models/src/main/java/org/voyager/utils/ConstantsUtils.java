@@ -22,6 +22,7 @@ public class ConstantsUtils {
     public static final String LATITUDE_PARAM_NAME = "latitude";
     public static final String LONGITUDE_PARAM_NAME = "longitude";
     public static final String LIMIT_PARAM_NAME = "limit";
+    public static final String CONTINENT_PARAM_NAME = "continent";
     public static final String COUNTRY_CODE_PARAM_NAME = "countryCode";
     public static final String TYPE_PARAM_NAME = "type";
     public static final String AIRLINE_PARAM_NAME = "airline";

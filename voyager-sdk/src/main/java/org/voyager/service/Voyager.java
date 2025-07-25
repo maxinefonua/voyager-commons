@@ -30,12 +30,18 @@ public class Voyager {
     private static PathService pathService;
     private static LocationService locationService;
     private static FlightService flightService;
+    private static CountryService countryService;
     private static final Logger LOGGER = LoggerFactory.getLogger(Voyager.class);
     private static final ObjectMapper om = new ObjectMapper();
 
     public Voyager(VoyagerConfig voyagerConfig) {
         this.voyagerConfig = voyagerConfig;
         this.voyagerHttpFactory = new VoyagerHttpFactory(voyagerConfig.getAuthorizationToken());
+    }
+
+    public CountryService getCountryService() {
+        if (countryService == null) countryService = new CountryService(voyagerConfig);
+        return countryService;
     }
 
     public FlightService getFlightService() {
