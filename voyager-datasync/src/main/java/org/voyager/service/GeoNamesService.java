@@ -1,9 +1,5 @@
 package org.voyager.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import lombok.NonNull;
 import org.voyager.error.ServiceError;
@@ -29,21 +25,21 @@ public class GeoNamesService {
 
     public static Either<ServiceError, List<GeoName>> findNearbyPlaces(@NonNull Double latitude, @NonNull Double longitude) {
         String requestURL = baseURL.concat(nearbyPlacePath).concat(String.format(nearbyPlaceParams,USERNAME,latitude,longitude));
-        return HttpRequestUtils.getRequestBody(requestURL, new TypeReference<GeoNameResponse>(){}).map(GeoNameResponse::getGeonames);
+        return HttpRequestUtils.getRequestBody(requestURL,GeoNameResponse.class).map(GeoNameResponse::getGeonames);
     }
 
     public static Either<ServiceError, Timezone> getTimezone(@NonNull Double latitude, @NonNull Double longitude) {
         String requestURL = baseURL.concat(timezonePath).concat(String.format(timezoneParams,latitude,longitude,USERNAME));
-        return HttpRequestUtils.getRequestBody(requestURL,new TypeReference<Timezone>(){});
+        return HttpRequestUtils.getRequestBody(requestURL,Timezone.class);
     }
 
     public static Either<ServiceError,GeoNameFull> fetchFull(@NonNull Long geonameId) {
         String requestURL = baseURL.concat(getPath).concat(String.format(getParams,geonameId,USERNAME));
-        return HttpRequestUtils.getRequestBody(requestURL,new TypeReference<GeoNameFull>(){});
+        return HttpRequestUtils.getRequestBody(requestURL,GeoNameFull.class);
     }
 
     public static Either<ServiceError,List<CountryGN>> getCountryGNList() {
         String requestURL = baseURL.concat(countryPath).concat(String.format(countryParams,USERNAME));
-        return HttpRequestUtils.getRequestBody(requestURL,new TypeReference<CountryGNResponse>(){}).map(CountryGNResponse::getCountryGNList);
+        return HttpRequestUtils.getRequestBody(requestURL,CountryGNResponse.class).map(CountryGNResponse::getCountryGNList);
     }
 }

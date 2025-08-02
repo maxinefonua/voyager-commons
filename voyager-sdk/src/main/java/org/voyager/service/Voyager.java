@@ -18,9 +18,6 @@ import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import static org.voyager.service.ServiceUtils.responseBody;
-import static org.voyager.service.ServiceUtils.responseBodyList;
-
 public class Voyager {
     private static VoyagerHttpFactory voyagerHttpFactory;
     private static VoyagerConfig voyagerConfig;
@@ -81,25 +78,21 @@ public class Voyager {
             VoyagerHttpClient client = voyagerHttpFactory.getClient();
             Either<ServiceError, HttpResponse<String>> responseEither = client.send(request);
             if (responseEither.isLeft()) return Either.left(responseEither.getLeft());
-            return responseBodyList(responseEither.get(),typeReference,requestURL);
+            return ServiceUtils.extractMappedResponse(responseEither.get(),typeReference,requestURL);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
 
     }
 
+    static Either<ServiceError,Boolean> fetchNoResponseBody(String requestURL, HttpMethod httpMethod) {
+        return fetchRequest(requestURL,httpMethod).flatMap(httpResponse ->
+                ServiceUtils.confirmValidResponse(httpResponse,requestURL));
+    }
+
     static <T> Either<ServiceError, T> fetch(String requestURL,HttpMethod httpMethod,Class<T> responseType) {
-        try {
-            URI uri = new URI(requestURL);
-            HttpRequest request = voyagerHttpFactory.request(uri,httpMethod);
-            Either<ServiceError, HttpResponse<String>> responseEither = voyagerHttpFactory.getClient().send(request);
-            if (responseEither.isLeft()) return Either.left(responseEither.getLeft());
-            return responseBody(responseEither.get(),responseType,requestURL);
-        } catch (URISyntaxException e) {
-            String message = String.format("Exception thrown when building URI of %s",requestURL);
-            LOGGER.error(message);
-            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
-        }
+        return fetchRequest(requestURL,httpMethod).flatMap(httpResponse ->
+                ServiceUtils.extractMappedResponse(httpResponse,responseType,requestURL));
     }
 
     static <T> Either<ServiceError, T> fetchWithRequestBody(String requestURL, HttpMethod httpMethod, Class<T> responseType, Object requestBody) {
@@ -109,13 +102,25 @@ public class Voyager {
             HttpRequest request = voyagerHttpFactory.request(uri,httpMethod,jsonPayload);
             Either<ServiceError, HttpResponse<String>> responseEither = voyagerHttpFactory.getClient().send(request);
             if (responseEither.isLeft()) return Either.left(responseEither.getLeft());
-            return responseBody(responseEither.get(),responseType,requestURL);
+            return ServiceUtils.extractMappedResponse(responseEither.get(),responseType,requestURL);
         } catch (URISyntaxException e) {
             String message = String.format("Exception thrown when building URI of %s",requestURL);
             LOGGER.error(message);
             return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
         } catch (JsonProcessingException e) {
             String message = String.format("Exception thrown when writing json payload of request body %s",requestBody);
+            LOGGER.error(message);
+            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
+        }
+    }
+
+    private static Either<ServiceError,HttpResponse<String>> fetchRequest(String requestURL, HttpMethod httpMethod) {
+        try {
+            URI uri = new URI(requestURL);
+            HttpRequest request = voyagerHttpFactory.request(uri,httpMethod);
+            return voyagerHttpFactory.getClient().send(request);
+        } catch (URISyntaxException e) {
+            String message = String.format("Exception thrown when building URI of %s",requestURL);
             LOGGER.error(message);
             return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
         }

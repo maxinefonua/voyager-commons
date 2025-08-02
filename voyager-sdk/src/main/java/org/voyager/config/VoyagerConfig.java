@@ -15,6 +15,7 @@ public class VoyagerConfig {
     private static final String SEARCH_PATH = "/search";
     private static final String ATTRIBUTION_PATH = "/search-attribution";
     private static final String LOCATIONS_PATH = "/locations";
+    private static final String LOCATION_PATH = "/location";
     private static final String FLIGHTS_PATH = "/flights";
     private static final String FETCH_PATH = "/fetch";
     private static final String COUNTRY_PATH = "/countries";
@@ -58,6 +59,10 @@ public class VoyagerConfig {
 
     public String getLocationsPath() {
         return baseURL.concat(LOCATIONS_PATH);
+    }
+
+    public String getLocationPath() {
+        return baseURL.concat(LOCATION_PATH);
     }
 
     public String getFlightsPath() {
