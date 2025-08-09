@@ -16,6 +16,7 @@ import java.util.StringJoiner;
 import static org.voyager.service.Voyager.fetch;
 import static org.voyager.service.Voyager.fetchWithRequestBody;
 import static org.voyager.utils.ConstantsUtils.CONTINENT_PARAM_NAME;
+import static org.voyager.utils.ConstantsUtils.CURRENCY_CODE_PARAM_NAME;
 
 public class CountryService {
     private final String servicePath;
@@ -26,6 +27,11 @@ public class CountryService {
 
     public Either<ServiceError, List<Country>> getCountries() {
         return fetch(servicePath, HttpMethod.GET,new TypeReference<List<Country>>(){});
+    }
+
+    public Either<ServiceError, List<Country>> getCountries(String currencyCode) {
+        String requestURL = servicePath.concat(String.format("?%s=%s",CURRENCY_CODE_PARAM_NAME,currencyCode));
+        return fetch(requestURL, HttpMethod.GET,new TypeReference<List<Country>>(){});
     }
 
     public Either<ServiceError, List<Country>> getCountries(List<Continent> continentList) {

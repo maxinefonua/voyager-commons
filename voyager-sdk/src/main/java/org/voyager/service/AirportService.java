@@ -99,46 +99,35 @@ public class AirportService {
     public Either<ServiceError,List<Airport>> getNearbyAirports(@NonNull Double longitude,
                                                                 @NonNull Double latitude,
                                                                 @NonNull Integer limit,
-                                                                @NonNull Airline airline) {
+                                                                @NonNull List<Airline> airlineList) {
+        StringJoiner airlineJoiner = new StringJoiner(",");
+        airlineList.forEach(airline -> airlineJoiner.add(airline.name()));
         String requestURL = String.format("%s" + "?%s=%f" + "&%s=%f" + "&%s=%d" + "&%s=%s",
                 nearbyPath,
                 LONGITUDE_PARAM_NAME,longitude,
                 LATITUDE_PARAM_NAME,latitude,
                 LIMIT_PARAM_NAME,limit,
-                AIRLINE_PARAM_NAME,airline.name()
-        );
+                AIRLINE_PARAM_NAME,airlineJoiner);
        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 
+
     public Either<ServiceError,List<Airport>> getNearbyAirports(@NonNull Double longitude,
                                                                 @NonNull Double latitude,
                                                                 @NonNull Integer limit,
+                                                                @NonNull List<AirportType> airportType,
                                                                 @NonNull List<Airline> airlineList) {
-        StringJoiner stringJoiner = new StringJoiner(",");
-        airlineList.forEach(airline -> stringJoiner.add(airline.name()));
-        String requestURL = String.format("%s" + "?%s=%f" + "&%s=%f" + "&%s=%d" + "&%s=%s",
-                nearbyPath,
-                LONGITUDE_PARAM_NAME,longitude,
-                LATITUDE_PARAM_NAME,latitude,
-                LIMIT_PARAM_NAME,limit,
-                AIRLINE_PARAM_NAME,stringJoiner
-        );
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
-    }
-
-
-    public Either<ServiceError,List<Airport>> getNearbyAirports(@NonNull Double longitude,
-                                                                @NonNull Double latitude,
-                                                                @NonNull Integer limit,
-                                                                @NonNull AirportType airportType,
-                                                                @NonNull Airline airline) {
+        StringJoiner airlineJoiner = new StringJoiner(",");
+        airlineList.forEach(airline -> airlineJoiner.add(airline.name()));
+        StringJoiner typeJoiner = new StringJoiner(",");
+        airportType.forEach(type -> typeJoiner.add(type.name()));
         String requestURL = String.format("%s" + "?%s=%f" + "&%s=%f" + "&%s=%d" + "&%s=%s" + "&%s=%s",
                 nearbyPath,
                 LONGITUDE_PARAM_NAME,longitude,
                 LATITUDE_PARAM_NAME,latitude,
                 LIMIT_PARAM_NAME,limit,
-                TYPE_PARAM_NAME,airportType.name(),
-                AIRLINE_PARAM_NAME,airline.name()
+                TYPE_PARAM_NAME,typeJoiner,
+                AIRLINE_PARAM_NAME,airlineJoiner
         );
         return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }

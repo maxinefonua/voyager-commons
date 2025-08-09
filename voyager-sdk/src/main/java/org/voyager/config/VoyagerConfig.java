@@ -10,6 +10,7 @@ public class VoyagerConfig {
     private static final String AIRLINES_PATH = "/airport-airlines";
     private static final String NEARBY_PATH = "/nearby-airports";
     private static final String ROUTES_PATH = "/routes";
+    private static final String ROUTE_PATH = "/route";
     private static final String PATH_AIRLINE_PATH = "/path-airline";
     private static final String PATH_PATH = "/path";
     private static final String SEARCH_PATH = "/search";
@@ -19,6 +20,9 @@ public class VoyagerConfig {
     private static final String FLIGHTS_PATH = "/flights";
     private static final String FETCH_PATH = "/fetch";
     private static final String COUNTRY_PATH = "/countries";
+    private static final String CURRENCIES_PATH = "/currencies";
+    private static final String LANGUAGES_PATH = "/languages";
+    private static final String LANGUAGE_PATH = "/language";
 
     @Getter
     private final int maxThreads;
@@ -91,5 +95,17 @@ public class VoyagerConfig {
 
     public String getCountryPath() {
         return baseURL.concat(COUNTRY_PATH);
+    }
+
+    public String getCurrenciesPath() {
+        return baseURL.concat(CURRENCIES_PATH);
+    }
+
+    public String getLanguagesPath() {
+        return baseURL.concat(LANGUAGES_PATH);
+    }
+
+    public String getLanguagePath() {
+        return baseURL.concat(LANGUAGE_PATH);
     }
 }

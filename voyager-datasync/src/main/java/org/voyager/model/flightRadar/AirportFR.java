@@ -1,4 +1,4 @@
-package org.voyager.model.datasync;
+package org.voyager.model.flightRadar;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;

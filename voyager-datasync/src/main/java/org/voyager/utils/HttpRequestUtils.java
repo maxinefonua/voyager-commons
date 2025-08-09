@@ -9,7 +9,6 @@ import org.jsoup.nodes.Document;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
-import org.voyager.http.HttpMethod;
 
 import java.io.IOException;
 import java.net.URI;
@@ -17,6 +16,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 
 public class HttpRequestUtils {
@@ -45,6 +45,25 @@ public class HttpRequestUtils {
         }
     }
 
+    public static Either<ServiceError,String> getResponseBodyAsString(String requestURL, List<String> headers) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder(new URI(requestURL)).headers(headers.toArray(String[]::new)).build();
+            HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
+                        new ServiceException(String.format("Non-200 response from requestURL %s, status: %d, body: %s",
+                                requestURL,response.statusCode(),response.body()))));
+            }
+            return Either.right(response.body());
+        } catch (URISyntaxException e) {
+            String message = String.format("error creating uri: %s",e.getMessage());
+            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
+        } catch (IOException | InterruptedException e) {
+            String message = String.format("error sending request: %s",e.getMessage());
+            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
+        }
+    }
+
     public static <T> Either<ServiceError, T> getRequestBody(String requestURL, Class<T> classType) {
         try {
             HttpRequest request = HttpRequest.newBuilder(new URI(requestURL)).build();
@@ -62,6 +81,26 @@ public class HttpRequestUtils {
         } catch (IOException | InterruptedException e) {
             String message = String.format("error sending request: %s",e.getMessage());
             return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
+        }
+    }
+
+    public static <T> Either<ServiceError, T> getRequestBody(String requestURL, List<String> headers, Class<T> classType) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder(new URI(requestURL)).headers(headers.toArray(String[]::new)).build();
+            HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                return Either.left(new org.voyager.error.ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
+                        new ServiceException(String.format("Non-200 response from requestURL %s, status: %d, body: %s",
+                                requestURL,response.statusCode(),response.body()))));
+            }
+            String jsonBody = response.body();
+            return extractResponseClass(jsonBody, classType);
+        } catch (URISyntaxException e) {
+            String message = String.format("error creating uri: %s",e.getMessage());
+            return Either.left(new org.voyager.error.ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
+        } catch (IOException | InterruptedException e) {
+            String message = String.format("error sending request: %s",e.getMessage());
+            return Either.left(new org.voyager.error.ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
         }
     }
 

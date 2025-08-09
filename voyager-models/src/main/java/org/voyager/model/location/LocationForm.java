@@ -7,7 +7,7 @@ import org.voyager.model.validate.ValidEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.voyager.utils.ConstantsUtils.COUNTRY_CODE_REGEX;
+import static org.voyager.utils.ConstantsUtils.ALPHA2_CODE_REGEX;
 
 @Builder
 @Data
@@ -31,7 +31,7 @@ public class LocationForm {
     String subdivision;
 
     @NotBlank
-    @Pattern(regexp = COUNTRY_CODE_REGEX, message = "must be a valid two-letter ISO 3166-1 alpha-2 country code")
+    @Pattern(regexp = ALPHA2_CODE_REGEX, message = "must be a valid two-letter ISO 3166-1 alpha-2 country code")
     String countryCode;
 
     @NotNull

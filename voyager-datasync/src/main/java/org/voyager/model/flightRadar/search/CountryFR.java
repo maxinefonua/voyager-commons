@@ -1,6 +1,5 @@
-package org.voyager.model.datasync.search;
+package org.voyager.model.flightRadar.search;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 

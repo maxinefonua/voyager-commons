@@ -7,7 +7,7 @@ import org.voyager.model.validate.ValidEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.voyager.utils.ConstantsUtils.COUNTRY_CODE_REGEX;
+import static org.voyager.utils.ConstantsUtils.ALPHA2_CODE_REGEX;
 
 @Builder
 @Data
@@ -16,7 +16,7 @@ import static org.voyager.utils.ConstantsUtils.COUNTRY_CODE_REGEX;
 @ToString(includeFieldNames = false)
 public class CountryForm {
     @NotBlank
-    @Pattern(regexp = COUNTRY_CODE_REGEX)
+    @Pattern(regexp = ALPHA2_CODE_REGEX)
     String countryCode;
 
     @NotBlank
