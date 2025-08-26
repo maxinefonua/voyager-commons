@@ -12,6 +12,7 @@
         <module>voyager-models</module>
         <module>voyager-sdk</module>
         <module>voyager-datasync</module>
+        <module>voyager-tests</module>
     </modules>
 
     <properties>
