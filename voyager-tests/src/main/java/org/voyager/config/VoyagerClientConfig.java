@@ -19,7 +19,7 @@ public class VoyagerClientConfig {
         loadPropertiesFile("config-" + activeProfile + ".properties");
 
         // 4. Load system env vars
-        String authToken = System.getenv("voyager.auth.token");
+        String authToken = System.getenv("TESTS_API_KEY");
         properties.putIfAbsent("voyager.auth.token",authToken);
     }
 
