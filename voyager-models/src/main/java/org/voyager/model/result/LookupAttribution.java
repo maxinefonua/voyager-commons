@@ -1,12 +1,9 @@
 package org.voyager.model.result;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder @NoArgsConstructor
-@AllArgsConstructor @Getter
+@AllArgsConstructor @Getter @ToString
 public class LookupAttribution {
     String name;
     String link;
