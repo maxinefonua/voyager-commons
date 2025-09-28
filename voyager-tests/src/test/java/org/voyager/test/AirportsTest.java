@@ -5,10 +5,9 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.voyager.config.VoyagerClientConfig;
+import org.voyager.config.VoyagerConfig;
 import org.voyager.model.airport.AirportPatch;
 import org.voyager.model.airport.AirportType;
-import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -18,12 +17,12 @@ public class AirportsTest {
     private static RequestSpecification requestSpec;
     @BeforeClass
     public static void setup() {
-        String portConfig = VoyagerClientConfig.getProperty("voyager.port");
+        String portConfig = VoyagerConfig.getProperty("voyager.port");
         if (portConfig != null && !portConfig.trim().isEmpty()) {
             RestAssured.port = Integer.parseInt(portConfig);
         }
-        RestAssured.basePath = VoyagerClientConfig.getProperty("voyager.path.airports");
-        String authToken = VoyagerClientConfig.getProperty("voyager.auth.token");
+        RestAssured.basePath = VoyagerConfig.getProperty("voyager.path.airports");
+        String authToken = VoyagerConfig.getProperty("voyager.auth.token");
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
         requestSpec = new RequestSpecBuilder()
                 .addHeader("Accept", "application/json")
@@ -35,7 +34,7 @@ public class AirportsTest {
     public void testGetIataCodes() {
         given()
                 .spec(requestSpec)
-                .basePath(VoyagerClientConfig.getProperty("voyager.path.iata"))
+                .basePath(VoyagerConfig.getProperty("voyager.path.iata"))
                 .when()
                 .get()
                 .then()
@@ -49,7 +48,7 @@ public class AirportsTest {
     public void testPostIata() {
         given()
                 .spec(requestSpec)
-                .basePath(VoyagerClientConfig.getProperty("voyager.path.iata"))
+                .basePath(VoyagerConfig.getProperty("voyager.path.iata"))
                 .when()
                 .post()
                 .then()
@@ -99,7 +98,7 @@ public class AirportsTest {
 
         given()
                 .spec(requestSpec)
-                .basePath(VoyagerClientConfig.getProperty("voyager.path.airports"))
+                .basePath(VoyagerConfig.getProperty("voyager.path.airports"))
                 .contentType(ContentType.JSON)
                 .body(airportPatch2)
                 .when()

@@ -5,7 +5,7 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.voyager.config.VoyagerClientConfig;
+import org.voyager.config.VoyagerConfig;
 
 import java.util.List;
 
@@ -19,12 +19,12 @@ public class AirportAirlinesTest {
     private static RequestSpecification requestSpec;
     @BeforeClass
     public static void setup() {
-        String portConfig = VoyagerClientConfig.getProperty("voyager.port");
+        String portConfig = VoyagerConfig.getProperty("voyager.port");
         if (portConfig != null && !portConfig.trim().isEmpty()) {
             RestAssured.port = Integer.parseInt(portConfig);
         }
-        RestAssured.basePath = VoyagerClientConfig.getProperty("voyager.path.airport-airlines");
-        String authToken = VoyagerClientConfig.getProperty("voyager.auth.token");
+        RestAssured.basePath = VoyagerConfig.getProperty("voyager.path.airport-airlines");
+        String authToken = VoyagerConfig.getProperty("voyager.auth.token");
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
         requestSpec = new RequestSpecBuilder()
                 .addHeader("Accept", "application/json")

@@ -4,9 +4,8 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.voyager.config.VoyagerClientConfig;
+import org.voyager.config.VoyagerConfig;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -18,13 +17,13 @@ public class HealthTest {
 
     @Before
     public void setup() {
-        String portConfig = VoyagerClientConfig.getProperty("voyager.port");
+        String portConfig = VoyagerConfig.getProperty("voyager.port");
         if (portConfig != null && !portConfig.trim().isEmpty()) {
             RestAssured.port = Integer.parseInt(portConfig);
         }
-        RestAssured.basePath = VoyagerClientConfig.getProperty("voyager.path.health");
+        RestAssured.basePath = VoyagerConfig.getProperty("voyager.path.health");
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        authToken = VoyagerClientConfig.getProperty("voyager.auth.token");
+        authToken = VoyagerConfig.getProperty("voyager.auth.token");
         requestSpec = new RequestSpecBuilder()
                 .addHeader("Accept", "application/json")
                 .addHeader(AUTH_TOKEN_HEADER_NAME, authToken)
