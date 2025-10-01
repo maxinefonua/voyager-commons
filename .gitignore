@@ -15,8 +15,9 @@ target/
 ### Mac OS ###
 .DS_Store
 
-
 ### script env and data downloads ###
-voyager-datasync/scripts/.env
+*.env
+*.env_local
+*.env_dev
 voyager-datasync/scripts/data/*
 voyager-datasync/scripts/postgres/logs/*

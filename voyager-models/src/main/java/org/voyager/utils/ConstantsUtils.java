@@ -13,8 +13,11 @@ public class ConstantsUtils {
     public static final String VOYAGER_BASE_URL = "VOYAGER_BASE_URL";
     private static final String ENV_VAR_LITERAL = "${%s}";
 
-    public static final String COUNTRY_CODE_REGEX = "^[a-zA-Z]{2}$";
-    public static final String IATA_CODE_REGEX = "^[a-zA-Z]{3}$";
+    public static final String ALPHA2_CODE_REGEX = "^[a-zA-Z]{2}$";
+    public static final String ALPHA3_CODE_REGEX = "^[a-zA-Z]{3}$";
+    public static final String ALPHA3_CODE_REGEX_OR_EMPTY = "^([a-zA-Z]{3}|)$";
+    public static final String ALPHA2_CODE_REGEX_OR_EMPTY = "^([a-zA-Z]{2}|)$";
+    public static final String ENGLISH_APLHA_REGEX = "[A-Za-z]*";
 
     public static final String QUERY_PARAM_NAME = "q";
     public static final String SOURCE_PARAM_NAME = "source";
@@ -22,7 +25,12 @@ public class ConstantsUtils {
     public static final String LATITUDE_PARAM_NAME = "latitude";
     public static final String LONGITUDE_PARAM_NAME = "longitude";
     public static final String LIMIT_PARAM_NAME = "limit";
+    public static final String CONTINENT_PARAM_NAME = "continent";
     public static final String COUNTRY_CODE_PARAM_NAME = "countryCode";
+    public static final String LANGUAGE_ISO6391_PARAM_NAME = "iso6391";
+    public static final String LANGUAGE_ISO6392_PARAM_NAME = "iso6392";
+    public static final String LANGUAGE_ISO6393_PARAM_NAME = "iso6393";
+    public static final String CURRENCY_CODE_PARAM_NAME = "currencyCode";
     public static final String TYPE_PARAM_NAME = "type";
     public static final String AIRLINE_PARAM_NAME = "airline";
     public static final String ROUTE_ID_PARAM_NAME = "routeId";
@@ -47,6 +55,9 @@ public class ConstantsUtils {
     public static final String AIRPORTS_PATH = "/airports";
     public static final String IATA_PATH = "/iata";
     public static final String DELTA_PATH = "/delta";
+    public static final String LANGUAGE_ISO639_1_CONSTRAINT = "Must be a valid two-letter ISO 639-1 alpha-2 language code";
+    public static final String LANGUAGE_ISO639_2_CONSTRAINT = "Must be a valid three-letter ISO 639-2 alpha-3 language code";
+    public static final String LANGUAGE_ISO639_3_CONSTRAINT = "Must be a valid three-letter ISO 639-3 alpha-3 language code";
 
     public static void validateEnvironVars(List<String> envVarKeys) {
         for (String key : envVarKeys) {

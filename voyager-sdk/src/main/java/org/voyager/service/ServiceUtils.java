@@ -7,43 +7,48 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vavr.control.Either;
 import lombok.NonNull;
-import org.springframework.core.ParameterizedTypeReference;
+import org.voyager.constants.MessageConstants;
 import org.voyager.error.HttpException;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
-import org.voyager.model.airport.Airport;
 
-import java.lang.reflect.Type;
 import java.net.http.HttpResponse;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.voyager.constants.MessageConstants.*;
 
 public class ServiceUtils {
     private static final ObjectMapper om = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    static <T> Either<ServiceError,T> responseBody(@NonNull HttpResponse<String> response,
-                                                          @NonNull Class<T> valueType,
-                                                          @NonNull String requestURL) {
+    static <T> Either<ServiceError,T> extractMappedResponse(@NonNull HttpResponse<String> response,
+                                                            @NonNull Class<T> valueType,
+                                                            @NonNull String requestURL) {
         if (response.statusCode() != 200) return Either.left(buildServiceError(response,requestURL));
         try {
             return Either.right(om.readValue(response.body(),valueType));
         } catch (JsonProcessingException e) {
-            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, getJsonParseResponseBodyExceptionMessage(requestURL,valueType,response),e));
+            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
+                    MessageConstants.getJsonParseResponseBodyExceptionMessage(requestURL,valueType,response),e));
         }
     }
 
-    static <T> Either<ServiceError,T> responseBodyList(@NonNull HttpResponse<String> response,
-                                                       @NonNull TypeReference<T> typeReference,
-                                                       @NonNull String requestURL) {
+    static Either<ServiceError,Boolean> confirmValidResponse(@NonNull HttpResponse<String> response,
+                                                             @NonNull String requestURL) {
+        if (response.statusCode() != 204) return Either.left(buildServiceError(response,requestURL));
+        return Either.right(true);
+    }
+
+    static <T> Either<ServiceError,T> extractMappedResponse(@NonNull HttpResponse<String> response,
+                                                            @NonNull TypeReference<T> typeReference,
+                                                            @NonNull String requestURL) {
         if (response.statusCode() != 200) return Either.left(buildServiceError(response,requestURL));
         try {
             return Either.right(om.readValue(response.body(), typeReference));
         } catch (JsonProcessingException e) {
-            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, getJsonParseResponseBodyExceptionMessage(requestURL,typeReference.getClass(),response),e));
+            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
+                    MessageConstants.getJsonParseResponseBodyExceptionMessage(requestURL,typeReference.getClass(),response),e));
         }
     }
 
@@ -55,11 +60,12 @@ public class ServiceUtils {
                 return new ServiceError(response.statusCode(),exception);
             } catch (JsonProcessingException e) { // TODO: implement alert for exceptions exposed via API
                 return new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                        getJsonParseResponseExceptionMessage(requestURL,response), e);
+                        MessageConstants.getJsonParseResponseExceptionMessage(requestURL,response), e);
             }
         }
         return new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                ServiceException.builder().message(getServiceExceptionBlankResponseBody(requestURL,response)).build()
+                ServiceException.builder().message(
+                        MessageConstants.getServiceExceptionBlankResponseBody(requestURL,response)).build()
         );
     }
 }

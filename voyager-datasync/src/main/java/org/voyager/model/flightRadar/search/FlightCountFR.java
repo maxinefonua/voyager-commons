@@ -1,4 +1,4 @@
-package org.voyager.model.datasync.search;
+package org.voyager.model.flightRadar.search;
 
 import lombok.Data;
 
