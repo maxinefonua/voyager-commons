@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.voyager.error.HttpException;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
@@ -74,7 +73,6 @@ class ServiceUtilsTest {
         String expectedMessage = "Resource not found for path variable 'iata' with value 'eee'. Information on given IATA code is currently unavailable";
         assertEquals(expectedMessage,either.getLeft().getMessage());
         assertEquals(HttpStatus.NOT_FOUND,either.getLeft().getHttpStatus());
-        assertEquals(HttpException.class,either.getLeft().getException().getClass());
     }
 
     @Test

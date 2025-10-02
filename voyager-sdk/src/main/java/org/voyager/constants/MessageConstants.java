@@ -8,7 +8,7 @@ public class MessageConstants {
     private static final String RESPONSE_BODY_EXCEPTION_BLANK = "Service exception with blank response body with status code '%d' returned from '%s'";
 
     public static  <T> String getJsonParseResponseBodyExceptionMessage(String requestURL, Class<T> classType, HttpResponse<String> response) {
-        return String.format(JSON_PARSE_RESPONSE_BODY,requestURL,classType.getName(),response);
+        return String.format(JSON_PARSE_RESPONSE_BODY,requestURL,classType.getName(),response.body());
     }
     public static  <T> String getJsonParseResponseExceptionMessage(String requestURL, HttpResponse<String> response) {
         return String.format(JSON_PARSE_RESPONSE_BODY_EXCEPTION,requestURL,response.statusCode(),response.body());

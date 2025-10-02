@@ -1,7 +1,17 @@
 package org.voyager.model.location;
 
-import jakarta.validation.constraints.*;
-import lombok.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Pattern;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import org.voyager.model.validate.ValidEnum;
 
 import java.util.ArrayList;
@@ -67,9 +77,4 @@ public class LocationForm {
     @NotNull
     @Builder.Default
     List<String> airports = new ArrayList<>();
-
-    public void setSource(String source) {
-        this.source = source;
-        if (source == null) this.source = Source.MANUAL.name();
-    }
 }

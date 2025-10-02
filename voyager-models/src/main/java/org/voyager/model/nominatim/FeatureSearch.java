@@ -1,11 +1,10 @@
 package org.voyager.model.nominatim;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
 
-@Setter @Getter
+@Data
 @ToString(includeFieldNames = false)
 public class FeatureSearch {
     String name;

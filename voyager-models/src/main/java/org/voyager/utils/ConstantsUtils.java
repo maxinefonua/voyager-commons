@@ -2,7 +2,7 @@ package org.voyager.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.List;
 
 public class ConstantsUtils {
     public static final String GEONAMES_API_USERNAME = "GEONAMES_API_USERNAME";
@@ -59,11 +59,16 @@ public class ConstantsUtils {
     public static final String LANGUAGE_ISO639_2_CONSTRAINT = "Must be a valid three-letter ISO 639-2 alpha-3 language code";
     public static final String LANGUAGE_ISO639_3_CONSTRAINT = "Must be a valid three-letter ISO 639-3 alpha-3 language code";
 
-    public static void validateEnvironVars(List<String> envVarKeys) {
+    public static void validateSystemProperty(List<String> envVarKeys) {
         for (String key : envVarKeys) {
-            String envVarVal = System.getenv(key);
+            String envVarVal = System.getProperty(key);
             if (StringUtils.isEmpty(envVarVal) || String.format(ENV_VAR_LITERAL,key).equals(envVarVal))
-                throw new IllegalArgumentException(MessageUtils.getEmptyEnvVarMessage(key));
+                throw new IllegalArgumentException(getUndefiniedSystemPropertyMessage(key));
         }
+    }
+
+    private static final String UNDEFINED_SYSTEM_PROP = "System property '%s' must be defined.";
+    public static String getUndefiniedSystemPropertyMessage(String envVarKey){
+        return String.format(UNDEFINED_SYSTEM_PROP,envVarKey);
     }
 }

@@ -1,6 +1,10 @@
 package org.voyager.model.geoname;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.Map;
 
@@ -8,21 +12,21 @@ import java.util.Map;
 @AllArgsConstructor
 @Data @ToString
 public class GeoName {
-    String adminCode1;
-    String lng;
-    String distance;
-    Long geonameId;
-    String toponymName;
-    String countryId;
-    String fcl;
-    Long population;
-    String countryCode;
-    String name;
-    String fclName;
-    Map<String,String> adminCodes1;
-    String countryName;
-    String fcodeName;
-    String adminName1;
-    String lat;
-    String fcode;
+    private String adminCode1;
+    private String lng;
+    private String distance;
+    private Long geonameId;
+    private String toponymName;
+    private String countryId;
+    private String fcl;
+    private Long population;
+    private String countryCode;
+    private String name;
+    private String fclName;
+    private Map<String,String> adminCodes1;
+    private String countryName;
+    private String fcodeName;
+    private String adminName1;
+    private String lat;
+    private String fcode;
 }

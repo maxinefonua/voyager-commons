@@ -11,9 +11,9 @@ import org.voyager.model.validate.ValidPatch;
 @NoArgsConstructor
 @AllArgsConstructor @ValidPatch
 public class FlightPatch {
-    Long departureTimestamp;
-    Long departureOffset;
-    Long arrivalTimestamp;
-    Long arrivalOffset;
-    Boolean isActive;
+    private Long departureTimestamp;
+    private Long departureOffset;
+    private Long arrivalTimestamp;
+    private Long arrivalOffset;
+    private Boolean isActive;
 }

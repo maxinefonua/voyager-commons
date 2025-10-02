@@ -1,10 +1,9 @@
 package org.voyager.model.nominatim;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
 
-@Setter @Getter
+@Data
 @ToString(includeFieldNames = false)
 public class Geometry {
     String type;

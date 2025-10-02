@@ -12,13 +12,13 @@ import java.time.Duration;
 @Data @Builder @NoArgsConstructor
 @AllArgsConstructor
 public class Flight {
-    Integer id;
-    String flightNumber;
-    Integer routeId;
-    ZonedDateTime zonedDateTimeDeparture;
-    ZonedDateTime zonedDateTimeArrival;
-    Boolean isActive;
-    Airline airline;
+    private Integer id;
+    private String flightNumber;
+    private Integer routeId;
+    private ZonedDateTime zonedDateTimeDeparture;
+    private ZonedDateTime zonedDateTimeArrival;
+    private Boolean isActive;
+    private Airline airline;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    Duration duration;
+    private Duration duration;
 }

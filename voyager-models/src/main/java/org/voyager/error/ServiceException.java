@@ -1,6 +1,12 @@
 package org.voyager.error;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Builder;
 
 @AllArgsConstructor
 @NoArgsConstructor @RequiredArgsConstructor

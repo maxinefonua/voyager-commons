@@ -1,6 +1,10 @@
 package org.voyager.model.geoname;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Builder
 @NoArgsConstructor
@@ -8,22 +12,22 @@ import lombok.*;
 @Data
 @ToString
 public class CountryGN {
-    String continent;
-    String capital;
-    String languages;
-    Long geonameId;
-    Double south;
-    String isoAlpha3;
-    Double north;
-    String fipsCode;
-    String population;
-    Double east;
-    String isoNumeric;
-    String areaInSqKm;
-    String countryCode;
-    Double west;
-    String countryName;
-    String postalCodeFormat;
-    String continentName;
-    String currencyCode;
+    private String continent;
+    private String capital;
+    private String languages;
+    private Long geonameId;
+    private Double south;
+    private String isoAlpha3;
+    private Double north;
+    private String fipsCode;
+    private String population;
+    private Double east;
+    private String isoNumeric;
+    private String areaInSqKm;
+    private String countryCode;
+    private Double west;
+    private String countryName;
+    private String postalCodeFormat;
+    private String continentName;
+    private String currencyCode;
 }

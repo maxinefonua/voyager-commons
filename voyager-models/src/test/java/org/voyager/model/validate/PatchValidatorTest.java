@@ -9,11 +9,11 @@ import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PatchValidatorTest {
     @Mock
     private ConstraintValidatorContext context;
-
     private PatchValidator patchValidator;
 
     @Builder
@@ -22,7 +22,6 @@ class PatchValidatorTest {
         Object field2;
         Object field3;
     }
-
 
     @BeforeEach
     void setup() {
@@ -38,7 +37,21 @@ class PatchValidatorTest {
 
     @Test
     void isNotValid() {
+        assertFalse(patchValidator.isValid(null,context));
         TestClass invalidObject = TestClass.builder().build();
         assertFalse(patchValidator.isValid(invalidObject,context));
+        invalidObject = TestClass.builder().field2(null).build();
+        assertFalse(patchValidator.isValid(invalidObject,context));
+    }
+
+    @Test
+    void isValidThrowsException() throws Exception {
+        Object testObject = new Object() {
+            @SuppressWarnings("unused")
+            private String field1 = null;
+            @SuppressWarnings("unused")
+            private String field2 = "hasValue";
+        };
+        assertThrows(RuntimeException.class,() -> patchValidator.isValid(testObject, null));
     }
 }

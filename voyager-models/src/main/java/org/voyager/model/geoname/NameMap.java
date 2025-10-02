@@ -2,7 +2,12 @@ package org.voyager.model.geoname;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Builder
 @NoArgsConstructor
@@ -11,17 +16,17 @@ import lombok.*;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NameMap {
-    Boolean isPreferredName;
-    Boolean isShortName;
-    Boolean isColloquial;
-    Boolean isHistoric;
+    private Boolean isPreferredName;
+    private Boolean isShortName;
+    private Boolean isColloquial;
+    private Boolean isHistoric;
 
     @JsonProperty("from")
-    String fromYear;
+    private String fromYear;
 
     @JsonProperty("to")
-    String toYear;
+    private String toYear;
 
-    String name;
-    String lang;
+    private String name;
+    private String lang;
 }

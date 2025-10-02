@@ -2,7 +2,12 @@ package org.voyager.model.flight;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import org.voyager.model.Airline;
 import org.voyager.model.validate.ValidEnum;
 
@@ -10,16 +15,16 @@ import org.voyager.model.validate.ValidEnum;
 @NoArgsConstructor @AllArgsConstructor
 public class FlightForm {
     @NotBlank
-    String flightNumber;
+    private String flightNumber;
     @NotNull
-    Integer routeId;
-    Long departureTimestamp;
-    Long departureOffset;
-    Long arrivalTimestamp;
-    Long arrivalOffset;
+    private Integer routeId;
+    private Long departureTimestamp;
+    private Long departureOffset;
+    private Long arrivalTimestamp;
+    private Long arrivalOffset;
     @NotNull
-    Boolean isActive;
+    private Boolean isActive;
     @NotBlank
     @ValidEnum(enumClass = Airline.class)
-    String airline;
+    private String airline;
 }

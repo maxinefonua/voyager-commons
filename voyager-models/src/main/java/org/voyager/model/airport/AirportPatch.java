@@ -1,6 +1,5 @@
 package org.voyager.model.airport;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import lombok.AllArgsConstructor;
@@ -14,9 +13,9 @@ import org.voyager.model.validate.ValidPatch;
 @NoArgsConstructor @ValidPatch
 @ToString(includeFieldNames = false)
 public class AirportPatch {
-    String name;
-    String city;
-    String subdivision;
+    private String name;
+    private String city;
+    private String subdivision;
     @ValidEnum(enumClass = AirportType.class)
-    String type;
+    private String type;
 }

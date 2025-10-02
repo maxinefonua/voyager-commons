@@ -9,8 +9,6 @@ import lombok.ToString;
 import org.voyager.model.location.Source;
 import org.voyager.model.location.Status;
 
-import java.util.List;
-
 @Builder
 @Getter @AllArgsConstructor
 @NoArgsConstructor

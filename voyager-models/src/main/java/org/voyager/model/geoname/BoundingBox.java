@@ -1,16 +1,14 @@
 package org.voyager.model.geoname;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
 
-@Setter
-@Getter
+@Data
 @ToString(includeFieldNames = false)
 public class BoundingBox {
-    Double east;
-    Double south;
-    Double north;
-    Double west;
-    Integer accuracyLevel;
+    private Double east;
+    private Double south;
+    private Double north;
+    private Double west;
+    private Integer accuracyLevel;
 }

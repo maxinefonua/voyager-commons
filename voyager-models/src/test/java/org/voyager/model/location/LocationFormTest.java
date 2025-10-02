@@ -4,7 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class LocationFormTest {
     private LocationForm locationForm;
@@ -16,17 +17,16 @@ class LocationFormTest {
 
     @Test
     @DisplayName("default source")
-    void setSource() {
-        assertNull(locationForm.getSource());
-        locationForm.setSource(null);
+    void getSource() {
         assertNotNull(locationForm.getSource());
-        assertEquals(Source.MANUAL,locationForm.getSource());
+        assertEquals(Source.MANUAL.toString(),locationForm.getSource());
     }
 
     @Test
     @DisplayName("default airports")
     void defaultAirports() {
         LocationForm defaultLocation = new LocationForm();
+        assertNotNull(defaultLocation.getAirports());
         assertNotNull(defaultLocation.getAirports());
     }
 }

@@ -1,6 +1,10 @@
 package org.voyager.model.geoname;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Builder
 @NoArgsConstructor
@@ -8,15 +12,15 @@ import lombok.*;
 @Data
 @ToString
 public class Timezone {
-    String sunrise;
-    Double lng;
-    String countryCode;
-    Integer gmtOffset;
-    Integer rawOffset;
-    String sunset;
-    String timezoneId;
-    Integer dstOffset;
-    String countryName;
-    String time;
-    Double lat;
+    private String sunrise;
+    private Double lng;
+    private String countryCode;
+    private Integer gmtOffset;
+    private Integer rawOffset;
+    private String sunset;
+    private String timezoneId;
+    private Integer dstOffset;
+    private String countryName;
+    private String time;
+    private Double lat;
 }

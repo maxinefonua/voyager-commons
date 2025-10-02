@@ -2,79 +2,80 @@ package org.voyager.model.geoname;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import org.voyager.model.country.Continent;
 
 import java.util.List;
-import java.util.Map;
 
 @Builder @NoArgsConstructor
 @AllArgsConstructor
 @Data @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GeoNameFull {
-    Long geonameId;
-    String name;
-    String asciiName;
-    String toponymName;
-    String countryName;
-    String countryCode;
-    String countryId;
+    private Long geonameId;
+    private String name;
+    private String asciiName;
+    private String toponymName;
+    private String countryName;
+    private String countryCode;
+    private String countryId;
 
     @JsonProperty("tag")
-    String sourceTag;
+    private String sourceTag;
 
     @JsonProperty("continentCode")
-    Continent continent;
+    private Continent continent;
 
     @JsonProperty("cc2")
-    String additionalCountryCode;
+    private String additionalCountryCode;
 
     @JsonProperty("astergdem")
-    Integer elevationAGDEM;
-    Integer elevation;
+    private Integer elevationAGDEM;
+    private Integer elevation;
 
-    Long population;
+    private Long population;
 
-    String wikipediaURL;
+    private String wikipediaURL;
 
     @JsonProperty("fcl")
-    String featureClass;
+    private String featureClass;
 
     @JsonProperty("fclName")
-    String featureClassName;
+    private String featureClassName;
 
     @JsonProperty("fcode")
-    String featureCode;
+    private String featureCode;
 
     @JsonProperty("fcodeName")
-    String featureCodeName;
+    private String featureCodeName;
 
     @JsonProperty("srtm3")
-    Integer elevationSRTM;
+    private Integer elevationSRTM;
 
     @JsonProperty("lat")
-    String latitudeInt;
+    private String latitudeInt;
 
     @JsonProperty("lng")
-    String longitudeInt;
+    private String longitudeInt;
 
     @JsonProperty("timezone")
-    TimezoneGN timezoneGN;
+    private TimezoneGN timezoneGN;
 
     @JsonProperty("bbox")
-    BoundingBox boundingBox;
+    private BoundingBox boundingBox;
 
-    String adminCode1;
-    String adminId1;
-    String adminName1;
-    String adminName2;
-    String adminName3;
-    String adminName4;
-    String adminName5;
-    List<NameMap> alternateNames;
-
-    public void setContinent(String countryCode) {
-        this.continent = Continent.valueOf(countryCode);
-    }
+    private String adminCode1;
+    private String adminId1;
+    private String adminName1;
+    private String adminName2;
+    private String adminName3;
+    private String adminName4;
+    private String adminName5;
+    private List<NameMap> alternateNames;
 }

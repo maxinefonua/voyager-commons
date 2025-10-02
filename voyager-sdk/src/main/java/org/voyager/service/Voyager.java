@@ -28,8 +28,6 @@ public class Voyager {
     private static LocationService locationService;
     private static FlightService flightService;
     private static CountryService countryService;
-    private static CurrencyService currencyService;
-    private static LanguageService languageService;
     private static final Logger LOGGER = LoggerFactory.getLogger(Voyager.class);
     private static final ObjectMapper om = new ObjectMapper();
 
@@ -41,16 +39,6 @@ public class Voyager {
     public CountryService getCountryService() {
         if (countryService == null) countryService = new CountryService(voyagerConfig);
         return countryService;
-    }
-
-    public CurrencyService getCurrencyService() {
-        if (currencyService == null) currencyService = new CurrencyService(voyagerConfig);
-        return currencyService;
-    }
-
-    public LanguageService getLanguageService() {
-        if (languageService == null) languageService = new LanguageService(voyagerConfig);
-        return languageService;
     }
 
     public FlightService getFlightService() {

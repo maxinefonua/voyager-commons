@@ -1,8 +1,12 @@
 package org.voyager.model.geoname;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
-import org.apache.commons.lang3.StringUtils;
+
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.ZoneId;
 
@@ -13,12 +17,8 @@ import java.time.ZoneId;
 @ToString
 public class TimezoneGN {
     @JsonProperty("timeZoneId")
-    ZoneId zoneId;
+    private ZoneId zoneId;
 
-    Integer gmtOffset;
-    Integer dstOffset;
-
-    public void setZoneId(String timezoneId) {
-        if (StringUtils.isNotBlank(timezoneId)) this.zoneId = ZoneId.of(timezoneId);
-    }
+    private Integer gmtOffset;
+    private Integer dstOffset;
 }

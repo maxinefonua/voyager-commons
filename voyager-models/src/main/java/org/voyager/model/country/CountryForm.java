@@ -1,7 +1,18 @@
 package org.voyager.model.country;
 
-import jakarta.validation.constraints.*;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.DecimalMax;
+
+import lombok.Builder;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import org.voyager.model.validate.ValidEnum;
 
 import java.util.ArrayList;
@@ -17,49 +28,49 @@ import static org.voyager.utils.ConstantsUtils.ALPHA2_CODE_REGEX;
 public class CountryForm {
     @NotBlank
     @Pattern(regexp = ALPHA2_CODE_REGEX)
-    String countryCode;
+    private String countryCode;
 
     @NotBlank
-    String countryName;
+    private String countryName;
 
     @NotNull
     @Min(0)
-    Long population;
+    private Long population;
 
     @NotNull
     @Min(0)
-    Double areaInSqKm;
+    private Double areaInSqKm;
 
     @ValidEnum(enumClass = Continent.class)
-    String continent;
+    private String continent;
 
     @NotNull
-    String capitalCity;
+    private String capitalCity;
 
     @NotNull
-    String currencyCode;
+    private String currencyCode;
 
     @NotNull
     @Builder.Default
-    List<String> languages = new ArrayList<>();
+    private List<String> languages = new ArrayList<>();
 
     @NotNull
     @DecimalMin(value = "-180.0")
     @DecimalMax(value = "180.0")
-    Double west;
+    private Double west;
 
     @NotNull
     @DecimalMin(value = "-180.0")
     @DecimalMax(value = "180.0")
-    Double south;
+    private Double south;
 
     @NotNull
     @DecimalMin(value = "-180.0")
     @DecimalMax(value = "180.0")
-    Double east;
+    private Double east;
 
     @NotNull
     @DecimalMin(value = "-180.0")
     @DecimalMax(value = "180.0")
-    Double north;
+    private Double north;
 }

@@ -15,22 +15,22 @@ import java.time.ZoneId;
 @ToString
 public class Airport {
     @NonNull
-    String iata;
+    private String iata;
     @NonNull
-    String name;
-    String city;
-    String subdivision;
+    private String name;
+    private String city;
+    private String subdivision;
     @NonNull
-    String countryCode;
+    private String countryCode;
     @NonNull
-    Double latitude;
+    private Double latitude;
     @NonNull
-    Double longitude;
+    private Double longitude;
     @NonNull
-    AirportType type;
-    ZoneId zoneId;
+    private AirportType type;
+    private ZoneId zoneId;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    Double distance;
+    private Double distance;
 
     private static final int EARTH_RADIUS = 6371;
 

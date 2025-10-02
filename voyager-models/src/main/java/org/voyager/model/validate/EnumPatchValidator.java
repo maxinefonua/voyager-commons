@@ -6,7 +6,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 import java.util.List;
 
-public class EnumValidator implements ConstraintValidator<ValidEnum,String> {
+public class EnumPatchValidator implements ConstraintValidator<ValidEnum,String> {
     private List<String> allowedValues;
 
     @Override
