@@ -51,10 +51,6 @@ public class ConstantsUtils {
 
     public static final String AIRPORTS_PROPERTY_NAME = "airports";
 
-    public static final String ROUTES_PATH = "/routes";
-    public static final String AIRPORTS_PATH = "/airports";
-    public static final String IATA_PATH = "/iata";
-    public static final String DELTA_PATH = "/delta";
     public static final String LANGUAGE_ISO639_1_CONSTRAINT = "Must be a valid two-letter ISO 639-1 alpha-2 language code";
     public static final String LANGUAGE_ISO639_2_CONSTRAINT = "Must be a valid three-letter ISO 639-2 alpha-3 language code";
     public static final String LANGUAGE_ISO639_3_CONSTRAINT = "Must be a valid three-letter ISO 639-3 alpha-3 language code";

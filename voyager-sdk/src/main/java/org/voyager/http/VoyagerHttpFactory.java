@@ -1,6 +1,6 @@
 package org.voyager.http;
 
-import lombok.NonNull;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -8,19 +8,33 @@ import java.net.http.HttpRequest;
 import static org.voyager.utils.ConstantsUtils.*;
 
 public class VoyagerHttpFactory {
-    private VoyagerHttpClient client;
-    private final String authorizationToken;
+    private static VoyagerHttpClient client;
+    private static boolean initialized = false;
+    private static String authorizationToken;
 
-    public VoyagerHttpFactory(String authorizationToken) {
-        this.authorizationToken = authorizationToken;
+    /**
+     * Initialize the factory with required authorization token
+     * Must be called before using any other methods
+     */
+    public static synchronized void initialize(String authToken) {
+        if (initialized) {
+            throw new IllegalStateException("VoyagerHttpFactory already initialized");
+        }
+        if (StringUtils.isBlank(authToken)) {
+            throw new IllegalArgumentException("Authorization token cannot be null or empty");
+        }
+        authorizationToken = authToken;
+        client = createClient();
+        initialized = true;
     }
 
-    public VoyagerHttpClient getClient() {
-        if (client == null) this.client = createClient();
-        return this.client;
+    public static VoyagerHttpClient getClient() {
+        checkInitialized();
+        return client;
     }
 
-    public HttpRequest request(URI uri,HttpMethod httpMethod) {
+    public static HttpRequest request(URI uri, HttpMethod httpMethod) {
+        checkInitialized();
         return HttpRequest.newBuilder()
                 .uri(uri)
                 .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken)
@@ -28,7 +42,8 @@ public class VoyagerHttpFactory {
                 .build();
     }
 
-    public HttpRequest request(URI uri,HttpMethod httpMethod,String jsonPayload) {
+    public static HttpRequest request(URI uri,HttpMethod httpMethod,String jsonPayload) {
+        checkInitialized();
         return HttpRequest.newBuilder()
                 .uri(uri)
                 .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken,CONTENT_TYPE_HEADER_NAME,JSON_TYPE_VALUE)
@@ -36,7 +51,13 @@ public class VoyagerHttpFactory {
                 .build();
     }
 
-    private VoyagerHttpClient createClient() {
-        return new VoyagerHttpClient();
+    private static void checkInitialized() {
+        if (!initialized) {
+            throw new IllegalStateException("VoyagerHttpFactory not initialized. Call initialize() first.");
+        }
+    }
+
+    protected static VoyagerHttpClient createClient() {
+        return new VoyagerHttpClientImpl();
     }
 }

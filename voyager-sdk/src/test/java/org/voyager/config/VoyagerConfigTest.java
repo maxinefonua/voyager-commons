@@ -27,7 +27,6 @@ class VoyagerConfigTest {
         assertNotNull(validVoyagerConfig);
         assertEquals(BASE_URL,validVoyagerConfig.getBaseURL());
         assertEquals(MAX_THREADS,validVoyagerConfig.getMaxThreads());
-        assertEquals(AIRPORTS_PATH,validVoyagerConfig.getAirportsServicePath());
         assertEquals(AUTH_TOKEN,validVoyagerConfig.getAuthorizationToken());
     }
 

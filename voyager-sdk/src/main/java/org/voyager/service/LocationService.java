@@ -8,75 +8,80 @@ import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
 import org.voyager.model.country.Continent;
 import org.voyager.model.location.*;
+import org.voyager.utils.ServiceUtils;
+import org.voyager.utils.ServiceUtilsFactory;
 
 import java.util.List;
 import java.util.StringJoiner;
 
-import static org.voyager.service.Voyager.*;
 import static org.voyager.utils.ConstantsUtils.*;
 
 public class LocationService {
-    private final String servicePath;
-    private final String serviceLocationPath;
+    private static final String LOCATIONS_PATH = "/locations";
+    private static final String LOCATION_PATH = "/location";
+    private final ServiceUtils serviceUtils;
 
-    LocationService(@NonNull VoyagerConfig voyagerConfig) {
-        this.servicePath = voyagerConfig.getLocationsPath();
-        this.serviceLocationPath = voyagerConfig.getLocationPath();
+    LocationService() {
+        this.serviceUtils = ServiceUtilsFactory.getInstance();
+    }
+
+    LocationService(ServiceUtils serviceUtils) {
+        this.serviceUtils = serviceUtils;
     }
 
     public Either<ServiceError,List<Location>> getLocations() {
-        return fetch(servicePath,HttpMethod.GET,new TypeReference<List<Location>>(){});
+        return serviceUtils.fetch(LOCATIONS_PATH,HttpMethod.GET,new TypeReference<List<Location>>(){});
     }
 
     public Either<ServiceError,Location> getLocation(Source source, String sourceId) {
-        String requestURL = serviceLocationPath.concat(String.format("?%s=%s" + "&%s=%s",
+        String requestURL = LOCATION_PATH.concat(String.format("?%s=%s" + "&%s=%s",
                 SOURCE_PARAM_NAME,source.name(),SOURCE_ID_PARAM_NAME,sourceId));
-        return fetch(requestURL,HttpMethod.GET,Location.class);
+        return serviceUtils.fetch(requestURL,HttpMethod.GET,Location.class);
     }
 
     public Either<ServiceError,List<Location>> getLocations(Source source, Continent continent) {
-        String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s",
+        String requestURL = LOCATIONS_PATH.concat(String.format("?%s=%s" + "&%s=%s",
                 SOURCE_PARAM_NAME,source.name(), CONTINENT_PARAM_NAME,continent.name()));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
+        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
     }
 
     public Either<ServiceError,List<Location>> getLocations(Source source, Continent continent,List<Status> statusList) {
         StringJoiner statusJoiner = new StringJoiner(",");
         statusList.forEach(status -> statusJoiner.add(status.name()));
-        String requestURL = servicePath.concat(String.format("?%s=%s" + "&%s=%s" + "&%s=%s",
+        String requestURL = LOCATIONS_PATH.concat(String.format("?%s=%s" + "&%s=%s" + "&%s=%s",
                 SOURCE_PARAM_NAME,source.name(), CONTINENT_PARAM_NAME,continent.name(),LOCATION_STATUS_PARAM_NAME,statusJoiner));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
+        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
     }
 
     public Either<ServiceError,List<Location>> getLocations(Status status) {
-        String requestURL = servicePath.concat(String.format("?%s=%s",
+        String requestURL = LOCATIONS_PATH.concat(String.format("?%s=%s",
                 LOCATION_STATUS_PARAM_NAME,status.name()));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
+        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
     }
 
     public Either<ServiceError,List<Location>> getLocations(Integer limit) {
-        String requestURL = servicePath.concat(String.format("?%s=%d",
+        String requestURL = LOCATIONS_PATH.concat(String.format("?%s=%d",
                 LIMIT_PARAM_NAME,limit));
-        return fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
+        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Location>>(){});
     }
 
 
     public Either<ServiceError,Location> getLocation(Integer id) {
-        String requestURL = servicePath.concat(String.format("/%d",id));
-        return fetch(requestURL,HttpMethod.GET,Location.class);
+        String requestURL = LOCATION_PATH.concat(String.format("/%d",id));
+        return serviceUtils.fetch(requestURL,HttpMethod.GET,Location.class);
     }
 
     public Either<ServiceError,Boolean> deleteLocation(Integer id) {
-        String requestURL = servicePath.concat(String.format("/%d",id));
-        return fetchNoResponseBody(requestURL,HttpMethod.DELETE);
+        String requestURL = LOCATIONS_PATH.concat(String.format("/%d",id));
+        return serviceUtils.fetchNoResponseBody(requestURL,HttpMethod.DELETE);
     }
 
     public Either<ServiceError,Location> createLocation(LocationForm locationForm) {
-        return fetchWithRequestBody(servicePath,HttpMethod.POST,Location.class,locationForm);
+        return serviceUtils.fetchWithRequestBody(LOCATIONS_PATH,HttpMethod.POST,Location.class,locationForm);
     }
 
     public Either<ServiceError,Location> patchLocation(Integer id, LocationPatch locationPatch) {
-        String requestURL = servicePath.concat(String.format("/%d",id));
-        return fetchWithRequestBody(requestURL,HttpMethod.PATCH,Location.class,locationPatch);
+        String requestURL = LOCATIONS_PATH.concat(String.format("/%d",id));
+        return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.PATCH,Location.class,locationPatch);
     }
 }
