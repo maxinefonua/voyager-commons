@@ -11,7 +11,7 @@ import java.util.List;
 
 @Data @Builder(toBuilder = true)
 @NoArgsConstructor @AllArgsConstructor
-public class PathAirline {
+public class AirlinePath {
     Airline airline;
     @Builder.Default
     Double totalDistanceKm = 0.0;

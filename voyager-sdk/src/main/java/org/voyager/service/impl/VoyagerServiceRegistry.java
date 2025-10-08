@@ -1,7 +1,4 @@
-package org.voyager.service;
-
-import org.voyager.config.VoyagerConfig;
-import org.voyager.http.VoyagerHttpFactory;
+package org.voyager.service.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;

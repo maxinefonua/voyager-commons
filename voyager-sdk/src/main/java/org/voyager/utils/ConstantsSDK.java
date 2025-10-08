@@ -1,8 +1,8 @@
-package org.voyager.constants;
+package org.voyager.utils;
 
 import java.net.http.HttpResponse;
 
-public class MessageConstants {
+public class ConstantsSDK {
     private static final String JSON_PARSE_RESPONSE_BODY = "Processing exception thrown while parsing response body from '%s'. Confirm [%s] is the correct class for this response: '%s'";
     private static final String JSON_PARSE_RESPONSE_BODY_EXCEPTION = "Processing exception thrown while parsing http exception from '%s', with status code: %d. Alerting yet to be implemented for unwrapped exception '%s'";
     private static final String RESPONSE_BODY_EXCEPTION_BLANK = "Service exception with blank response body with status code '%d' returned from '%s'";

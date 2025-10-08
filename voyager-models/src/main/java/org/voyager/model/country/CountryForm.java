@@ -14,11 +14,10 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import org.voyager.model.validate.ValidEnum;
+import org.voyager.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.voyager.utils.ConstantsUtils.ALPHA2_CODE_REGEX;
 
 @Builder
 @Data
@@ -27,7 +26,7 @@ import static org.voyager.utils.ConstantsUtils.ALPHA2_CODE_REGEX;
 @ToString(includeFieldNames = false)
 public class CountryForm {
     @NotBlank
-    @Pattern(regexp = ALPHA2_CODE_REGEX)
+    @Pattern(regexp = Constants.Voyager.Regex.ALPHA2_CODE_REGEX)
     private String countryCode;
 
     @NotBlank

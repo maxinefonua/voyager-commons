@@ -1,22 +1,17 @@
-package org.voyager.service;
+package org.voyager.service.impl;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.config.Protocol;
 import org.voyager.config.VoyagerConfig;
-import org.voyager.utils.ServiceUtils;
-import org.voyager.utils.ServiceUtilsFactory;
+import org.voyager.service.*;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class VoyagerServiceRegistryTest {
-    private static final VoyagerConfig VOYAGER_CONFIG = new VoyagerConfig(Protocol.HTTP,"testhost",
-            8080,1,"test-token");
     private static final VoyagerServiceRegistry testRegistry = VoyagerServiceRegistry.getInstance();
 
     @Test
@@ -31,8 +26,16 @@ class VoyagerServiceRegistryTest {
 
     @Test
     void register() {
-        assertDoesNotThrow(()->
-                testRegistry.registerImplementation(AirportService.class, AirportServiceImpl.class));
+        assertDoesNotThrow(()-> {
+            testRegistry.registerImplementation(AirlineService.class, AirlineServiceImpl.class);
+            testRegistry.registerImplementation(AirportService.class, AirportServiceImpl.class);
+            testRegistry.registerImplementation(CountryService.class, CountryServiceImpl.class);
+            testRegistry.registerImplementation(FlightService.class, FlightServiceImpl.class);
+            testRegistry.registerImplementation(LocationService.class, LocationSerivceImpl.class);
+            testRegistry.registerImplementation(PathService.class, PathServiceImpl.class);
+            testRegistry.registerImplementation(RouteService.class, RouteServiceImpl.class);
+            testRegistry.registerImplementation(SearchService.class, SearchServiceImpl.class);
+        });
 
         class TestClassNoConstructor {}
         assertThrows(RuntimeException.class,()->

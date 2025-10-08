@@ -13,10 +13,10 @@ class ConstantsUtilsTest {
         String envVarName = "${TEST_VAR}";
         String propertyValue = "value";
         System.setProperty(propertyName,propertyValue);
-        ConstantsUtils.validateSystemProperty(List.of(propertyName));
+        Constants.validateSystemProperty(List.of(propertyName));
         System.clearProperty(propertyName);
-        assertThrows(IllegalArgumentException.class,()->ConstantsUtils.validateSystemProperty(List.of(propertyName)));
+        assertThrows(IllegalArgumentException.class,()-> Constants.validateSystemProperty(List.of(propertyName)));
         System.setProperty(propertyName,envVarName);
-        assertThrows(IllegalArgumentException.class,()->ConstantsUtils.validateSystemProperty(List.of(propertyName)));
+        assertThrows(IllegalArgumentException.class,()-> Constants.validateSystemProperty(List.of(propertyName)));
     }
 }

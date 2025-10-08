@@ -10,8 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import static org.voyager.utils.ConstantsUtils.ALPHA3_CODE_REGEX;
+import org.voyager.utils.Constants;
 
 @Builder
 @Data
@@ -20,11 +19,11 @@ import static org.voyager.utils.ConstantsUtils.ALPHA3_CODE_REGEX;
 @ToString(includeFieldNames = false)
 public class RouteForm {
     @NotBlank
-    @Pattern(regexp = ALPHA3_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
+    @Pattern(regexp = Constants.Voyager.Regex.ALPHA3_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
     String origin;
 
     @NotBlank
-    @Pattern(regexp = ALPHA3_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
+    @Pattern(regexp = Constants.Voyager.Regex.ALPHA3_CODE_REGEX, message = "must be a valid three-letter IATA airport code")
     String destination;
 
     @NotNull

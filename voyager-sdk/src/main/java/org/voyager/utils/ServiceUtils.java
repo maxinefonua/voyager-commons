@@ -9,5 +9,5 @@ public interface ServiceUtils {
     <T> Either<ServiceError, T> fetch(String requestURL,HttpMethod httpMethod,Class<T> responseType);
     <T> Either<ServiceError, T> fetch(String requestURL, HttpMethod httpMethod, TypeReference<T> typeReference);
     <T> Either<ServiceError, T> fetchWithRequestBody(String requestURL, HttpMethod httpMethod, Class<T> responseType, Object requestBody);
-    Either<ServiceError,Boolean> fetchNoResponseBody(String requestURL, HttpMethod httpMethod);
+    Either<ServiceError,Void> fetchNoResponseBody(String requestURL, HttpMethod httpMethod);
 }

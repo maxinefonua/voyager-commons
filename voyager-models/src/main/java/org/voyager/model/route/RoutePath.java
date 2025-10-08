@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
-public class Path {
+public class RoutePath {
     @Builder.Default
     Double totalDistanceKm = 0.0;
     @Builder.Default

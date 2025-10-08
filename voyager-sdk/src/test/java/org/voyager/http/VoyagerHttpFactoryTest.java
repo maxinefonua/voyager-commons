@@ -2,25 +2,21 @@ package org.voyager.http;
 
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class VoyagerHttpFactoryTest {
 
     @Test
-    void initialize() {
-        assertThrows(IllegalStateException.class, VoyagerHttpFactoryTestImpl::getClient);
-        assertDoesNotThrow(()->VoyagerHttpFactoryTestImpl.initialize("test-token"));
-    }
-
-    @Test
-    void getClient() {
-    }
-
-    @Test
-    void request() {
-    }
-
-    @Test
-    void testRequest() {
+    void testAllMethods() throws URISyntaxException {
+        assertThrows(IllegalStateException.class, VoyagerHttpFactory::getClient);
+        assertThrows(IllegalArgumentException.class,()->VoyagerHttpFactory.initialize(""));
+        assertDoesNotThrow(()->VoyagerHttpFactory.initialize("test-token"));
+        assertThrows(IllegalStateException.class,()->VoyagerHttpFactory.initialize("test-token"));
+        assertNotNull(VoyagerHttpFactory.getClient());
+        assertNotNull(VoyagerHttpFactory.request(new URI("http://test"),HttpMethod.GET));
+        assertNotNull(VoyagerHttpFactory.request(new URI("http://test"),HttpMethod.POST,"test"));
     }
 }

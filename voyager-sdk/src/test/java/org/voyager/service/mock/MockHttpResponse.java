@@ -1,4 +1,4 @@
-package org.voyager.service;
+package org.voyager.service.mock;
 
 import javax.net.ssl.SSLSession;
 import java.net.URI;

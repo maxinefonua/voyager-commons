@@ -9,7 +9,6 @@ import io.vavr.control.Either;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.voyager.constants.MessageConstants;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
@@ -66,7 +65,7 @@ public class ServiceUtilsDefault implements ServiceUtils {
     }
 
     @Override
-    public Either<ServiceError, Boolean> fetchNoResponseBody(String requestURL, HttpMethod httpMethod) {
+    public Either<ServiceError, Void> fetchNoResponseBody(String requestURL, HttpMethod httpMethod) {
         return fetchRequest(requestURL,httpMethod).flatMap(httpResponse ->
                 confirmValidResponse(httpResponse,requestURL));
     }
@@ -79,14 +78,14 @@ public class ServiceUtilsDefault implements ServiceUtils {
             return Either.right(om.readValue(response.body(),returnType));
         } catch (JsonProcessingException e) {
             return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                    MessageConstants.getJsonParseResponseBodyExceptionMessage(requestURL,returnType,response),e));
+                    ConstantsSDK.getJsonParseResponseBodyExceptionMessage(requestURL,returnType,response),e));
         }
     }
 
-    private static Either<ServiceError,Boolean> confirmValidResponse(@NonNull HttpResponse<String> response,
+    private static Either<ServiceError,Void> confirmValidResponse(@NonNull HttpResponse<String> response,
                                                                      @NonNull String requestURL) {
         if (response.statusCode() != 204) return Either.left(buildServiceError(response,requestURL));
-        return Either.right(true);
+        return Either.right(null);
     }
 
     private static <T> Either<ServiceError,T> extractMappedResponse(@NonNull HttpResponse<String> response,
@@ -97,7 +96,7 @@ public class ServiceUtilsDefault implements ServiceUtils {
             return Either.right(om.readValue(response.body(), returnType));
         } catch (JsonProcessingException e) {
             return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                    MessageConstants.getJsonParseResponseBodyExceptionMessage(requestURL,returnType.getClass(),response),e));
+                    ConstantsSDK.getJsonParseResponseBodyExceptionMessage(requestURL,returnType.getClass(),response),e));
         }
     }
 
@@ -108,16 +107,16 @@ public class ServiceUtilsDefault implements ServiceUtils {
                 return new ServiceError(response.statusCode(),exception);
             } catch (JsonProcessingException e) { // TODO: implement alert for exceptions exposed via API
                 return new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                        MessageConstants.getJsonParseResponseExceptionMessage(requestURL,response), e);
+                        ConstantsSDK.getJsonParseResponseExceptionMessage(requestURL,response), e);
             }
         }
         return new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
                 ServiceException.builder().message(
-                        MessageConstants.getServiceExceptionBlankResponseBody(requestURL,response)).build()
+                        ConstantsSDK.getServiceExceptionBlankResponseBody(requestURL,response)).build()
         );
     }
 
-    private static Either<ServiceError,HttpResponse<String>> fetchRequest(String requestURL, HttpMethod httpMethod) {
+    private Either<ServiceError,HttpResponse<String>> fetchRequest(String requestURL, HttpMethod httpMethod) {
         try {
             URI uri = new URI(requestURL);
             HttpRequest request = getRequest(uri,httpMethod);
@@ -129,11 +128,11 @@ public class ServiceUtilsDefault implements ServiceUtils {
         }
     }
 
-    protected static HttpRequest getRequest(URI uri, HttpMethod httpMethod) {
+    protected HttpRequest getRequest(URI uri, HttpMethod httpMethod) {
         return VoyagerHttpFactory.request(uri,httpMethod);
     }
 
-    protected static Either<ServiceError,HttpResponse<String>> sendRequest(HttpRequest request) {
+    protected Either<ServiceError,HttpResponse<String>> sendRequest(HttpRequest request) {
         return VoyagerHttpFactory.getClient().send(request);
     }
 }

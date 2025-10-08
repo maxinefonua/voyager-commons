@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.net.URI;
 import java.net.http.HttpRequest;
 
-import static org.voyager.utils.ConstantsUtils.*;
+import static org.voyager.utils.Constants.*;
 
 public class VoyagerHttpFactory {
     private static VoyagerHttpClient client;
@@ -37,7 +37,7 @@ public class VoyagerHttpFactory {
         checkInitialized();
         return HttpRequest.newBuilder()
                 .uri(uri)
-                .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken)
+                .headers(Voyager.Headers.AUTH_TOKEN_HEADER_NAME,authorizationToken)
                 .method(httpMethod.name(),HttpRequest.BodyPublishers.noBody())
                 .build();
     }
@@ -46,7 +46,9 @@ public class VoyagerHttpFactory {
         checkInitialized();
         return HttpRequest.newBuilder()
                 .uri(uri)
-                .headers(AUTH_TOKEN_HEADER_NAME,authorizationToken,CONTENT_TYPE_HEADER_NAME,JSON_TYPE_VALUE)
+                .headers(Voyager.Headers.AUTH_TOKEN_HEADER_NAME,authorizationToken,
+                        Voyager.Headers.CONTENT_TYPE_HEADER_NAME,
+                        Voyager.Headers.JSON_TYPE_VALUE)
                 .method(httpMethod.name(),HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
     }

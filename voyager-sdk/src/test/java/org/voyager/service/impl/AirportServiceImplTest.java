@@ -1,4 +1,4 @@
-package org.voyager.service;
+package org.voyager.service.impl;
 
 import io.vavr.control.Either;
 import org.junit.jupiter.api.*;
@@ -7,8 +7,10 @@ import org.voyager.model.Airline;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportPatch;
 import org.voyager.model.airport.AirportType;
-import org.voyager.service.model.AirportQuery;
-import org.voyager.service.model.NearbyAirportQuery;
+import org.voyager.model.AirportQuery;
+import org.voyager.model.NearbyAirportQuery;
+import org.voyager.service.AirportService;
+import org.voyager.service.TestServiceRegistry;
 import org.voyager.service.utils.ServiceUtilsTestFactory;
 import org.voyager.utils.ServiceUtils;
 

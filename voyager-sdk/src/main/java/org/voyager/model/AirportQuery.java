@@ -1,25 +1,21 @@
-package org.voyager.service.model;
+package org.voyager.model;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
-import org.voyager.model.Airline;
 import org.voyager.model.airport.AirportType;
+import org.voyager.utils.Constants;
 
 import java.util.List;
 import java.util.StringJoiner;
 
-import static org.voyager.utils.ConstantsUtils.*;
-import static org.voyager.utils.ConstantsUtils.TYPE_PARAM_NAME;
-
 public class AirportQuery {
-    public static final String AIRPORTS_PATH = "/airports";
-
-    @Getter
     private String countryCode;
-    @Getter
     private Airline airline;
-    @Getter
     private List<AirportType> airportTypeList;
 
     private AirportQuery(String countryCode,Airline airline, List<AirportType> airportTypeList) {
@@ -29,28 +25,28 @@ public class AirportQuery {
     }
 
     public static String resolveRequestURL(AirportQuery airportQuery) {
-        if (airportQuery == null) return AIRPORTS_PATH;
+        if (airportQuery == null) return Constants.Voyager.Path.AIRPORTS;
 
         StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(AIRPORTS_PATH);
+        urlBuilder.append(Constants.Voyager.Path.AIRPORTS);
         urlBuilder.append("?");
 
         StringJoiner paramsJoiner = new StringJoiner("&");
 
-        String countryCode = airportQuery.getCountryCode();
+        String countryCode = airportQuery.countryCode;
         if (StringUtils.isNotBlank(countryCode)) {
-            paramsJoiner.add(String.format("%s=%s", COUNTRY_CODE_PARAM_NAME,countryCode));
+            paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.COUNTRY_CODE_PARAM_NAME,countryCode));
         }
-        Airline airline = airportQuery.getAirline();
+        Airline airline = airportQuery.airline;
         if (airline != null) {
-            paramsJoiner.add(String.format("%s=%s",AIRLINE_PARAM_NAME,airline.name()));
+            paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.AIRLINE_PARAM_NAME,airline.name()));
         }
 
-        List<AirportType> airportTypeList = airportQuery.getAirportTypeList();
+        List<AirportType> airportTypeList = airportQuery.airportTypeList;
         if (airportTypeList != null && !airportTypeList.isEmpty()) {
             StringJoiner typeJoiner = new StringJoiner(",");
             airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
-            paramsJoiner.add(String.format("%s=%s",TYPE_PARAM_NAME,typeJoiner));
+            paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.TYPE_PARAM_NAME,typeJoiner));
         }
 
         urlBuilder.append(paramsJoiner);
@@ -71,12 +67,14 @@ public class AirportQuery {
             return this;
         }
 
-        public AirportQueryBuilder withCountryCode(@NonNull String countryCode) {
+        public AirportQueryBuilder withCountryCode(@NotBlank @Pattern(regexp =
+                Constants.Voyager.Regex.ALPHA2_CODE_REGEX, message = Constants.Voyager.ConstraintMessage.COUNTRY_CODE)
+                                                   String countryCode) {
             this.countryCode = countryCode;
             return this;
         }
 
-        public AirportQueryBuilder withTypeList(@NonNull List<AirportType> airportTypeList) {
+        public AirportQueryBuilder withTypeList(@NotEmpty @Valid List<@NonNull AirportType> airportTypeList) {
             this.airportTypeList = airportTypeList;
             return this;
         }

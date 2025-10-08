@@ -1,18 +1,18 @@
-package org.voyager.service.model;
+package org.voyager.model;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.NonNull;
-import org.voyager.model.Airline;
 import org.voyager.model.airport.AirportType;
+import org.voyager.utils.Constants;
 
 import java.util.List;
 import java.util.StringJoiner;
 
-import static org.voyager.utils.ConstantsUtils.*;
-
 public class NearbyAirportQuery {
-    public static final String NEARBY_PATH = "/nearby-airports";
-
     @Getter
     private Double latitude;
     @Getter
@@ -24,8 +24,9 @@ public class NearbyAirportQuery {
     @Getter
     private List<AirportType> airportTypeList;
 
-    private NearbyAirportQuery(@NonNull Double latitude, @NonNull Double longitude, Integer limit,
-                               List<Airline> airlineList, List<AirportType> airportTypeList) {
+    private NearbyAirportQuery(@NonNull @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0") Double latitude,
+                               @NonNull @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0") Double longitude,
+                               Integer limit, List<Airline> airlineList, List<AirportType> airportTypeList) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.limit = limit;
@@ -37,26 +38,28 @@ public class NearbyAirportQuery {
         Double latitude = nearbyAirportQuery.getLatitude();
         Double longitude = nearbyAirportQuery.getLongitude();
         StringJoiner paramsJoiner = new StringJoiner("&");
-        paramsJoiner.add(String.format("%s" + "?%s=%s",NEARBY_PATH,LATITUDE_PARAM_NAME,latitude));
-        paramsJoiner.add(String.format("%s=%s",LONGITUDE_PARAM_NAME,longitude));
+        paramsJoiner.add(String.format("%s" + "?%s=%s", Constants.Voyager.Path.NEARBY_AIRPORTS,
+                Constants.Voyager.ParameterNames.LATITUDE_PARAM_NAME,latitude));
+        paramsJoiner.add(String.format("%s=%s",
+                Constants.Voyager.ParameterNames.LONGITUDE_PARAM_NAME,longitude));
 
         Integer limit = nearbyAirportQuery.getLimit();
         if (limit != null) {
-            paramsJoiner.add(String.format("%s=%s",LIMIT_PARAM_NAME,limit));
+            paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.LIMIT_PARAM_NAME,limit));
         }
 
         List<Airline> airlineList = nearbyAirportQuery.getAirlineList();
         if (airlineList != null && !airlineList.isEmpty()) {
             StringJoiner airlineJoiner = new StringJoiner(",");
             airlineList.forEach(airline -> airlineJoiner.add(airline.name()));
-            paramsJoiner.add(String.format("%s=%s", AIRLINE_PARAM_NAME, airlineJoiner));
+            paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.AIRLINE_PARAM_NAME, airlineJoiner));
         }
 
         List<AirportType> airportTypeList = nearbyAirportQuery.getAirportTypeList();
         if (airportTypeList != null && !airportTypeList.isEmpty()) {
             StringJoiner typeJoiner = new StringJoiner(",");
             airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
-            paramsJoiner.add(String.format("%s=%s", TYPE_PARAM_NAME, typeJoiner));
+            paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.TYPE_PARAM_NAME, typeJoiner));
         }
 
         return paramsJoiner.toString();
@@ -88,12 +91,12 @@ public class NearbyAirportQuery {
             return this;
         }
 
-        public NearbyAirportQueryBuilder withAirlineList(@NonNull List<Airline> airlineList) {
+        public NearbyAirportQueryBuilder withAirlineList(@NotEmpty @Valid List<@NonNull Airline> airlineList) {
             this.airlineList = airlineList;
             return this;
         }
 
-        public NearbyAirportQueryBuilder withTypeList(@NonNull List<AirportType> airportTypeList) {
+        public NearbyAirportQueryBuilder withTypeList(@NonNull @Valid List<@NonNull AirportType> airportTypeList) {
             this.airportTypeList = airportTypeList;
             return this;
         }
