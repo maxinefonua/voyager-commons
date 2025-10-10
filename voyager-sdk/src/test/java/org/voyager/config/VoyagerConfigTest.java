@@ -14,7 +14,6 @@ class VoyagerConfigTest {
     private static final int MAX_THREADS = 100;
     private static final String AUTH_TOKEN = "auth-token";
     private static final String BASE_URL = "http://host:8080";
-    private static final String AIRPORTS_PATH = "http://host:8080/airports";
 
     @BeforeAll
     public static void init() {

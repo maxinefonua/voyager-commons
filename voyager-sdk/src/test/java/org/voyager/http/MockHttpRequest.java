@@ -1,4 +1,4 @@
-package org.voyager.service.mock;
+package org.voyager.http;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,8 +11,19 @@ import java.time.Duration;
 import java.util.Optional;
 
 public class MockHttpRequest extends HttpRequest {
+    public enum HttpType {
+        FETCH_COUNTRY,
+        FETCH_ROUTES,
+        FETCH_ERROR
+    }
+
     @Getter @Setter
-    private String jsonPayload;
+    private HttpType requestType;
+
+    @Override
+    public String toString() {
+        return "MockHttpRequest";
+    }
 
     @Override
     public Optional<BodyPublisher> bodyPublisher() {

@@ -6,16 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.DecimalMax;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
 import org.voyager.model.validate.ValidEnum;
 import org.voyager.utils.Constants;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +23,7 @@ import java.util.List;
 @ToString(includeFieldNames = false)
 public class CountryForm {
     @NotBlank
-    @Pattern(regexp = Constants.Voyager.Regex.ALPHA2_CODE_REGEX)
+    @Pattern(regexp = Constants.Voyager.Regex.COUNTRY_CODE_ALPHA2)
     private String countryCode;
 
     @NotBlank

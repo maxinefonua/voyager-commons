@@ -1,21 +1,23 @@
 package org.voyager.model;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
+import org.voyager.model.validate.AllStringsMatchRegex;
 import org.voyager.utils.Constants;
-
+import org.voyager.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
 public class AirlineQuery {
-    private List<String> iataList;
+    @Getter
+    @Size(min = 1,message = "cannot be empty") // allows null List
+    @AllStringsMatchRegex(regexp = Constants.Voyager.Regex.IATA_CODE_ALPHA3,
+            message = Constants.Voyager.ConstraintMessage.IATA_CODE_ELEMENTS) // allows null List, excludes null elements
+    private List<String> IATAList;
 
-    AirlineQuery(@NonNull List<String> iataList) {
-        this.iataList = iataList;
+    private AirlineQuery(@NonNull List<String> IATAList) {
+        this.IATAList = IATAList;
     }
 
     public static AirlineQueryBuilder builder() {
@@ -23,33 +25,29 @@ public class AirlineQuery {
     }
 
     public static class AirlineQueryBuilder {
-        private List<String> iataList;
+       List<String> IATAList;
 
-        public AirlineQueryBuilder withIataList(@NotEmpty @Valid List<@NonNull @Pattern(regexp =
-                Constants.Voyager.Regex.ALPHA3_CODE_REGEX,message = Constants.Voyager.ConstraintMessage.IATA_CODE)
-                String> iataList) {
-            this.iataList = iataList;
+        public AirlineQueryBuilder withIATAList(@NonNull List<String> IATAList) {
+            this.IATAList = IATAList;
             return this;
         }
 
         public AirlineQuery build() {
-            return new AirlineQuery(iataList);
+            AirlineQuery query = new AirlineQuery(IATAList);
+            JakartaValidationUtil.validate(query);
+            query.IATAList = query.IATAList.stream().map(String::toUpperCase).toList();
+            return query;
         }
     }
 
-    public static String resolveRequestURL(@NonNull AirlineQuery airlineQuery) {
-        if (airlineQuery == null) return Constants.Voyager.Path.AIRLINES;
-
+    public String getRequestURL() {
         StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(Constants.Voyager.Path.AIRLINES);
         urlBuilder.append("?");
 
-        List<String> iataList = airlineQuery.iataList;
-        if (iataList != null && !iataList.isEmpty()) {
-            StringJoiner iataJoiner = new StringJoiner(",");
-            iataList.forEach(iataJoiner::add);
-            urlBuilder.append(String.format("%s=%s", Constants.Voyager.ParameterNames.IATA_PARAM_NAME,iataJoiner));
-        }
+        StringJoiner iataJoiner = new StringJoiner(",");
+        IATAList.forEach(iataJoiner::add);
+        urlBuilder.append(String.format("%s=%s", Constants.Voyager.ParameterNames.IATA_PARAM_NAME,iataJoiner));
         return urlBuilder.toString();
     }
 }

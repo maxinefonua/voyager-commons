@@ -16,7 +16,6 @@ import org.voyager.service.AirportService;
 import org.voyager.utils.Constants;
 import org.voyager.utils.ServiceUtils;
 import org.voyager.utils.ServiceUtilsFactory;
-
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -33,10 +32,16 @@ public class AirportServiceImpl implements AirportService {
     }
 
     @Override
-    public Either<ServiceError, List<Airport>> getAirports(AirportQuery airportQuery) {
-        String requestURL = AirportQuery.resolveRequestURL(airportQuery);
+    public Either<ServiceError, List<Airport>> getAirports() {
+        String requestURL = Constants.Voyager.Path.AIRPORTS;
         LOGGER.info(String.format("attempting to GET airports from: %s",requestURL));
         return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+    }
+
+    @Override
+    public Either<ServiceError, List<Airport>> getAirports(@NonNull AirportQuery airportQuery) {
+        LOGGER.info(String.format("attempting to GET airports from: %s",airportQuery.getRequestURL()));
+        return serviceUtils.fetch(airportQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 
     @Override
@@ -54,7 +59,7 @@ public class AirportServiceImpl implements AirportService {
     }
 
     @Override
-    public Either<ServiceError,List<String>> getIATACodes(List<AirportType> airportTypeList) {
+    public Either<ServiceError,List<String>> getIATACodes(@NonNull List<AirportType> airportTypeList) {
         StringJoiner typeJoiner = new StringJoiner(",");
         airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
         String requestURL = String.format("%s?" + "%s=%s",Constants.Voyager.Path.IATA,
@@ -65,8 +70,7 @@ public class AirportServiceImpl implements AirportService {
 
     @Override
     public Either<ServiceError, List<Airport>> getNearbyAirports(@NonNull NearbyAirportQuery nearbyAirportQuery) {
-        String requestURL = NearbyAirportQuery.resolveRequestURL(nearbyAirportQuery);
-        LOGGER.info(String.format("attempting to GET nearby airports from: %s",requestURL));
-        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+        LOGGER.info(String.format("attempting to GET nearby airports from: %s",nearbyAirportQuery.getRequestURL()));
+        return serviceUtils.fetch(nearbyAirportQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 }

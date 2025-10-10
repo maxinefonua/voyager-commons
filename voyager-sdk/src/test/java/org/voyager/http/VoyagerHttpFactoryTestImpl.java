@@ -1,8 +1,6 @@
 package org.voyager.http;
 
 import org.junit.platform.commons.util.StringUtils;
-import org.voyager.service.mock.MockHttpRequest;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
@@ -11,7 +9,7 @@ public class VoyagerHttpFactoryTestImpl extends VoyagerHttpFactory {
     private static final String BASE_URL = "http://test.org";
 
     protected static VoyagerHttpClient createClient() {
-        return new VoyagerHttpTestClient();
+        return new VoyagerHttpClientImpl();
     }
 
     public static HttpRequest request(URI uri, HttpMethod httpMethod) {

@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 
 public class AirlineSync {
-    private static Voyager voyager;
     private static FlightService flightService;
     private static RouteService routeService;
     private static final Logger LOGGER = LoggerFactory.getLogger(AirlineSync.class);

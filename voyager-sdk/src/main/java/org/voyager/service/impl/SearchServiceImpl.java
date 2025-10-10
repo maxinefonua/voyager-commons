@@ -14,9 +14,6 @@ import org.voyager.utils.Constants;
 import org.voyager.utils.ServiceUtils;
 import org.voyager.utils.ServiceUtilsFactory;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 public class SearchServiceImpl implements SearchService {
     private final ServiceUtils serviceUtils;
 
@@ -30,8 +27,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public Either<ServiceError, SearchResult<ResultSearch>> search(SearchQuery searchQuery) {
-        String requestURL = SearchQuery.resolveRequestURL(searchQuery);
-        return serviceUtils.fetch(requestURL, HttpMethod.GET,new TypeReference<SearchResult<ResultSearch>>(){});
+        return serviceUtils.fetch(searchQuery.getRequestURL(), HttpMethod.GET,new TypeReference<SearchResult<ResultSearch>>(){});
     }
 
     @Override

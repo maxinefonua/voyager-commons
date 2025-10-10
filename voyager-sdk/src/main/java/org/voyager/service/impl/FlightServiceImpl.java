@@ -15,7 +15,6 @@ import org.voyager.service.FlightService;
 import org.voyager.utils.Constants;
 import org.voyager.utils.ServiceUtils;
 import org.voyager.utils.ServiceUtilsFactory;
-
 import java.util.List;
 
 public class FlightServiceImpl implements FlightService {
@@ -31,9 +30,14 @@ public class FlightServiceImpl implements FlightService {
 
 
     @Override
-    public Either<ServiceError, List<Flight>> getFlights(FlightQuery flightQuery) {
-        String requestURL = FlightQuery.resolveRequestURL(flightQuery);
+    public Either<ServiceError, List<Flight>> getFlights() {
+        String requestURL = Constants.Voyager.Path.FLIGHTS;
         return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Flight>>(){});
+    }
+
+    @Override
+    public Either<ServiceError, List<Flight>> getFlights(FlightQuery flightQuery) {
+        return serviceUtils.fetch(flightQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Flight>>(){});
     }
 
     @Override

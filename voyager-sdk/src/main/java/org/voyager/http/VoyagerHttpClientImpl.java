@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
-
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -18,6 +17,10 @@ public class VoyagerHttpClientImpl implements VoyagerHttpClient {
 
     VoyagerHttpClientImpl() {
         this.httpClient = HttpClient.newBuilder().build();
+    }
+
+    VoyagerHttpClientImpl(HttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
     @Override

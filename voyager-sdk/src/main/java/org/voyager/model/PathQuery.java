@@ -1,21 +1,50 @@
 package org.voyager.model;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import lombok.Getter;
 import lombok.NonNull;
+import org.voyager.model.validate.AllStringsMatchRegex;
+import org.voyager.model.validate.NonNullElements;
 import org.voyager.utils.Constants;
+import org.voyager.utils.JakartaValidationUtil;
 
 import java.util.List;
 import java.util.StringJoiner;
 
 public class PathQuery {
+    @Getter
+    @Size(min = 1,message = "cannot be empty") // allows null List
+    @AllStringsMatchRegex(regexp = Constants.Voyager.Regex.IATA_CODE_ALPHA3,
+            message = Constants.Voyager.ConstraintMessage.IATA_CODE_ELEMENTS) // allows null List, excludes null elements
     private List<String> originIATAList;
+
+    @Getter
+    @Size(min = 1,message = "cannot be empty") // allows null List
+    @AllStringsMatchRegex(regexp = Constants.Voyager.Regex.IATA_CODE_ALPHA3,
+            message = Constants.Voyager.ConstraintMessage.IATA_CODE_ELEMENTS) // allows null List, excludes null elements
     private List<String> destinationIATAList;
+
+    @Getter
+    @Size(min = 1,message = "cannot be empty") // allows null List
+    @AllStringsMatchRegex(regexp = Constants.Voyager.Regex.IATA_CODE_ALPHA3,
+            message = Constants.Voyager.ConstraintMessage.IATA_CODE_ELEMENTS) // allows null List, excludes null elements
     private List<String> excludeIATAList;
+
+    @Getter
+    @Size(min = 1,message = "cannot be empty") // allows null List
+    @NonNullElements
     private List<Integer> excludeRouteIdList;
+
+    @Getter
+    @Size(min = 1,message = "cannot be empty") // allows null List
+    @AllStringsMatchRegex(regexp = Constants.Voyager.Regex.NOEMPTY_NOWHITESPACE,
+            message = Constants.Voyager.ConstraintMessage.NOEMPTY_NOWHITESPACE) // allows null List, excludes null elements
     private List<String> excludeFlightNumberList;
+
+    @Getter
+    @Min(1) @Max(25)
     private Integer limit;
 
     PathQuery(@NonNull List<String> originIATAList, @NonNull List<String> destinationIATAList,
@@ -33,40 +62,36 @@ public class PathQuery {
         return new PathQueryBuilder();
     }
 
-    public static String resolveRequestURL(@NonNull PathQuery pathQuery) {
+    public String getRequestURL() {
         StringJoiner originJoiner = new StringJoiner(",");
-        pathQuery.originIATAList.forEach(originJoiner::add);
+        originIATAList.forEach(originJoiner::add);
         StringJoiner destinationJoiner = new StringJoiner(",");
-        pathQuery.destinationIATAList.forEach(destinationJoiner::add);
+        destinationIATAList.forEach(destinationJoiner::add);
 
         StringJoiner paramsJoiner = new StringJoiner("&");
         paramsJoiner.add(String.format("%s=%s",Constants.Voyager.ParameterNames.ORIGIN_PARAM_NAME,originJoiner));
         paramsJoiner.add(String.format("%s=%s",
                 Constants.Voyager.ParameterNames.DESTINATION_PARAM_NAME,destinationJoiner));
 
-        List<String> excludeIATAList = pathQuery.excludeIATAList;
-        if (excludeIATAList != null && !excludeIATAList.isEmpty()) {
+        if (excludeIATAList != null) {
             StringJoiner iataJoiner = new StringJoiner(",");
             excludeIATAList.forEach(iataJoiner::add);
             paramsJoiner.add(String.format("%s=%s",Constants.Voyager.ParameterNames.EXCLUDE_PARAM_NAME,iataJoiner));
         }
 
-        List<Integer> excludeRouteIdList = pathQuery.excludeRouteIdList;
-        if (excludeRouteIdList != null && !excludeRouteIdList.isEmpty()) {
+        if (excludeRouteIdList != null) {
             StringJoiner routeIdJoiner = new StringJoiner(",");
             excludeRouteIdList.forEach(routeId -> routeIdJoiner.add(String.valueOf(routeId)));
             paramsJoiner.add(String.format("%s=%s",Constants.Voyager.ParameterNames.EXCLUDE_ROUTE_PARAM_NAME,routeIdJoiner));
         }
 
-        List<String> excludeFlightNumberList = pathQuery.excludeFlightNumberList;
-        if (excludeFlightNumberList != null && !excludeFlightNumberList.isEmpty()) {
+        if (excludeFlightNumberList != null) {
             StringJoiner flightJoiner = new StringJoiner(",");
             excludeFlightNumberList.forEach(flightJoiner::add);
             paramsJoiner.add(String.format("%s=%s",
                     Constants.Voyager.ParameterNames.EXCLUDE_FLIGHT_PARAM_NAME,flightJoiner));
         }
 
-        Integer limit = pathQuery.limit;
         if (limit != null) paramsJoiner.add(String.format("%s=%s",
                 Constants.Voyager.ParameterNames.LIMIT_PARAM_NAME,limit));
 
@@ -81,34 +106,27 @@ public class PathQuery {
         private List<String> excludeFlightNumberList;
         private Integer limit;
 
-        public PathQueryBuilder withOriginIATAList(@NotEmpty @Valid List<@NonNull @Pattern(regexp =
-                Constants.Voyager.Regex.ALPHA3_CODE_REGEX,message = Constants.Voyager.ConstraintMessage.IATA_CODE)
-                String> originIATAList) {
+        public PathQueryBuilder withOriginIATAList(@NonNull List<String> originIATAList) {
             this.originIATAList = originIATAList;
             return this;
         }
 
-        public PathQueryBuilder withDestinationIATAList(@NotEmpty @Valid List<@NonNull @Pattern(regexp =
-                Constants.Voyager.Regex.ALPHA3_CODE_REGEX,message = Constants.Voyager.ConstraintMessage.IATA_CODE)
-                String> destinationIATAList) {
+        public PathQueryBuilder withDestinationIATAList(@NonNull List<String> destinationIATAList) {
             this.destinationIATAList = destinationIATAList;
             return this;
         }
 
-        public PathQueryBuilder withExcludeIATAList(@NotEmpty @Valid List<@NonNull @Pattern(regexp =
-                Constants.Voyager.Regex.ALPHA3_CODE_REGEX,message = Constants.Voyager.ConstraintMessage.IATA_CODE)
-                String> excludeIATAList) {
+        public PathQueryBuilder withExcludeIATAList(@NonNull List<String> excludeIATAList) {
             this.excludeIATAList = excludeIATAList;
             return this;
         }
 
-        public PathQueryBuilder withExcludeRouteIdList(@NotEmpty @Valid List<@NonNull Integer> excludeRouteIdList) {
+        public PathQueryBuilder withExcludeRouteIdList(@NonNull List<Integer> excludeRouteIdList) {
             this.excludeRouteIdList = excludeRouteIdList;
             return this;
         }
 
-        public PathQueryBuilder withExcludeFlightNumberList(@NotEmpty @Valid List<@NotBlank String>
-                                                                    excludeFlightNumberList) {
+        public PathQueryBuilder withExcludeFlightNumberList(@NonNull List<String> excludeFlightNumberList) {
             this.excludeFlightNumberList = excludeFlightNumberList;
             return this;
         }
@@ -119,8 +137,18 @@ public class PathQuery {
         }
 
         public PathQuery build() {
-            return new PathQuery(originIATAList,destinationIATAList,excludeIATAList,excludeRouteIdList,
-                    excludeFlightNumberList,limit);
+            PathQuery pathQuery = new PathQuery(originIATAList,destinationIATAList,excludeIATAList,
+                    excludeRouteIdList, excludeFlightNumberList,limit);
+            JakartaValidationUtil.validate(pathQuery);
+            pathQuery.originIATAList = originIATAList.stream().map(String::toUpperCase).toList();
+            pathQuery.destinationIATAList = destinationIATAList.stream().map(String::toUpperCase).toList();
+            if (excludeIATAList != null) {
+                pathQuery.excludeIATAList = excludeIATAList.stream().map(String::toUpperCase).toList();
+            }
+            if (excludeFlightNumberList != null) {
+                pathQuery.excludeFlightNumberList = excludeFlightNumberList.stream().map(String::toUpperCase).toList();
+            }
+            return pathQuery;
         }
     }
 }

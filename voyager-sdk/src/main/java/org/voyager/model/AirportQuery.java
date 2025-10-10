@@ -1,49 +1,53 @@
 package org.voyager.model;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.voyager.model.airport.AirportType;
+import org.voyager.model.validate.NonNullElements;
 import org.voyager.utils.Constants;
-
+import org.voyager.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
 public class AirportQuery {
+    @Getter
+    @Pattern(regexp = Constants.Voyager.Regex.COUNTRY_CODE_ALPHA2,
+            message = Constants.Voyager.ConstraintMessage.COUNTRY_CODE) // only checks when String is nonnull
     private String countryCode;
+
+    @Getter
     private Airline airline;
+
+    @Getter
+    @Size(min = 1, message = "cannot be empty") // allows null List
+    @NonNullElements // allows null List
     private List<AirportType> airportTypeList;
 
     private AirportQuery(String countryCode,Airline airline, List<AirportType> airportTypeList) {
         this.countryCode = countryCode;
         this.airline = airline;
         this.airportTypeList = airportTypeList;
+        if (countryCode == null && airline == null && airportTypeList == null)
+            throw new IllegalArgumentException("at least one field of AirportQuery must be set");
     }
 
-    public static String resolveRequestURL(AirportQuery airportQuery) {
-        if (airportQuery == null) return Constants.Voyager.Path.AIRPORTS;
-
+    public String getRequestURL() {
         StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(Constants.Voyager.Path.AIRPORTS);
         urlBuilder.append("?");
 
         StringJoiner paramsJoiner = new StringJoiner("&");
 
-        String countryCode = airportQuery.countryCode;
         if (StringUtils.isNotBlank(countryCode)) {
             paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.COUNTRY_CODE_PARAM_NAME,countryCode));
         }
-        Airline airline = airportQuery.airline;
         if (airline != null) {
             paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.AIRLINE_PARAM_NAME,airline.name()));
         }
-
-        List<AirportType> airportTypeList = airportQuery.airportTypeList;
-        if (airportTypeList != null && !airportTypeList.isEmpty()) {
+        if (airportTypeList != null) {
             StringJoiner typeJoiner = new StringJoiner(",");
             airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
             paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.TYPE_PARAM_NAME,typeJoiner));
@@ -67,20 +71,22 @@ public class AirportQuery {
             return this;
         }
 
-        public AirportQueryBuilder withCountryCode(@NotBlank @Pattern(regexp =
-                Constants.Voyager.Regex.ALPHA2_CODE_REGEX, message = Constants.Voyager.ConstraintMessage.COUNTRY_CODE)
-                                                   String countryCode) {
-            this.countryCode = countryCode;
+        public AirportQueryBuilder withCountryCode(@NonNull String countryCode) {
+            this.countryCode = countryCode.toUpperCase();
             return this;
         }
 
-        public AirportQueryBuilder withTypeList(@NotEmpty @Valid List<@NonNull AirportType> airportTypeList) {
+        public AirportQueryBuilder withTypeList(@NonNull List<AirportType> airportTypeList) {
             this.airportTypeList = airportTypeList;
             return this;
         }
 
         public AirportQuery build() {
-            return new AirportQuery(countryCode, airline, airportTypeList);
+            AirportQuery airportQuery = new AirportQuery(countryCode, airline, airportTypeList);
+            JakartaValidationUtil.validate(airportQuery);
+            if (airportQuery.countryCode != null)
+                airportQuery.countryCode = airportQuery.countryCode.toUpperCase();
+            return airportQuery;
         }
     }
 }

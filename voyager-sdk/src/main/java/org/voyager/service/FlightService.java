@@ -9,10 +9,10 @@ import org.voyager.model.FlightQuery;
 import org.voyager.model.flight.Flight;
 import org.voyager.model.flight.FlightForm;
 import org.voyager.model.flight.FlightPatch;
-
 import java.util.List;
 
 public interface FlightService {
+    Either<ServiceError, List<Flight>> getFlights();
     Either<ServiceError, List<Flight>> getFlights(FlightQuery flightQuery);
     Either<ServiceError, Flight> getFlight(@NonNull Integer id);
     Either<ServiceError, Flight> getFlight(@NonNull Integer routeId, @Valid @NotBlank String flightNumber);

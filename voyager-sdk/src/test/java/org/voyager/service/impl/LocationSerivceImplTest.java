@@ -4,6 +4,7 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.error.ServiceError;
+import org.voyager.model.LocationQuery;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.LocationForm;
 import org.voyager.model.location.LocationPatch;
@@ -40,7 +41,13 @@ class LocationSerivceImplTest {
 
     @Test
     void getLocations() {
-        Either<ServiceError, List<Location>> either = locationService.getLocations(null);
+        Either<ServiceError, List<Location>> either = locationService.getLocations();
+        assertNotNull(either);
+        assertTrue(either.isRight());
+        assertFalse(either.get().isEmpty());
+        assertNotNull(either.get().get(0));
+
+        either = locationService.getLocations(LocationQuery.builder().withLimit(20).build());
         assertNotNull(either);
         assertTrue(either.isRight());
         assertFalse(either.get().isEmpty());

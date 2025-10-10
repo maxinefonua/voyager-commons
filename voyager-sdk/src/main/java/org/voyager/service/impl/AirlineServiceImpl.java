@@ -12,7 +12,6 @@ import org.voyager.model.AirlineQuery;
 import org.voyager.service.AirlineService;
 import org.voyager.utils.ServiceUtils;
 import org.voyager.utils.ServiceUtilsFactory;
-
 import java.util.List;
 
 public class AirlineServiceImpl implements AirlineService {
@@ -29,8 +28,7 @@ public class AirlineServiceImpl implements AirlineService {
 
     @Override
     public Either<ServiceError, List<Airline>> getAirportAirlines(@NonNull AirlineQuery airlineQuery) {
-        String requestURL = AirlineQuery.resolveRequestURL(airlineQuery);
-        LOGGER.info(String.format("attempting to GET airlines from: %s",requestURL));
-        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airline>>(){});
+        LOGGER.info(String.format("attempting to GET airlines from: %s",airlineQuery.getRequestURL()));
+        return serviceUtils.fetch(airlineQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Airline>>(){});
     }
 }

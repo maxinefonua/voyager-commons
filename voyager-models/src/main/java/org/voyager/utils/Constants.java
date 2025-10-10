@@ -1,7 +1,6 @@
 package org.voyager.utils;
 
 import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
 
 public class Constants {
@@ -67,18 +66,17 @@ public class Constants {
         }
 
         public static class Regex {
-            public static final String ALPHA2_CODE_REGEX = "^[a-zA-Z]{2}$";
-            public static final String ALPHA3_CODE_REGEX = "^[a-zA-Z]{3}$";
-            public static final String ALPHA3_CODE_REGEX_OR_EMPTY = "^([a-zA-Z]{3}|)$";
-            public static final String ALPHA2_CODE_REGEX_OR_EMPTY = "^([a-zA-Z]{2}|)$";
-            public static final String ENGLISH_APLHA_REGEX = "[A-Za-z]*";
+            public static final String IATA_CODE_ALPHA3 = "^[a-zA-Z]{3}$";
+            public static final String COUNTRY_CODE_ALPHA2 = "^[a-zA-Z]{2}$";
+            public static final String NOEMPTY_NOWHITESPACE = "^\\S+$";
         }
+
         public static class ConstraintMessage {
-            public static final String LANGUAGE_ISO639_1_CONSTRAINT = "Must be a valid two-letter ISO 639-1 alpha-2 language code";
-            public static final String LANGUAGE_ISO639_2_CONSTRAINT = "Must be a valid three-letter ISO 639-2 alpha-3 language code";
-            public static final String LANGUAGE_ISO639_3_CONSTRAINT = "Must be a valid three-letter ISO 639-3 alpha-3 language code";
             public static final String IATA_CODE = "must be a valid three-letter ISO 3166-1 alpha-3 IATA code";
+            public static final String IATA_CODE_ELEMENTS = "all elements must be a valid three-letter ISO 3166-1 alpha-3 IATA code";
             public static final String COUNTRY_CODE = "must be a valid two-letter ISO 3166-1 alpha-2 IATA code";
+            public static final String COUNTRY_CODE_ELEMENTS = "all elements must be a valid two-letter ISO 3166-1 alpha-2 IATA code";
+            public static final String NOEMPTY_NOWHITESPACE = "cannot be empty or contain whitespaces";
         }
     }
 

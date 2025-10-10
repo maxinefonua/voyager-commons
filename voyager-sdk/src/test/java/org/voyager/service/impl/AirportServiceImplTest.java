@@ -20,16 +20,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AirportServiceImplTest {
-    private static TestServiceRegistry testServiceRegistry;
-
+    private static AirportService airportService;
     @BeforeAll
     static void init() {
-        testServiceRegistry = TestServiceRegistry.getInstance();
-    }
-
-    @BeforeEach
-    void setup() {
-        testServiceRegistry.reset();
+        TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
         testServiceRegistry.registerSupplier(AirportService.class,() -> {
             try {
                 return AirportServiceImpl.class.getDeclaredConstructor(ServiceUtils.class)
@@ -39,28 +33,28 @@ class AirportServiceImplTest {
                 throw new RuntimeException(e);
             }
         });
+        airportService = testServiceRegistry.get(AirportService.class);
+        assertNotNull(airportService);
     }
 
     @Test
     void getAirports() {
-        AirportService airportService = testServiceRegistry.get(AirportService.class);
-        Either<ServiceError, List<Airport>> either = airportService.getAirports(null);
-        assertNotNull(either);
-        assertTrue(either.isRight());
-        assertFalse(either.get().isEmpty());
-        assertEquals("IATA",either.get().get(0).getIata());
+        assertThrows(NullPointerException.class,()->airportService.getAirports(null));
 
-        either = airportService.getAirports(AirportQuery.builder().withAirline(Airline.DELTA)
+        Either<ServiceError, List<Airport>> either = airportService.getAirports(AirportQuery.builder().withAirline(Airline.DELTA)
                 .withCountryCode("TO").withTypeList(List.of(AirportType.CIVIL)).build());
         assertNotNull(either);
         assertTrue(either.isRight());
         assertFalse(either.get().isEmpty());
         assertEquals("IATA",either.get().get(0).getIata());
+
+        either = airportService.getAirports();
+        assertNotNull(either);
+        assertTrue(either.isRight());
     }
 
     @Test
     void getAirport() {
-        AirportService airportService = testServiceRegistry.get(AirportService.class);
         assertThrows(NullPointerException.class,()->airportService.getAirport(null));
         Either<ServiceError,Airport> either = airportService.getAirport("IATA");
         assertNotNull(either);
@@ -70,7 +64,6 @@ class AirportServiceImplTest {
 
     @Test
     void patchAirport() {
-        AirportService airportService = testServiceRegistry.get(AirportService.class);
         assertThrows(NullPointerException.class,()->airportService.patchAirport(null,null));
         assertThrows(NullPointerException.class,()->airportService.patchAirport("IATA",null));
         Either<ServiceError,Airport> either = airportService.patchAirport("IATA",
@@ -82,7 +75,7 @@ class AirportServiceImplTest {
 
     @Test
     void getIATACodes() {
-        AirportService airportService = testServiceRegistry.get(AirportService.class);
+        assertThrows(NullPointerException.class,()->airportService.getIATACodes(null));
         Either<ServiceError,List<String>> either = airportService.getIATACodes(List.of(AirportType.HISTORICAL));
         assertNotNull(either);
         assertTrue(either.isRight());
@@ -92,11 +85,10 @@ class AirportServiceImplTest {
 
     @Test
     void getNearbyAirports() {
-        AirportService airportService = testServiceRegistry.get(AirportService.class);
         assertThrows(NullPointerException.class,()->airportService.getNearbyAirports(null));
         NearbyAirportQuery nearbyAirportQuery = NearbyAirportQuery.builder().withLatitude(1.0)
                 .withLongitude(-1.0).withLimit(3).withAirlineList(List.of(Airline.AIRNZ))
-                .withTypeList(List.of(AirportType.UNVERIFIED)).build();
+                .withAirportTypeList(List.of(AirportType.UNVERIFIED)).build();
         Either<ServiceError, List<Airport>> either = airportService.getNearbyAirports(nearbyAirportQuery);
         assertNotNull(either);
         assertTrue(either.isRight());

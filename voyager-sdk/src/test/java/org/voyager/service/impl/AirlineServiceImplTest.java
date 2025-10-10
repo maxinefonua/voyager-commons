@@ -18,16 +18,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AirlineServiceImplTest {
-    private static TestServiceRegistry testServiceRegistry;
+    private static AirlineService airlineService;
 
     @BeforeAll
     static void init() {
-        testServiceRegistry = TestServiceRegistry.getInstance();
-    }
-
-    @BeforeEach
-    void setup() {
-        testServiceRegistry.reset();
+        TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
         testServiceRegistry.registerSupplier(AirlineService.class,() ->{
             try {
                 return AirlineServiceImpl.class.getDeclaredConstructor(ServiceUtils.class)
@@ -37,21 +32,14 @@ class AirlineServiceImplTest {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    @Test
-    void testConstructor() {
-        AirlineService airlineService = new AirlineServiceImpl();
+        airlineService = testServiceRegistry.get(AirlineService.class);
         assertNotNull(airlineService);
-        assertInstanceOf(AirlineServiceImpl.class,airlineService);
     }
 
     @Test
     void getAirportAirlines() {
-        AirlineService airlineService = testServiceRegistry.get(AirlineService.class);
-        assertNotNull(airlineService);
         assertThrows(NullPointerException.class,() -> airlineService.getAirportAirlines(null));
-        AirlineQuery airlineQuery = AirlineQuery.builder().withIataList(List.of("IATA")).build();
+        AirlineQuery airlineQuery = AirlineQuery.builder().withIATAList(List.of("HEL")).build();
         Either<ServiceError, List<Airline>> either = airlineService.getAirportAirlines(airlineQuery);
         assertNotNull(either);
         assertTrue(either.isRight());

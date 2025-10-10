@@ -13,6 +13,11 @@ import org.voyager.model.country.Country;
 import org.voyager.model.flight.Flight;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.Source;
+import org.voyager.model.response.SearchResult;
+import org.voyager.model.result.LookupAttribution;
+import org.voyager.model.result.ResultSearch;
+import org.voyager.model.result.ResultSearchFull;
+import org.voyager.model.route.*;
 import org.voyager.utils.ServiceUtilsDefault;
 
 import java.net.URI;
@@ -28,6 +33,10 @@ public class TestServiceUtils extends ServiceUtilsDefault {
     private static final Country COUNTRY =  Country.builder().code("TS").name("NAME").capitalCity("CITY").build();
     private static final Flight FLIGHT = Flight.builder().flightNumber("DL988").build();
     private static final Location LOCATION = Location.builder().name("test location").build();
+    private static final PathResponse<AirlinePath> PATH_RESPONSE = PathResponse.<AirlinePath>builder()
+            .responseList(List.of(AirlinePath.builder().airline(Airline.DELTA).build())).build();
+    private static final Route ROUTE = Route.builder().id(555).build();
+
 
     @Override
     @SuppressWarnings("unchecked")
@@ -51,6 +60,16 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 LOCATION.setSource(Source.MANUAL);
                 LOCATION.setSourceId("test-source-id");
                 return Either.right((T) LOCATION);
+            case "/routes/555":
+                return Either.right((T)ROUTE);
+            case "/route?origin=HNL&destination=HND":
+                ROUTE.setOrigin("HNL");
+                ROUTE.setDestination("HND");
+                return Either.right((T) ROUTE);
+            case "/search-attribution":
+                return Either.right((T) LookupAttribution.builder().build());
+            case "/search/test-source-id":
+                return Either.right((T) ResultSearchFull.builder().build());
             default:
                 throw new RuntimeException(String.format(
                     "ServiceUtilsTest fetch class: '%s' not yet implemented for requestURL: %s",
@@ -67,7 +86,6 @@ public class TestServiceUtils extends ServiceUtilsDefault {
     protected Either<ServiceError, HttpResponse<String>> sendRequest(HttpRequest request) {
         String uriString = request.uri().toString();
         if (request.bodyPublisher().isPresent() && !request.bodyPublisher().get().equals(HttpRequest.BodyPublishers.noBody())) {
-            HttpRequest.BodyPublisher bodyPublisher = request.bodyPublisher().get();
             String body = request.bodyPublisher().get().toString();
             throw new RuntimeException(String.format(
                     "ServiceUtilsTest fetch uri: '%s' not yet implemented with body: %s",uriString,body));
@@ -84,7 +102,6 @@ public class TestServiceUtils extends ServiceUtilsDefault {
     public <T> Either<ServiceError, T> fetch(String requestURL, HttpMethod httpMethod, TypeReference<T> typeReference) {
         switch (requestURL) {
             case "/airports":
-                return Either.right((T) List.of(AIRPORT));
             case "/airports?countryCode=TO&airline=DELTA&type=CIVIL":
                 return Either.right((T) List.of(AIRPORT));
             case "/iata?type=HISTORICAL":
@@ -92,17 +109,28 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/nearby-airports?latitude=1.0&longitude=-1.0&limit=3&airline=AIRNZ&type=UNVERIFIED":
                 Airport nearby = AIRPORT.toBuilder().type(AirportType.UNVERIFIED).build();
                 return Either.right((T) List.of(nearby));
-            case "/airport-airlines?iata=IATA":
+            case "/airport-airlines?iata=HEL":
                 return Either.right((T)List.of(Airline.DELTA,Airline.JAPAN));
             case "/countries":
                 return Either.right((T)List.of(COUNTRY));
             case "/flights":
-                return Either.right((T)List.of(FLIGHT));
             case "/flights?flightNumber=DL100":
-                FLIGHT.setFlightNumber("DL100");
                 return Either.right((T)List.of(FLIGHT));
+            case "/locations?limit=20":
             case "/locations":
                 return Either.right((T)List.of(LOCATION));
+            case "/path-airline?origin=SJC&destination=SLC":
+                return Either.right((T)PATH_RESPONSE);
+            case "/path?origin=SJC&destination=SLC":
+                return Either.right((T)List.of(RoutePath.builder().routeAirlineList(List.of(
+                        RouteAirline.builder().airlines(List.of(Airline.DELTA,Airline.UNITED)).build())).build()));
+            case "/routes?origin=SJC":
+            case "/routes":
+                return Either.right((T)List.of(Route.builder().build()));
+            case "/search?q=test":
+                return Either.right((T) SearchResult.builder().results(List.of(ResultSearch.builder().build())));
+            case "/countries?countryCode=OC":
+                return Either.right((T) List.of(COUNTRY));
             default:
                 throw new RuntimeException(String.format(
                     "ServiceUtilsTest fetch typeReference: '%s' not yet implemented for requestURL: %s",
@@ -121,23 +149,17 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                     return Either.right((T)patched);
                 }
             case "/countries":
-                if (httpMethod.equals(HttpMethod.POST)) {
-                    Country country = Country.builder().code("MM").build();
-                    return Either.right((T)country);
-                }
+                return Either.right((T)COUNTRY);
             case "/flights":
-                if (httpMethod.equals(HttpMethod.POST)) {
-                    return Either.right((T)FLIGHT);
-                }
             case "/flights/30":
-                if (httpMethod.equals(HttpMethod.PATCH)) {
-                    return Either.right((T)FLIGHT);
-                }
+                return Either.right((T)FLIGHT);
             case "/locations":
-                return Either.right((T)LOCATION);
             case "/locations/2":
                 LOCATION.setId(2);
                 return Either.right((T) LOCATION);
+            case "/routes":
+            case "/routes/555":
+                return Either.right((T) ROUTE);
             default:
                 throw new RuntimeException(String.format(
                     "ServiceUtilsTest fetchWithRequestBody: '%s' not yet implemented for requestURL: %s",

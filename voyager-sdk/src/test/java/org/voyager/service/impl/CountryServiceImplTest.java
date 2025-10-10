@@ -55,7 +55,15 @@ class CountryServiceImplTest {
 
     @Test
     void getCountries() {
-        Either<ServiceError, List<Country>> either = countryService.getCountries(null);
+        Either<ServiceError, List<Country>> either = countryService.getCountries();
+        assertNotNull(either);
+        assertTrue(either.isRight());
+        assertFalse(either.get().isEmpty());
+        assertEquals("TS",either.get().get(0).getCode());
+
+        assertThrows(NullPointerException.class,()->countryService.getCountries(null));
+        CountryQuery countryQuery = CountryQuery.builder().withContinentList(List.of(Continent.OC)).build();
+        either = countryService.getCountries(countryQuery);
         assertNotNull(either);
         assertTrue(either.isRight());
         assertFalse(either.get().isEmpty());

@@ -7,7 +7,6 @@ import org.voyager.model.PathQuery;
 import org.voyager.model.route.RoutePath;
 import org.voyager.model.route.AirlinePath;
 import org.voyager.model.route.PathResponse;
-
 import java.util.List;
 
 public interface PathService {

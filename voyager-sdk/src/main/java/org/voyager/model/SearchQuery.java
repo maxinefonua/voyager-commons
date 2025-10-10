@@ -1,17 +1,28 @@
 package org.voyager.model;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.utils.Constants;
-
+import org.voyager.utils.JakartaValidationUtil;
 import java.util.StringJoiner;
 
 public class SearchQuery {
+    @Getter
+    @NotBlank
     private String query;
+
+    @Getter
+    @Min(1)
     private Integer skipRowCount;
+
+    @Getter
+    @Min(1)
+    // TODO: find out max for geonames
     private Integer limit;
 
-    SearchQuery(@NotBlank String query, Integer skipRowCount, Integer limit) {
+    SearchQuery(@NonNull String query, Integer skipRowCount, Integer limit) {
         this.query = query;
         this.skipRowCount = skipRowCount;
         this.limit = limit;
@@ -21,18 +32,16 @@ public class SearchQuery {
         return new SearchQueryBuilder();
     }
 
-    public static String resolveRequestURL(@NonNull SearchQuery searchQuery) {
+    public String getRequestURL() {
         StringJoiner paramsJoiner = new StringJoiner("&");
         paramsJoiner.add(String.format("%s=%s",
-                Constants.Voyager.ParameterNames.QUERY_PARAM_NAME,searchQuery.query));
+                Constants.Voyager.ParameterNames.QUERY_PARAM_NAME,query));
 
-        Integer skipRowCount = searchQuery.skipRowCount;
         if (skipRowCount != null) {
             paramsJoiner.add(String.format("%s=%s",
                     Constants.Voyager.ParameterNames.SKIP_ROW_PARAM_NAME,skipRowCount));
         }
 
-        Integer limit = searchQuery.limit;
         if (limit != null) {
             paramsJoiner.add(String.format("%s=%s",
                     Constants.Voyager.ParameterNames.LIMIT_PARAM_NAME,limit));
@@ -45,7 +54,7 @@ public class SearchQuery {
         private Integer skipRowCount;
         private Integer limit;
 
-        public SearchQueryBuilder withQuery(@NotBlank String query) {
+        public SearchQueryBuilder withQuery(@NonNull String query) {
             this.query = query;
             return this;
         }
@@ -61,7 +70,9 @@ public class SearchQuery {
         }
 
         public SearchQuery build() {
-            return new SearchQuery(query,skipRowCount,limit);
+            SearchQuery searchQuery = new SearchQuery(query,skipRowCount,limit);
+            JakartaValidationUtil.validate(searchQuery);
+            return searchQuery;
         }
     }
 }

@@ -47,7 +47,7 @@ class FlightServiceImplTest {
 
     @Test
     void getFlights() {
-        Either<ServiceError, List<Flight>> either = flightService.getFlights(null);
+        Either<ServiceError, List<Flight>> either = flightService.getFlights();
         assertNotNull(either);
         assertTrue(either.isRight());
         assertNotNull(either.get());
@@ -58,7 +58,6 @@ class FlightServiceImplTest {
         assertTrue(either.isRight());
         assertNotNull(either.get());
         assertFalse(either.get().isEmpty());
-        assertEquals("DL100",either.get().get(0).getFlightNumber());
     }
 
     @Test

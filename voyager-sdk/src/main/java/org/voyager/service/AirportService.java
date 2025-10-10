@@ -10,9 +10,10 @@ import org.voyager.model.airport.AirportType;
 import java.util.List;
 
 public interface AirportService {
-    Either<ServiceError,List<Airport>> getAirports(AirportQuery airportQuery);
-    Either<ServiceError,Airport> getAirport(String iata);
-    Either<ServiceError,Airport> patchAirport(String iata, AirportPatch airportPatch);
-    Either<ServiceError,List<String>> getIATACodes(List<AirportType> airportTypeList);
+    Either<ServiceError,List<Airport>> getAirports();
+    Either<ServiceError,List<Airport>> getAirports(@NonNull AirportQuery airportQuery);
+    Either<ServiceError,Airport> getAirport(@NonNull String iata);
+    Either<ServiceError,Airport> patchAirport(@NonNull String iata, @NonNull AirportPatch airportPatch);
+    Either<ServiceError,List<String>> getIATACodes(@NonNull List<AirportType> airportTypeList);
     Either<ServiceError,List<Airport>> getNearbyAirports(@NonNull NearbyAirportQuery nearbyAirportQuery);
 }

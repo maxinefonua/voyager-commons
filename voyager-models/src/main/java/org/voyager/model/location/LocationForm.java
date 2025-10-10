@@ -5,16 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Pattern;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
 import org.voyager.model.validate.ValidEnum;
 import org.voyager.utils.Constants;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +37,7 @@ public class LocationForm {
     String subdivision;
 
     @NotBlank
-    @Pattern(regexp = Constants.Voyager.Regex.ALPHA2_CODE_REGEX, message = "must be a valid two-letter ISO 3166-1 alpha-2 country code")
+    @Pattern(regexp = Constants.Voyager.Regex.COUNTRY_CODE_ALPHA2, message = "must be a valid two-letter ISO 3166-1 alpha-2 country code")
     String countryCode;
 
     @NotNull

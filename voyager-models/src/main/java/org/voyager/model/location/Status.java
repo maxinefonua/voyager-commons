@@ -2,7 +2,8 @@ package org.voyager.model.location;
 
 import lombok.Getter;
 
-public enum Status {
+public enum
+Status {
     NEW("Save"),
     SAVED("Saved"),
     ARCHIVED("Archived"),

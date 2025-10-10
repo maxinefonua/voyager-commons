@@ -1,31 +1,43 @@
 package org.voyager.model;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.model.airport.AirportType;
+import org.voyager.model.validate.NonNullElements;
 import org.voyager.utils.Constants;
+import org.voyager.utils.JakartaValidationUtil;
 
 import java.util.List;
 import java.util.StringJoiner;
 
 public class NearbyAirportQuery {
     @Getter
+    @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0")
     private Double latitude;
+
     @Getter
+    @DecimalMin(value = "-180.0") @DecimalMax(value = "180.0")
     private Double longitude;
+
     @Getter
+    @Min(1)
     private Integer limit;
+
     @Getter
+    @Size(min = 1,message = "cannot be empty") // allows null List
+    @NonNullElements // allows for null List
     private List<Airline> airlineList;
+
     @Getter
+    @Size(min = 1,message = "cannot be empty") // allows null List
+    @NonNullElements // allows for null List
     private List<AirportType> airportTypeList;
 
-    private NearbyAirportQuery(@NonNull @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0") Double latitude,
-                               @NonNull @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0") Double longitude,
+    private NearbyAirportQuery(@NonNull Double latitude, @NonNull Double longitude,
                                Integer limit, List<Airline> airlineList, List<AirportType> airportTypeList) {
         this.latitude = latitude;
         this.longitude = longitude;
@@ -34,29 +46,24 @@ public class NearbyAirportQuery {
         this.airportTypeList = airportTypeList;
     }
 
-    public static String resolveRequestURL(@NonNull NearbyAirportQuery nearbyAirportQuery) {
-        Double latitude = nearbyAirportQuery.getLatitude();
-        Double longitude = nearbyAirportQuery.getLongitude();
+    public String getRequestURL() {
         StringJoiner paramsJoiner = new StringJoiner("&");
         paramsJoiner.add(String.format("%s" + "?%s=%s", Constants.Voyager.Path.NEARBY_AIRPORTS,
                 Constants.Voyager.ParameterNames.LATITUDE_PARAM_NAME,latitude));
         paramsJoiner.add(String.format("%s=%s",
                 Constants.Voyager.ParameterNames.LONGITUDE_PARAM_NAME,longitude));
 
-        Integer limit = nearbyAirportQuery.getLimit();
         if (limit != null) {
             paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.LIMIT_PARAM_NAME,limit));
         }
 
-        List<Airline> airlineList = nearbyAirportQuery.getAirlineList();
-        if (airlineList != null && !airlineList.isEmpty()) {
+        if (airlineList != null) {
             StringJoiner airlineJoiner = new StringJoiner(",");
             airlineList.forEach(airline -> airlineJoiner.add(airline.name()));
             paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.AIRLINE_PARAM_NAME, airlineJoiner));
         }
 
-        List<AirportType> airportTypeList = nearbyAirportQuery.getAirportTypeList();
-        if (airportTypeList != null && !airportTypeList.isEmpty()) {
+        if (airportTypeList != null) {
             StringJoiner typeJoiner = new StringJoiner(",");
             airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
             paramsJoiner.add(String.format("%s=%s", Constants.Voyager.ParameterNames.TYPE_PARAM_NAME, typeJoiner));
@@ -91,18 +98,21 @@ public class NearbyAirportQuery {
             return this;
         }
 
-        public NearbyAirportQueryBuilder withAirlineList(@NotEmpty @Valid List<@NonNull Airline> airlineList) {
+        public NearbyAirportQueryBuilder withAirlineList(@NonNull List<Airline> airlineList) {
             this.airlineList = airlineList;
             return this;
         }
 
-        public NearbyAirportQueryBuilder withTypeList(@NonNull @Valid List<@NonNull AirportType> airportTypeList) {
+        public NearbyAirportQueryBuilder withAirportTypeList(@NonNull List<AirportType> airportTypeList) {
             this.airportTypeList = airportTypeList;
             return this;
         }
 
         public NearbyAirportQuery build() {
-            return new NearbyAirportQuery(latitude,longitude,limit,airlineList,airportTypeList);
+            NearbyAirportQuery nearbyAirportQuery =
+                    new NearbyAirportQuery(latitude,longitude,limit,airlineList,airportTypeList);
+            JakartaValidationUtil.validate(nearbyAirportQuery);
+            return nearbyAirportQuery;
         }
     }
 }

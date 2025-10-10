@@ -1,23 +1,30 @@
 package org.voyager.model;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
 import org.junit.platform.commons.util.StringUtils;
+import org.voyager.model.validate.NonNullElements;
 import org.voyager.utils.Constants;
-
+import org.voyager.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
 public class FlightQuery {
     @Getter
+    @NonNullElements // allows null list
+    @Size(min = 1,message = "cannot be empty") // allows null List
     private List<Integer> routeIdList;
+
     @Getter
+    @Pattern(regexp = Constants.Voyager.Regex.NOEMPTY_NOWHITESPACE,
+            message = Constants.Voyager.ConstraintMessage.NOEMPTY_NOWHITESPACE)  // only checks when String is nonnull
     private String flightNumber;
+
     @Getter
     private Airline airline;
+
     @Getter
     private Boolean isActive;
 
@@ -26,38 +33,34 @@ public class FlightQuery {
         this.flightNumber = flightNumber;
         this.airline = airline;
         this.isActive = isActive;
+        if (routeIdList == null && flightNumber == null && airline == null && isActive == null)
+            throw new IllegalArgumentException("at least one field of FlightQuery must be set");
     }
 
     public static FlightQueryBuilder builder() {
         return new FlightQueryBuilder();
     }
 
-    public static String resolveRequestURL(FlightQuery flightQuery) {
-        if (flightQuery == null) return Constants.Voyager.Path.FLIGHTS;
+    public String getRequestURL() {
         StringJoiner paramJoiner = new StringJoiner("&");
-        List<Integer> routeIdList = flightQuery.getRouteIdList();
-        if (routeIdList != null && !routeIdList.isEmpty()) {
+        if (routeIdList != null) {
             StringJoiner routeIdJoiner = new StringJoiner(",");
             routeIdList.forEach(routeId -> routeIdJoiner.add(String.valueOf(routeId)));
             paramJoiner.add(String.format("%s=%s",
                     Constants.Voyager.ParameterNames.ROUTE_ID_PARAM_NAME,routeIdJoiner));
         }
-        String flightNumber = flightQuery.getFlightNumber();
         if (StringUtils.isNotBlank(flightNumber)) {
             paramJoiner.add(String.format("%s=%s",
                     Constants.Voyager.ParameterNames.FLIGHT_NUMBER_PARAM_NAME,flightNumber));
         }
-        Airline airline = flightQuery.getAirline();
         if (airline != null) {
             paramJoiner.add(String.format("%s=%s",
                     Constants.Voyager.ParameterNames.AIRLINE_PARAM_NAME,airline.name()));
         }
-        Boolean isActive = flightQuery.getIsActive();
         if (isActive != null) {
             paramJoiner.add(String.format("%s=%s",
                     Constants.Voyager.ParameterNames.IS_ACTIVE_PARAM_NAME,isActive));
         }
-        if (paramJoiner.length() == 0) return Constants.Voyager.Path.FLIGHTS;
         return String.format("%s?%s", Constants.Voyager.Path.FLIGHTS,paramJoiner);
     }
 
@@ -67,12 +70,12 @@ public class FlightQuery {
         private Airline airline;
         private Boolean isActive;
 
-        public FlightQueryBuilder withRouteIdList(@NotEmpty @Valid List<@NonNull Integer> routeIdList) {
+        public FlightQueryBuilder withRouteIdList(@NonNull List<Integer> routeIdList) {
             this.routeIdList = routeIdList;
             return this;
         }
 
-        public FlightQueryBuilder withFlightNumber(@NotBlank String flightNumber) {
+        public FlightQueryBuilder withFlightNumber(@NonNull String flightNumber) {
             this.flightNumber = flightNumber;
             return this;
         }
@@ -88,7 +91,9 @@ public class FlightQuery {
         }
 
         public FlightQuery build() {
-            return new FlightQuery(routeIdList,flightNumber,airline,isActive);
+            FlightQuery flightQuery = new FlightQuery(routeIdList,flightNumber,airline,isActive);
+            JakartaValidationUtil.validate(flightQuery);
+            return flightQuery;
         }
     }
 }

@@ -3,21 +3,18 @@ package org.voyager.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.vavr.control.Either;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
 import org.voyager.model.CountryQuery;
-import org.voyager.model.airport.Airport;
-import org.voyager.model.country.Continent;
 import org.voyager.model.country.Country;
 import org.voyager.model.country.CountryForm;
 import org.voyager.service.CountryService;
 import org.voyager.utils.Constants;
 import org.voyager.utils.ServiceUtils;
 import org.voyager.utils.ServiceUtilsFactory;
-
 import java.util.List;
-import java.util.StringJoiner;
 
 public class CountryServiceImpl implements CountryService {
     private final ServiceUtils serviceUtils;
@@ -31,13 +28,18 @@ public class CountryServiceImpl implements CountryService {
     }
 
     @Override
-    public Either<ServiceError, List<Country>> getCountries(CountryQuery countryQuery) {
-        String requestURL = CountryQuery.resolveRequestURL(countryQuery);
+    public Either<ServiceError, List<Country>> getCountries() {
+        String requestURL = Constants.Voyager.Path.COUNTRIES;
         return serviceUtils.fetch(requestURL, HttpMethod.GET,new TypeReference<List<Country>>(){});
     }
 
     @Override
-    public Either<ServiceError, Country> getCountry(String countryCode) {
+    public Either<ServiceError, List<Country>> getCountries(@NonNull CountryQuery countryQuery) {
+        return serviceUtils.fetch(countryQuery.getRequestURL(), HttpMethod.GET,new TypeReference<List<Country>>(){});
+    }
+
+    @Override
+    public Either<ServiceError, Country> getCountry(@NotBlank String countryCode) {
         String requestURL = Constants.Voyager.Path.COUNTRIES.concat(String.format("/%s",countryCode));
         return serviceUtils.fetch(requestURL, HttpMethod.GET, Country.class);    }
 

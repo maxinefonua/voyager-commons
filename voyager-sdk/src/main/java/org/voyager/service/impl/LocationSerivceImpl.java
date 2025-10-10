@@ -15,7 +15,6 @@ import org.voyager.service.LocationService;
 import org.voyager.utils.Constants;
 import org.voyager.utils.ServiceUtils;
 import org.voyager.utils.ServiceUtilsFactory;
-
 import java.util.List;
 
 public class LocationSerivceImpl implements LocationService {
@@ -31,9 +30,14 @@ public class LocationSerivceImpl implements LocationService {
 
 
     @Override
-    public Either<ServiceError, List<Location>> getLocations(LocationQuery locationQuery) {
-        String requestURL = LocationQuery.resolveRequestURL(locationQuery);
+    public Either<ServiceError, List<Location>> getLocations() {
+        String requestURL = Constants.Voyager.Path.LOCATIONS;
         return serviceUtils.fetch(requestURL, HttpMethod.GET, new TypeReference<List<Location>>() {});
+    }
+
+    @Override
+    public Either<ServiceError, List<Location>> getLocations(LocationQuery locationQuery) {
+        return serviceUtils.fetch(locationQuery.getRequestURL(), HttpMethod.GET, new TypeReference<List<Location>>() {});
     }
 
     @Override
