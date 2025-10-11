@@ -2,6 +2,7 @@ package org.voyager.service.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.vavr.control.Either;
+import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
 import org.voyager.http.VoyagerHttpFactoryTestImpl;
@@ -22,6 +23,7 @@ import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.RouteAirline;
 import org.voyager.model.route.AirlinePath;
 import org.voyager.model.route.RoutePath;
+import org.voyager.utils.Constants;
 import org.voyager.utils.ServiceUtilsDefault;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -40,8 +42,11 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             .responseList(List.of(AirlinePath.builder().airline(Airline.DELTA).build())).build();
     private static final Route ROUTE = Route.builder().id(555).build();
 
-    protected TestServiceUtils(String baseURL) {
-        super(baseURL);
+    private final VoyagerConfig voyagerConfig;
+
+    protected TestServiceUtils(VoyagerConfig voyagerConfig) {
+        super(voyagerConfig);
+        this.voyagerConfig = voyagerConfig;
     }
 
 

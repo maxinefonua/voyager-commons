@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
+import org.voyager.config.Protocol;
+import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
@@ -25,14 +27,11 @@ import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceUtilsDefaultTest {
+    private static final VoyagerConfig VOYAGER_CONFIG = new VoyagerConfig(Protocol.HTTP,"test.org","test-token",true);
     private static final String BASE_URL = "http://test.org";
     private static final String COUNTRY_URL = "/countries/to";
     private static final String COUNTRY_JSON = "{\"code\":\"TO\",\"name\":\"Tonga\",\"population\":103197,\"capitalCity\":\"Nuku'alofa\",\"areaInSqKm\":748.0,\"continent\":\"Oceania\",\"bounds\":[-176.21263122558594,-22.34571647644043,-173.7366485595703,-15.566146850585938]}";
@@ -46,6 +45,7 @@ class ServiceUtilsDefaultTest {
     private static final String LOCATION_URL = "/locations/123";
 
     private static final String SERVICE_ERROR_URL = "/error";
+    private static final String HEALTH_JSON = "{\"status\":\"UP\"}";
 
     private static final String SERVICE_ERROR_NO_BODY_URL = "/error/nobody";
 
@@ -56,8 +56,8 @@ class ServiceUtilsDefaultTest {
     private static final String SERVICE_EXCEPTION_JSON = "{\"timestamp\":\"2025-10-10T18:59:16.959+00:00\",\"status\":404,\"error\":\"Not Found\",\"message\":\"No static resource test.\",\"path\":\"/test\"}";
 
     class ServiceUtilsTestClass extends ServiceUtilsDefault {
-        protected ServiceUtilsTestClass(String baseURL) {
-            super(baseURL);
+        protected ServiceUtilsTestClass(VoyagerConfig voyagerConfig) {
+            super(voyagerConfig);
         }
 
         @Override
@@ -74,6 +74,8 @@ class ServiceUtilsDefaultTest {
         protected Either<ServiceError, HttpResponse<String>> sendRequest(HttpRequest request) {
             String url = request.uri().toString().replaceFirst(BASE_URL,"");
             switch (url) {
+                case Constants.Voyager.Path.HEALTH:
+                    return Either.right(new MockHttpResponse(HEALTH_JSON,200));
                 case COUNTRY_URL:
                     return Either.right(new MockHttpResponse(COUNTRY_JSON,200));
                 case ROUTES_URL:
@@ -93,7 +95,18 @@ class ServiceUtilsDefaultTest {
         }
     }
 
-    ServiceUtilsTestClass serviceUtilsTestClass = new ServiceUtilsTestClass("http://test.org");
+    ServiceUtilsTestClass serviceUtilsTestClass = new ServiceUtilsTestClass(VOYAGER_CONFIG);
+
+    @Test
+    void testVerifyHealth() {
+        // with testMode true
+        assertDoesNotThrow(()-> serviceUtilsTestClass.verifyHealth());
+
+        // with testMode false
+        VOYAGER_CONFIG.setTestMode(false);
+        ServiceUtilsTestClass testClass = new ServiceUtilsTestClass(VOYAGER_CONFIG);
+        assertDoesNotThrow(testClass::verifyHealth);
+    }
 
     @Test
     void fetch() {
@@ -245,7 +258,8 @@ class ServiceUtilsDefaultTest {
 
     @Test
     void testProtectedMethods() throws URISyntaxException {
-        ServiceUtilsDefault serviceUtilsDefault = new ServiceUtilsDefault("http://test.org");
+        VOYAGER_CONFIG.setTestMode(false);
+        ServiceUtilsDefault serviceUtilsDefault = new ServiceUtilsDefault(VOYAGER_CONFIG);
         String authToken = "test-token";
         VoyagerHttpFactory.initialize(authToken);
         String fullURL = BASE_URL.concat(LOCATION_URL);
@@ -268,6 +282,8 @@ class ServiceUtilsDefaultTest {
         assertEquals(HttpMethod.POST.name(),httpRequest.method());
         assertTrue(httpRequest.bodyPublisher().isPresent());
         assertEquals(jsonPayload.getBytes().length,httpRequest.bodyPublisher().get().contentLength());
+
+        assertThrows(RuntimeException.class, serviceUtilsDefault::verifyHealth);
 
         VoyagerHttpFactory.reset();
     }

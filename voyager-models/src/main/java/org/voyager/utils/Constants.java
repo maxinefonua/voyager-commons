@@ -46,6 +46,7 @@ public class Constants {
         }
 
         public static class Path {
+            public static final String HEALTH = "/actuator/health";
             public static final String IATA = "/iata";
             public static final String AIRLINES = "/airport-airlines";
             public static final String AIRPORTS = "/airports";
@@ -59,10 +60,10 @@ public class Constants {
             public static final String PATH = "/path";
             public static final String ROUTES = "/routes";
             public static final String ROUTE = "/route";
-            public static final String SEARCH_PATH = "/search";
-            public static final String ATTRIBUTION_PATH = "/search-attribution";
+            public static final String SEARCH = "/search";
+            public static final String ATTRIBUTION = "/search-attribution";
             // TODO: make sub calls /search/fetch, /search/attribution
-            public static final String FETCH_PATH = "/fetch";
+            public static final String FETCH = "/fetch";
         }
 
         public static class Regex {

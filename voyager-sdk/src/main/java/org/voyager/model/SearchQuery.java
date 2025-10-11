@@ -46,7 +46,7 @@ public class SearchQuery {
             paramsJoiner.add(String.format("%s=%s",
                     Constants.Voyager.ParameterNames.LIMIT_PARAM_NAME,limit));
         }
-        return String.format("%s?%s", Constants.Voyager.Path.SEARCH_PATH,paramsJoiner);
+        return String.format("%s?%s", Constants.Voyager.Path.SEARCH,paramsJoiner);
     }
 
     public static class SearchQueryBuilder {

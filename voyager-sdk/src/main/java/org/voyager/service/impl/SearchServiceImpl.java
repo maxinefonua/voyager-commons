@@ -32,12 +32,12 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public Either<ServiceError, LookupAttribution> attribution() {
-        return serviceUtils.fetch(Constants.Voyager.Path.ATTRIBUTION_PATH, HttpMethod.GET,LookupAttribution.class);
+        return serviceUtils.fetch(Constants.Voyager.Path.ATTRIBUTION, HttpMethod.GET,LookupAttribution.class);
     }
 
     @Override
     public Either<ServiceError, ResultSearchFull> fetchResultSearchFull(String sourceId) {
-        String requestURL = String.format("%s/%s",Constants.Voyager.Path.SEARCH_PATH,sourceId);
+        String requestURL = String.format("%s/%s",Constants.Voyager.Path.SEARCH,sourceId);
         return serviceUtils.fetch(requestURL, HttpMethod.GET,ResultSearchFull.class);
     }
 }

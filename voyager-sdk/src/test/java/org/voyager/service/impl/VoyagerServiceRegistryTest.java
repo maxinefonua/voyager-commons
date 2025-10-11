@@ -25,8 +25,9 @@ class VoyagerServiceRegistryTest {
     void getInstance() {
         assertThrows(IllegalStateException.class,ServiceUtilsFactory::getInstance);
         assertThrows(IllegalStateException.class,()->VoyagerServiceRegistry.getInstance().get(AirportService.class));
+        voyagerConfig.setTestMode(true);
         VoyagerServiceRegistry.initialize(voyagerConfig);
-        assertThrows(IllegalStateException.class,()->ServiceUtilsFactory.initialize("testURL"));
+        assertThrows(IllegalStateException.class,()->ServiceUtilsFactory.initialize(voyagerConfig));
         assertDoesNotThrow(()->VoyagerServiceRegistry.initialize(voyagerConfig));
         assertNotNull(VoyagerServiceRegistry.getInstance());
 

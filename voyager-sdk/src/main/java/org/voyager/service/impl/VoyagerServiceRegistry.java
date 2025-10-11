@@ -18,8 +18,9 @@ public class VoyagerServiceRegistry {
 
     public static void initialize(VoyagerConfig voyagerConfig) {
         if (!initialized) {
-            ServiceUtilsFactory.initialize(voyagerConfig.getBaseURL());
+            ServiceUtilsFactory.initialize(voyagerConfig);
             VoyagerHttpFactory.initialize(voyagerConfig.getAuthorizationToken());
+            ServiceUtilsFactory.getInstance().verifyHealth();
             initialized = true;
         }
     }

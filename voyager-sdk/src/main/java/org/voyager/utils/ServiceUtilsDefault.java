@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
@@ -22,8 +23,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ServiceUtilsDefault implements ServiceUtils {
     private final String baseURL;
-    protected ServiceUtilsDefault(String baseURL){
-        this.baseURL = baseURL;
+    private final boolean testMode;
+
+    protected ServiceUtilsDefault(VoyagerConfig voyagerConfig){
+        this.baseURL = voyagerConfig.getBaseURL();
+        this.testMode = voyagerConfig.getTestMode();
     }
 
     private static final ObjectMapper om = new ObjectMapper()
@@ -31,6 +35,16 @@ public class ServiceUtilsDefault implements ServiceUtils {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceUtilsDefault.class);
+
+    @Override
+    public void verifyHealth() {
+        if (testMode) return;
+        Either<ServiceError, HttpResponse<String>> response = fetchRequest(Constants.Voyager.Path.HEALTH,HttpMethod.GET);
+        if (response.isLeft()) {
+            throw new RuntimeException(String.format("error occured while verifying API health at baseURL: %s. " +
+                    "Confirm configuration details are correct.",baseURL));
+        }
+    }
 
     @Override
     public <T> Either<ServiceError, T> fetch(String requestURL, HttpMethod httpMethod, Class<T> responseType) {
