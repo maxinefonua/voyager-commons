@@ -1,7 +1,6 @@
 package org.voyager.service.impl;
 
 import io.vavr.control.Either;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.voyager.error.ServiceError;
@@ -13,11 +12,9 @@ import org.voyager.model.result.ResultSearchFull;
 import org.voyager.service.SearchService;
 import org.voyager.service.TestServiceRegistry;
 import org.voyager.service.utils.ServiceUtilsTestFactory;
-import org.voyager.utils.ServiceUtils;
-
-import java.lang.reflect.InvocationTargetException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SearchServiceImplTest {
     SearchService searchService;
@@ -25,15 +22,8 @@ class SearchServiceImplTest {
     @BeforeEach
     void setUp() {
         TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
-        testServiceRegistry.registerSupplier(SearchService.class,()->{
-            try {
-                return SearchServiceImpl.class.getDeclaredConstructor(ServiceUtils.class)
-                        .newInstance(ServiceUtilsTestFactory.getInstance());
-            } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
-                     NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        testServiceRegistry.registerTestImplementation(
+                SearchService.class,SearchServiceImpl.class,ServiceUtilsTestFactory.getInstance());
         searchService = testServiceRegistry.get(SearchService.class);
         assertNotNull(searchService);
     }

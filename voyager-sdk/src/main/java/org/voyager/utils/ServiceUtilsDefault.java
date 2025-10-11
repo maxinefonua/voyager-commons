@@ -18,11 +18,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ServiceUtilsDefault implements ServiceUtils {
-    protected ServiceUtilsDefault(){}
+    private final String baseURL;
+    protected ServiceUtilsDefault(String baseURL){
+        this.baseURL = baseURL;
+    }
 
     private static final ObjectMapper om = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -45,7 +47,7 @@ public class ServiceUtilsDefault implements ServiceUtils {
     @Override
     public <T> Either<ServiceError, T> fetchWithRequestBody(String requestURL, HttpMethod httpMethod, Class<T> responseType, Object requestBody) {
         try {
-            URI uri = new URI(requestURL);
+            URI uri = buildURI(requestURL);
             String jsonPayload = om.writeValueAsString(requestBody);
             HttpRequest request = getRequestWithBody(uri,httpMethod,jsonPayload);
             Either<ServiceError, HttpResponse<String>> responseEither = sendRequest(request);
@@ -115,7 +117,7 @@ public class ServiceUtilsDefault implements ServiceUtils {
 
     private Either<ServiceError,HttpResponse<String>> fetchRequest(String requestURL, HttpMethod httpMethod) {
         try {
-            URI uri = new URI(requestURL);
+            URI uri = buildURI(requestURL);
             HttpRequest request = getRequest(uri,httpMethod);
             return sendRequest(request);
         } catch (URISyntaxException e) {
@@ -123,6 +125,10 @@ public class ServiceUtilsDefault implements ServiceUtils {
             LOGGER.error(message);
             return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
         }
+    }
+
+    private URI buildURI(String requestURL) throws URISyntaxException {
+        return new URI(baseURL.concat(requestURL));
     }
 
     protected HttpRequest getRequest(URI uri, HttpMethod httpMethod) {

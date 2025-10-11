@@ -1,14 +1,11 @@
 package org.voyager.model;
 
-import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
-import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AirportQueryTest {
 

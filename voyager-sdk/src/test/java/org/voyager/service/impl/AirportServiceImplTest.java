@@ -1,7 +1,8 @@
 package org.voyager.service.impl;
 
 import io.vavr.control.Either;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.voyager.error.ServiceError;
 import org.voyager.model.Airline;
 import org.voyager.model.airport.Airport;
@@ -12,27 +13,20 @@ import org.voyager.model.NearbyAirportQuery;
 import org.voyager.service.AirportService;
 import org.voyager.service.TestServiceRegistry;
 import org.voyager.service.utils.ServiceUtilsTestFactory;
-import org.voyager.utils.ServiceUtils;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class AirportServiceImplTest {
     private static AirportService airportService;
     @BeforeAll
     static void init() {
         TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
-        testServiceRegistry.registerSupplier(AirportService.class,() -> {
-            try {
-                return AirportServiceImpl.class.getDeclaredConstructor(ServiceUtils.class)
-                        .newInstance(ServiceUtilsTestFactory.getInstance());
-            } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
-                     NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        testServiceRegistry.registerTestImplementation(
+                AirportService.class, AirportServiceImpl.class,ServiceUtilsTestFactory.getInstance());
         airportService = testServiceRegistry.get(AirportService.class);
         assertNotNull(airportService);
     }

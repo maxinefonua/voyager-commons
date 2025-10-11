@@ -1,9 +1,9 @@
 package org.voyager.service.impl;
 
+import org.voyager.utils.ServiceUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 public class VoyagerServiceRegistry {
     private static final VoyagerServiceRegistry INSTANCE = new VoyagerServiceRegistry();
@@ -15,19 +15,16 @@ public class VoyagerServiceRegistry {
         return INSTANCE;
     }
 
-    public <T> void registerImplementation(Class<T> interfaceClass, Class<? extends T> implementationClass) {
+    public <T> void registerTestImplementation(Class<T> interfaceClass, Class<? extends T> implementationClass,
+                                               ServiceUtils serviceUtils) {
         services.computeIfAbsent(interfaceClass,k->{
             try {
-                return implementationClass.getDeclaredConstructor().newInstance();
+                return implementationClass.getDeclaredConstructor(ServiceUtils.class).newInstance(serviceUtils);
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
                      NoSuchMethodException e) {
                 throw new RuntimeException("Failed to create service: " + implementationClass.getName(), e);
             }
         });
-    }
-
-    public <T> void registerSupplier(Class<T> interfaceClass, Supplier<? extends T> implementationSupplier) {
-        services.computeIfAbsent(interfaceClass,k->implementationSupplier.get());
     }
 
     public void reset(){
@@ -38,7 +35,33 @@ public class VoyagerServiceRegistry {
     public <T> T get(Class<T> serviceClass) {
         T service = (T) services.get(serviceClass);
         if (service == null) {
-            throw new IllegalStateException("No implementation registered for type: " + serviceClass.getName());
+            switch (serviceClass.getSimpleName()) {
+                case "AirlineService":
+                    services.put(serviceClass,new AirlineServiceImpl());
+                    return (T) services.get(serviceClass);
+                case "AirportService":
+                    services.put(serviceClass,new AirportServiceImpl());
+                    return (T) services.get(serviceClass);
+                case "CountryService":
+                    services.put(serviceClass,new CountryServiceImpl());
+                    return (T) services.get(serviceClass);
+                case "FlightService":
+                    services.put(serviceClass,new FlightServiceImpl());
+                    return (T) services.get(serviceClass);
+                case "LocationService":
+                    services.put(serviceClass,new LocationSerivceImpl());
+                    return (T) services.get(serviceClass);
+                case "PathService":
+                    services.put(serviceClass,new PathServiceImpl());
+                    return (T) services.get(serviceClass);
+                case "RouteService":
+                    services.put(serviceClass,new RouteServiceImpl());
+                    return (T) services.get(serviceClass);
+                case "SearchService":
+                    services.put(serviceClass,new SearchServiceImpl());
+                    return (T) services.get(serviceClass);
+            }
+            throw new IllegalStateException("No implementation registered for type: " + serviceClass.getSimpleName());
         }
         return service;
     }

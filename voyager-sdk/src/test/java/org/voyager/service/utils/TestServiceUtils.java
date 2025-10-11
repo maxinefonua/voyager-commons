@@ -17,9 +17,12 @@ import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.model.result.ResultSearchFull;
-import org.voyager.model.route.*;
+import org.voyager.model.route.Route;
+import org.voyager.model.route.PathResponse;
+import org.voyager.model.route.RouteAirline;
+import org.voyager.model.route.AirlinePath;
+import org.voyager.model.route.RoutePath;
 import org.voyager.utils.ServiceUtilsDefault;
-
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -36,6 +39,10 @@ public class TestServiceUtils extends ServiceUtilsDefault {
     private static final PathResponse<AirlinePath> PATH_RESPONSE = PathResponse.<AirlinePath>builder()
             .responseList(List.of(AirlinePath.builder().airline(Airline.DELTA).build())).build();
     private static final Route ROUTE = Route.builder().id(555).build();
+
+    protected TestServiceUtils(String baseURL) {
+        super(baseURL);
+    }
 
 
     @Override

@@ -4,11 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.voyager.model.country.Continent;
 import org.voyager.model.location.Source;
 import org.voyager.model.location.Status;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class LocationQueryTest {
 

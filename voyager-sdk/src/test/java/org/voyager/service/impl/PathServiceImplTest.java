@@ -13,12 +13,13 @@ import org.voyager.model.route.RoutePath;
 import org.voyager.service.PathService;
 import org.voyager.service.TestServiceRegistry;
 import org.voyager.service.utils.ServiceUtilsTestFactory;
-import org.voyager.utils.ServiceUtils;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class PathServiceImplTest {
     private static PathService pathService;
@@ -26,15 +27,8 @@ class PathServiceImplTest {
     @BeforeAll
     static void setUp() {
         TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
-        testServiceRegistry.registerSupplier(PathService.class,()->{
-            try {
-                return PathServiceImpl.class.getDeclaredConstructor(ServiceUtils.class)
-                        .newInstance(ServiceUtilsTestFactory.getInstance());
-            } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
-                     NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        testServiceRegistry.registerTestImplementation(
+                PathService.class,PathServiceImpl.class,ServiceUtilsTestFactory.getInstance());
         pathService = testServiceRegistry.get(PathService.class);
         assertNotNull(pathService);
         assertInstanceOf(PathServiceImpl.class,pathService);

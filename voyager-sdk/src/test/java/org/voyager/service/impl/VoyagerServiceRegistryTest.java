@@ -1,15 +1,21 @@
 package org.voyager.service.impl;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.voyager.config.Protocol;
-import org.voyager.config.VoyagerConfig;
-import org.voyager.service.*;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.voyager.service.AirlineService;
+import org.voyager.service.AirportService;
+import org.voyager.service.CountryService;
+import org.voyager.service.FlightService;
+import org.voyager.service.LocationService;
+import org.voyager.service.PathService;
+import org.voyager.service.RouteService;
+import org.voyager.service.SearchService;
+import org.voyager.service.utils.ServiceUtilsTestFactory;
+import org.voyager.utils.ServiceUtilsFactory;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class VoyagerServiceRegistryTest {
     private static final VoyagerServiceRegistry testRegistry = VoyagerServiceRegistry.getInstance();
@@ -17,6 +23,13 @@ class VoyagerServiceRegistryTest {
     @Test
     void getInstance() {
         assertNotNull(testRegistry);
+    }
+
+    @BeforeAll
+    static void init() {
+        assertThrows(IllegalStateException.class, ServiceUtilsFactory::getInstance);
+        ServiceUtilsTestFactory.initialize("http://test.org");
+        assertThrows(IllegalStateException.class,()->ServiceUtilsTestFactory.initialize("fail on second"));
     }
 
     @AfterAll
@@ -27,31 +40,25 @@ class VoyagerServiceRegistryTest {
     @Test
     void register() {
         assertDoesNotThrow(()-> {
-            testRegistry.registerImplementation(AirlineService.class, AirlineServiceImpl.class);
-            testRegistry.registerImplementation(AirportService.class, AirportServiceImpl.class);
-            testRegistry.registerImplementation(CountryService.class, CountryServiceImpl.class);
-            testRegistry.registerImplementation(FlightService.class, FlightServiceImpl.class);
-            testRegistry.registerImplementation(LocationService.class, LocationSerivceImpl.class);
-            testRegistry.registerImplementation(PathService.class, PathServiceImpl.class);
-            testRegistry.registerImplementation(RouteService.class, RouteServiceImpl.class);
-            testRegistry.registerImplementation(SearchService.class, SearchServiceImpl.class);
+            testRegistry.get(AirlineService.class);
+            testRegistry.get(AirportService.class);
+            testRegistry.get(CountryService.class);
+            testRegistry.get(FlightService.class);
+            testRegistry.get(LocationService.class);
+            testRegistry.get(PathService.class);
+            testRegistry.get(RouteService.class);
+            testRegistry.get(SearchService.class);
         });
-
         class TestClassNoConstructor {}
-        assertThrows(RuntimeException.class,()->
-                testRegistry.registerImplementation(Object.class,TestClassNoConstructor.class));
-    }
-
-    @Test
-    void registerSupplier() {
-        testRegistry.registerSupplier(Map.class,HashMap::new);
+        assertThrows(RuntimeException.class,()-> testRegistry.registerTestImplementation(
+                Object.class,TestClassNoConstructor.class,ServiceUtilsTestFactory.getInstance()));
     }
 
     @Test
     void get() {
         assertThrows(IllegalStateException.class,()->
                 testRegistry.get(String.class));
-        testRegistry.registerImplementation(AirportService.class, AirportServiceImpl.class);
+        testRegistry.get(AirportService.class);
         assertDoesNotThrow(()->testRegistry.get(AirportService.class));
     }
 }

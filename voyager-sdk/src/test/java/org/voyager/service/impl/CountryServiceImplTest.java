@@ -9,16 +9,16 @@ import org.voyager.model.CountryQuery;
 import org.voyager.model.country.Continent;
 import org.voyager.model.country.Country;
 import org.voyager.model.country.CountryForm;
-import org.voyager.service.AirlineService;
 import org.voyager.service.CountryService;
 import org.voyager.service.TestServiceRegistry;
 import org.voyager.service.utils.ServiceUtilsTestFactory;
-import org.voyager.utils.ServiceUtils;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class CountryServiceImplTest {
     private static TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
@@ -26,15 +26,8 @@ class CountryServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        testServiceRegistry.registerSupplier(CountryService.class,() ->{
-            try {
-                return CountryServiceImpl.class.getDeclaredConstructor(ServiceUtils.class)
-                        .newInstance(ServiceUtilsTestFactory.getInstance());
-            } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
-                     NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        testServiceRegistry.registerTestImplementation(
+                CountryService.class,CountryServiceImpl.class,ServiceUtilsTestFactory.getInstance());
         countryService = testServiceRegistry.get(CountryService.class);
     }
 
@@ -46,7 +39,7 @@ class CountryServiceImplTest {
     @Test
     void testConstructor() {
         assertNotNull(testServiceRegistry);
-        testServiceRegistry.registerImplementation(CountryService.class,CountryServiceImpl.class);
+        testServiceRegistry.get(CountryService.class);
         CountryService actualCountryService = testServiceRegistry.get(CountryService.class);
         assertNotNull(actualCountryService);
         assertInstanceOf(CountryServiceImpl.class,actualCountryService);

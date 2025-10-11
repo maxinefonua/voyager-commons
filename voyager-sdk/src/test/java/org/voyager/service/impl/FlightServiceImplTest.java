@@ -2,7 +2,6 @@ package org.voyager.service.impl;
 
 import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.voyager.error.ServiceError;
 import org.voyager.model.FlightQuery;
@@ -12,12 +11,13 @@ import org.voyager.model.flight.FlightPatch;
 import org.voyager.service.FlightService;
 import org.voyager.service.TestServiceRegistry;
 import org.voyager.service.utils.ServiceUtilsTestFactory;
-import org.voyager.utils.ServiceUtils;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class FlightServiceImplTest {
     static FlightService flightService;
@@ -26,15 +26,8 @@ class FlightServiceImplTest {
     static void setUp() {
         TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
         assertNotNull(testServiceRegistry);
-        testServiceRegistry.registerSupplier(FlightService.class,() -> {
-            try {
-                return FlightServiceImpl.class.getDeclaredConstructor(ServiceUtils.class)
-                        .newInstance(ServiceUtilsTestFactory.getInstance());
-            } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
-                     NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        testServiceRegistry.registerTestImplementation(
+                FlightService.class,FlightServiceImpl.class,ServiceUtilsTestFactory.getInstance());
 
         flightService = testServiceRegistry.get(FlightService.class);
     }

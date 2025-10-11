@@ -19,39 +19,47 @@ import org.voyager.model.flight.Flight;
 import org.voyager.model.flight.FlightForm;
 import org.voyager.model.location.Location;
 import org.voyager.model.route.Route;
-
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class ServiceUtilsDefaultTest {
-    private static final String COUNTRY_URL = "http://test.org/countries/to";
+    private static final String BASE_URL = "http://test.org";
+    private static final String COUNTRY_URL = "/countries/to";
     private static final String COUNTRY_JSON = "{\"code\":\"TO\",\"name\":\"Tonga\",\"population\":103197,\"capitalCity\":\"Nuku'alofa\",\"areaInSqKm\":748.0,\"continent\":\"Oceania\",\"bounds\":[-176.21263122558594,-22.34571647644043,-173.7366485595703,-15.566146850585938]}";
 
-    private static final String ROUTES_URL = "http://test.org/routes?origin=sjc";
+    private static final String ROUTES_URL = "/routes?origin=sjc";
     private static final String ROUTES_JSON = "[{\"id\":1625,\"origin\":\"SJC\",\"destination\":\"SLC\",\"distanceKm\":938.89691},{\"id\":1624,\"origin\":\"SJC\",\"destination\":\"SEA\",\"distanceKm\":1122.04908},{\"id\":1870,\"origin\":\"SJC\",\"destination\":\"VNY\",\"distanceKm\":null},{\"id\":1620,\"origin\":\"SJC\",\"destination\":\"ATL\",\"distanceKm\":3397.62655},{\"id\":3965,\"origin\":\"SJC\",\"destination\":\"AUS\",\"distanceKm\":2371.38808},{\"id\":3967,\"origin\":\"SJC\",\"destination\":\"BOI\",\"distanceKm\":841.24283},{\"id\":3968,\"origin\":\"SJC\",\"destination\":\"BUR\",\"distanceKm\":476.73006},{\"id\":3969,\"origin\":\"SJC\",\"destination\":\"BWI\",\"distanceKm\":3915.03826},{\"id\":3970,\"origin\":\"SJC\",\"destination\":\"DAL\",\"distanceKm\":2328.54601},{\"id\":3973,\"origin\":\"SJC\",\"destination\":\"GEG\",\"distanceKm\":1195.43782},{\"id\":3974,\"origin\":\"SJC\",\"destination\":\"HNL\",\"distanceKm\":3885.73967},{\"id\":3975,\"origin\":\"SJC\",\"destination\":\"HOU\",\"distanceKm\":2605.23248},{\"id\":3978,\"origin\":\"SJC\",\"destination\":\"OGG\",\"distanceKm\":3787.96324},{\"id\":3979,\"origin\":\"SJC\",\"destination\":\"ONT\",\"distanceKm\":536.41936},{\"id\":3982,\"origin\":\"SJC\",\"destination\":\"RNO\",\"distanceKm\":303.0199},{\"id\":3985,\"origin\":\"SJC\",\"destination\":\"STL\",\"distanceKm\":2753.76053},{\"id\":3976,\"origin\":\"SJC\",\"destination\":\"LGB\",\"distanceKm\":521.44494},{\"id\":3984,\"origin\":\"SJC\",\"destination\":\"SNA\",\"distanceKm\":550.46802},{\"id\":1621,\"origin\":\"SJC\",\"destination\":\"LAS\",\"distanceKm\":620.43284},{\"id\":1622,\"origin\":\"SJC\",\"destination\":\"LAX\",\"distanceKm\":495.73784},{\"id\":3966,\"origin\":\"SJC\",\"destination\":\"BNA\",\"distanceKm\":3125.64174},{\"id\":3981,\"origin\":\"SJC\",\"destination\":\"PHX\",\"distanceKm\":998.67141},{\"id\":3977,\"origin\":\"SJC\",\"destination\":\"MDW\",\"distanceKm\":2950.27514},{\"id\":3980,\"origin\":\"SJC\",\"destination\":\"PDX\",\"distanceKm\":916.34129},{\"id\":3983,\"origin\":\"SJC\",\"destination\":\"SAN\",\"distanceKm\":671.41958},{\"id\":6622,\"origin\":\"SJC\",\"destination\":\"DTW\",\"distanceKm\":3311.05782},{\"id\":1623,\"origin\":\"SJC\",\"destination\":\"MSP\",\"distanceKm\":2530.00194},{\"id\":5951,\"origin\":\"SJC\",\"destination\":\"IAH\",\"distanceKm\":11975.97978},{\"id\":6373,\"origin\":\"SJC\",\"destination\":\"ORD\",\"distanceKm\":11043.00766},{\"id\":4912,\"origin\":\"SJC\",\"destination\":\"KOA\",\"distanceKm\":12503.9031},{\"id\":4913,\"origin\":\"SJC\",\"destination\":\"LIH\",\"distanceKm\":12411.77383},{\"id\":6859,\"origin\":\"SJC\",\"destination\":\"MSY\",\"distanceKm\":11975.40307},{\"id\":4914,\"origin\":\"SJC\",\"destination\":\"PVR\",\"distanceKm\":12466.74556},{\"id\":4915,\"origin\":\"SJC\",\"destination\":\"SJD\",\"distanceKm\":12358.08199},{\"id\":4911,\"origin\":\"SJC\",\"destination\":\"GDL\",\"distanceKm\":2595.4683},{\"id\":3972,\"origin\":\"SJC\",\"destination\":\"EUG\",\"distanceKm\":759.55914},{\"id\":3971,\"origin\":\"SJC\",\"destination\":\"DEN\",\"distanceKm\":1522.26539},{\"id\":8651,\"origin\":\"SJC\",\"destination\":\"DFW\",\"distanceKm\":2310.1967},{\"id\":9261,\"origin\":\"SJC\",\"destination\":\"BJX\",\"distanceKm\":2681.74735},{\"id\":9262,\"origin\":\"SJC\",\"destination\":\"MLM\",\"distanceKm\":2807.84262},{\"id\":9263,\"origin\":\"SJC\",\"destination\":\"ZCL\",\"distanceKm\":2442.69649},{\"id\":9350,\"origin\":\"SJC\",\"destination\":\"NRT\",\"distanceKm\":8276.09181}]";
 
-    private static final String FLIGHT_URL = "http://test.org/flights";
+    private static final String FLIGHT_URL = "/flights";
     private static final String FLIGHT_JSON = "{\"id\":52983,\"flightNumber\":\"HA465\",\"routeId\":4533,\"zonedDateTimeDeparture\":\"2025-07-04T02:30:00Z\",\"zonedDateTimeArrival\":\"2025-07-04T08:10:00Z\",\"isActive\":true,\"airline\":\"HAWAIIAN\"}";
 
-    private static final String LOCATION_URL = "http://test.org/locations/123";
+    private static final String LOCATION_URL = "/locations/123";
 
-    private static final String SERVICE_ERROR_URL = "http://test.org/error";
+    private static final String SERVICE_ERROR_URL = "/error";
 
-    private static final String SERVICE_ERROR_NO_BODY_URL = "http://test.org/error/nobody";
+    private static final String SERVICE_ERROR_NO_BODY_URL = "/error/nobody";
 
-    private static final String EXPOSED_SERVICE_ERROR_URL = "http://test.org/error/exposed";
+    private static final String EXPOSED_SERVICE_ERROR_URL = "/error/exposed";
     private static final String EXPOSED_SERVICE_ERROR = "Error: service error is surfaced";
 
-    private static final String SERVICE_EXCEPTION_URL = "http://test.org/error/test";
+    private static final String SERVICE_EXCEPTION_URL = "/error/test";
     private static final String SERVICE_EXCEPTION_JSON = "{\"timestamp\":\"2025-10-10T18:59:16.959+00:00\",\"status\":404,\"error\":\"Not Found\",\"message\":\"No static resource test.\",\"path\":\"/test\"}";
 
     class ServiceUtilsTestClass extends ServiceUtilsDefault {
+        protected ServiceUtilsTestClass(String baseURL) {
+            super(baseURL);
+        }
+
         @Override
         protected HttpRequest getRequest(URI uri, HttpMethod httpMethod) {
             return HttpRequest.newBuilder(uri).build();
@@ -64,7 +72,7 @@ class ServiceUtilsDefaultTest {
 
         @Override
         protected Either<ServiceError, HttpResponse<String>> sendRequest(HttpRequest request) {
-            String url = request.uri().toString();
+            String url = request.uri().toString().replaceFirst(BASE_URL,"");
             switch (url) {
                 case COUNTRY_URL:
                     return Either.right(new MockHttpResponse(COUNTRY_JSON,200));
@@ -85,7 +93,7 @@ class ServiceUtilsDefaultTest {
         }
     }
 
-    ServiceUtilsTestClass serviceUtilsTestClass = new ServiceUtilsTestClass();
+    ServiceUtilsTestClass serviceUtilsTestClass = new ServiceUtilsTestClass("http://test.org");
 
     @Test
     void fetch() {
@@ -237,15 +245,16 @@ class ServiceUtilsDefaultTest {
 
     @Test
     void testProtectedMethods() throws URISyntaxException {
-        ServiceUtilsDefault serviceUtilsDefault = new ServiceUtilsDefault();
+        ServiceUtilsDefault serviceUtilsDefault = new ServiceUtilsDefault("http://test.org");
         String authToken = "test-token";
         VoyagerHttpFactory.initialize(authToken);
+        String fullURL = BASE_URL.concat(LOCATION_URL);
         Either<ServiceError, HttpResponse<String>> either = serviceUtilsDefault
-                .sendRequest(HttpRequest.newBuilder().uri(new URI(LOCATION_URL)).build());
+                .sendRequest(HttpRequest.newBuilder().uri(new URI(fullURL)).build());
         assertTrue(either.isLeft());
         assertInstanceOf(ConnectException.class,either.getLeft().getException());
 
-        HttpRequest httpRequest = serviceUtilsDefault.getRequest(new URI(LOCATION_URL),HttpMethod.GET);
+        HttpRequest httpRequest = serviceUtilsDefault.getRequest(new URI(fullURL),HttpMethod.GET);
         assertNotNull(httpRequest);
         assertEquals(HttpMethod.GET.name(),httpRequest.method());
         assertTrue(httpRequest.headers().firstValue(Constants.Voyager.Headers.AUTH_TOKEN_HEADER_NAME).isPresent());
@@ -254,7 +263,7 @@ class ServiceUtilsDefaultTest {
         String jsonPayload = "[{\"id\":1625,\"origin\":\"SJC\",\"destination\":\"SLC\",\"distanceKm\":938.89691},{\"id\":1624,\"origin\":\"SJC\",\"destination\":\"SEA\",\"distanceKm\":1122.04908},{\"id\":1870,\"origin\":\"SJC\",\"destination\":\"VNY\",\"distanceKm\":null},{\"id\":1620,\"origin\":\"SJC\",\"destination\":\"ATL\",\"distanceKm\":3397.62655},{\"id\":3965,\"origin\":\"SJC\",\"destination\":\"AUS\",\"distanceKm\":2371.38808},{\"id\":3967,\"origin\":\"SJC\",\"destination\":\"BOI\",\"distanceKm\":841.24283},{\"id\":3968,\"origin\":\"SJC\",\"destination\":\"BUR\",\"distanceKm\":476.73006},{\"id\":3969,\"origin\":\"SJC\",\"destination\":\"BWI\",\"distanceKm\":3915.03826},{\"id\":3970,\"origin\":\"SJC\",\"destination\":\"DAL\",\"distanceKm\":2328.54601},{\"id\":3973,\"origin\":\"SJC\",\"destination\":\"GEG\",\"distanceKm\":1195.43782},{\"id\":3974,\"origin\":\"SJC\",\"destination\":\"HNL\",\"distanceKm\":3885.73967},{\"id\":3975,\"origin\":\"SJC\",\"destination\":\"HOU\",\"distanceKm\":2605.23248},{\"id\":3978,\"origin\":\"SJC\",\"destination\":\"OGG\",\"distanceKm\":3787.96324},{\"id\":3979,\"origin\":\"SJC\",\"destination\":\"ONT\",\"distanceKm\":536.41936},{\"id\":3982,\"origin\":\"SJC\",\"destination\":\"RNO\",\"distanceKm\":303.0199},{\"id\":3985,\"origin\":\"SJC\",\"destination\":\"STL\",\"distanceKm\":2753.76053},{\"id\":3976,\"origin\":\"SJC\",\"destination\":\"LGB\",\"distanceKm\":521.44494},{\"id\":3984,\"origin\":\"SJC\",\"destination\":\"SNA\",\"distanceKm\":550.46802},{\"id\":1621,\"origin\":\"SJC\",\"destination\":\"LAS\",\"distanceKm\":620.43284},{\"id\":1622,\"origin\":\"SJC\",\"destination\":\"LAX\",\"distanceKm\":495.73784},{\"id\":3966,\"origin\":\"SJC\",\"destination\":\"BNA\",\"distanceKm\":3125.64174},{\"id\":3981,\"origin\":\"SJC\",\"destination\":\"PHX\",\"distanceKm\":998.67141},{\"id\":3977,\"origin\":\"SJC\",\"destination\":\"MDW\",\"distanceKm\":2950.27514},{\"id\":3980,\"origin\":\"SJC\",\"destination\":\"PDX\",\"distanceKm\":916.34129},{\"id\":3983,\"origin\":\"SJC\",\"destination\":\"SAN\",\"distanceKm\":671.41958},{\"id\":6622,\"origin\":\"SJC\",\"destination\":\"DTW\",\"distanceKm\":3311.05782},{\"id\":1623,\"origin\":\"SJC\",\"destination\":\"MSP\",\"distanceKm\":2530.00194},{\"id\":5951,\"origin\":\"SJC\",\"destination\":\"IAH\",\"distanceKm\":11975.97978},{\"id\":6373,\"origin\":\"SJC\",\"destination\":\"ORD\",\"distanceKm\":11043.00766},{\"id\":4912,\"origin\":\"SJC\",\"destination\":\"KOA\",\"distanceKm\":12503.9031},{\"id\":4913,\"origin\":\"SJC\",\"destination\":\"LIH\",\"distanceKm\":12411.77383},{\"id\":6859,\"origin\":\"SJC\",\"destination\":\"MSY\",\"distanceKm\":11975.40307},{\"id\":4914,\"origin\":\"SJC\",\"destination\":\"PVR\",\"distanceKm\":12466.74556},{\"id\":4915,\"origin\":\"SJC\",\"destination\":\"SJD\",\"distanceKm\":12358.08199},{\"id\":4911,\"origin\":\"SJC\",\"destination\":\"GDL\",\"distanceKm\":2595.4683},{\"id\":3972,\"origin\":\"SJC\",\"destination\":\"EUG\",\"distanceKm\":759.55914},{\"id\":3971,\"origin\":\"SJC\",\"destination\":\"DEN\",\"distanceKm\":1522.26539},{\"id\":8651,\"origin\":\"SJC\",\"destination\":\"DFW\",\"distanceKm\":2310.1967},{\"id\":9261,\"origin\":\"SJC\",\"destination\":\"BJX\",\"distanceKm\":2681.74735},{\"id\":9262,\"origin\":\"SJC\",\"destination\":\"MLM\",\"distanceKm\":2807.84262},{\"id\":9263,\"origin\":\"SJC\",\"destination\":\"ZCL\",\"distanceKm\":2442.69649},{\"id\":9350,\"origin\":\"SJC\",\"destination\":\"NRT\",\"distanceKm\":8276.09181}]";
 
         httpRequest = serviceUtilsDefault
-                .getRequestWithBody(new URI(LOCATION_URL),HttpMethod.POST,jsonPayload);
+                .getRequestWithBody(new URI(fullURL),HttpMethod.POST,jsonPayload);
         assertNotNull(httpRequest);
         assertEquals(HttpMethod.POST.name(),httpRequest.method());
         assertTrue(httpRequest.bodyPublisher().isPresent());

@@ -6,7 +6,7 @@ import org.voyager.utils.ServiceUtilsFactory;
 public class ServiceUtilsTestFactory extends ServiceUtilsFactory {
     private static ServiceUtils TEST_INSTANCE;
     public static ServiceUtils getInstance() {
-        if (TEST_INSTANCE == null) TEST_INSTANCE = new TestServiceUtils();
+        if (TEST_INSTANCE == null) TEST_INSTANCE = new TestServiceUtils("http://test.org");
         return TEST_INSTANCE;
     }
 }
