@@ -1,6 +1,9 @@
 package org.voyager.service.impl;
 
+import org.voyager.config.VoyagerConfig;
+import org.voyager.http.VoyagerHttpFactory;
 import org.voyager.utils.ServiceUtils;
+import org.voyager.utils.ServiceUtilsFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,15 +11,33 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VoyagerServiceRegistry {
     private static final VoyagerServiceRegistry INSTANCE = new VoyagerServiceRegistry();
     private static final Map<Class<?>,Object> services = new ConcurrentHashMap<>();
+    private static boolean initialized = false;
+    private static boolean testMode = false;
 
     protected VoyagerServiceRegistry() {}
 
+    public static void initialize(VoyagerConfig voyagerConfig) {
+        if (!initialized) {
+            ServiceUtilsFactory.initialize(voyagerConfig.getBaseURL());
+            VoyagerHttpFactory.initialize(voyagerConfig.getAuthorizationToken());
+            initialized = true;
+        }
+    }
+
+    private static void checkInitialized() {
+        if (!testMode && !initialized) {
+            throw new IllegalStateException("VoyagerServiceRegistry not initialized. Call initialize() first.");
+        }
+    }
+
     public static VoyagerServiceRegistry getInstance() {
+        checkInitialized();
         return INSTANCE;
     }
 
     public <T> void registerTestImplementation(Class<T> interfaceClass, Class<? extends T> implementationClass,
                                                ServiceUtils serviceUtils) {
+        testMode = true;
         services.computeIfAbsent(interfaceClass,k->{
             try {
                 return implementationClass.getDeclaredConstructor(ServiceUtils.class).newInstance(serviceUtils);
@@ -29,10 +50,12 @@ public class VoyagerServiceRegistry {
 
     public void reset(){
         services.clear();
+        testMode = false;
     }
 
     @SuppressWarnings("unchecked")
     public <T> T get(Class<T> serviceClass) {
+        checkInitialized();
         T service = (T) services.get(serviceClass);
         if (service == null) {
             switch (serviceClass.getSimpleName()) {
