@@ -32,6 +32,7 @@ public class ChAviationService {
 
     public static Either<ServiceError,AirportCH> getAirportCH(String iata) {
         try {
+            LOGGER.debug(String.format("fetching %s details from ChAviationService",iata));
             Document doc = Jsoup.connect(baseURL.concat(airportsPath).concat(iata)).timeout(0)
                     .cookies(Map.of(SSSID_NAME,SSSID_VALUE,GUEST_SESS_ID,GUEST_SESS_VALUE))
                     .get();
