@@ -16,7 +16,7 @@ import java.util.MissingResourceException;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-public class ConstantsLocal {
+public class ConstantsDatasync {
     public static final String IATA_FILE = "airports/iata.txt";
     public static final String CIVIL_FILE = "airports/civil.txt";
     public static final String MILITARY_FILE = "airports/military.txt";
@@ -46,19 +46,22 @@ public class ConstantsLocal {
     public static final String HISTORICAL_AIRPORT = "Airport no longer in use";
 
     public static Set<String> loadCodesFromFile(String fileName) {
-        InputStream is = ConstantsUtils.class.getClassLoader().getResourceAsStream(fileName);
-        if (is == null) throw new MissingResourceException(String.format("Required file missing from resources directory: %s",fileName),ConstantsUtils.class.getName(),fileName);
+        InputStream is = ConstantsDatasync.class.getClassLoader().getResourceAsStream(fileName);
+        if (is == null) throw new MissingResourceException(
+                String.format("Required file missing from resources directory: %s",fileName),
+                ConstantsDatasync.class.getName(),fileName);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         Set<String> codes = new HashSet<>();
         try {
             String line = br.readLine();
-            if (line == null) throw new IllegalArgumentException(String.format(
-                    "Incorrectly formatted input file: %s\nMust be a line of valid, comma-separated, 3-letter IATA codes.",fileName));
+            if (line == null) throw new IllegalArgumentException(
+                    String.format("Incorrectly formatted input file: %s\n" +
+                            "Must be a line of valid, comma-separated, 3-letter IATA codes.",fileName));
             String[] tokens = line.split(",");
             for (String token : tokens) {
                 if (token.length() != 3) {
-                    throw new IllegalArgumentException(String.format(
-                            "Incorrectly formatted input file: %s\nMust be a line of valid, comma-separated, 3-letter IATA codes.", fileName));
+                    throw new IllegalArgumentException(String.format("Incorrectly formatted input file: %s\n" +
+                                    "Must be a line of valid, comma-separated, 3-letter IATA codes.", fileName));
                 }
                 codes.add(token);
             }
@@ -70,8 +73,10 @@ public class ConstantsLocal {
     }
 
     public static Set<String> loadCodesFromListFile(String fileName) {
-        InputStream is = ConstantsUtils.class.getClassLoader().getResourceAsStream(fileName);
-        if (is == null) throw new MissingResourceException(String.format("Required file missing from resources directory: %s",fileName),ConstantsUtils.class.getName(),fileName);
+        InputStream is = ConstantsDatasync.class.getClassLoader().getResourceAsStream(fileName);
+        if (is == null) throw new MissingResourceException(
+                String.format("Required file missing from resources directory: %s",fileName),
+                ConstantsDatasync.class.getName(),fileName);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         Set<String> codes = new HashSet<>();
         try {
@@ -93,8 +98,10 @@ public class ConstantsLocal {
     }
 
     public static Set<String> loadAllCodesFromJson(String fileName) {
-        InputStream is = ConstantsUtils.class.getClassLoader().getResourceAsStream(fileName);
-        if (is == null) throw new MissingResourceException(String.format("Required file missing from resources directory: %s",fileName),ConstantsUtils.class.getName(),fileName);
+        InputStream is = ConstantsDatasync.class.getClassLoader().getResourceAsStream(fileName);
+        if (is == null) throw new MissingResourceException(
+                String.format("Required file missing from resources directory: %s",fileName),
+                ConstantsDatasync.class.getName(),fileName);
         Scanner scanner = new Scanner(new InputStreamReader(is));
         scanner.useDelimiter(",");
         Set<String> codes = new HashSet<>();
@@ -108,40 +115,40 @@ public class ConstantsLocal {
     }
 
     public static void writeSetLineByLine(Set<String> airports, String file) {
-        String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
+        String filePath = ConstantsDatasync.class.getClassLoader().getResource(file).getFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             StringJoiner joiner = new StringJoiner("\n");
             airports.forEach(code -> joiner.add(String.format("%s",code)));
             writer.write(joiner.toString());
         } catch (IOException e) {
-            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()), ConstantsDatasync.class.getName(),filePath);
         }
     }
 
     public static void writeSetToFile(Set<String> airports, String file) {
-        String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
+        String filePath = ConstantsDatasync.class.getClassLoader().getResource(file).getFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             StringJoiner joiner = new StringJoiner(",");
             airports.forEach(code -> joiner.add(String.format("'%s'",code)));
             writer.write(joiner.toString());
         } catch (IOException e) {
-            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()), ConstantsDatasync.class.getName(),filePath);
         }
     }
 
     public static void writeSetToFileForDBInsertion(Set<String> airports, String file) {
-        String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
+        String filePath = ConstantsDatasync.class.getClassLoader().getResource(file).getFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             StringJoiner joiner = new StringJoiner(",");
             airports.forEach(code -> joiner.add(String.format("('%s')",code)));
             writer.write(joiner.toString());
         } catch (IOException e) {
-            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()), ConstantsDatasync.class.getName(),filePath);
         }
     }
 
     public static void writeSetToFileForDBInsertionAirports(Set<Airport> missingAirports, String file) {
-        String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
+        String filePath = ConstantsDatasync.class.getClassLoader().getResource(file).getFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             StringJoiner joiner = new StringJoiner(",");
             missingAirports.forEach(airport -> joiner.add(String.format("('%s','%s',%f,%f,'%s','%s','%s','%s','%s')",
@@ -151,12 +158,12 @@ public class ConstantsLocal {
                     airport.getSubdivision().replace("'","''"),airport.getType())));
             writer.write(String.format("INSERT INTO airports(iata,country,lon,lat,tz,name,city,subd,type) VALUES %s",joiner));
         } catch (IOException e) {
-            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()), ConstantsDatasync.class.getName(),filePath);
         }
     }
 
     public static void writeSetToFileForDBInsertionWithAirline(Set<String> airports, Airline airline, boolean isActive, String file) {
-        String filePath = ConstantsLocal.class.getClassLoader().getResource(file).getFile();
+        String filePath = ConstantsDatasync.class.getClassLoader().getResource(file).getFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             StringJoiner joiner = new StringJoiner(",");
             airports.forEach(code -> joiner.add(String.format("('%s','%s',%s)",code,airline.name(),isActive)));
@@ -165,7 +172,7 @@ public class ConstantsLocal {
             writer.write("SELECT orgn,dstn FROM flights INNER JOIN routes ON flights.route_id = routes.id WHERE (flights.departure_zdt IS NULL OR flights.arrival_zdt IS NULL) AND flights.active = true;\n");
             writer.write("-- UPDATE flights SET active = false WHERE (flights.departure_zdt IS NULL OR flights.arrival_zdt IS NULL) AND flights.active = true;");
         } catch (IOException e) {
-            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()),ConstantsLocal.class.getName(),filePath);
+            throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()), ConstantsDatasync.class.getName(),filePath);
         }
     }
 }

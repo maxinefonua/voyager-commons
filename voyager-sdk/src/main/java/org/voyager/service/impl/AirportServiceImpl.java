@@ -34,27 +34,27 @@ public class AirportServiceImpl implements AirportService {
     @Override
     public Either<ServiceError, List<Airport>> getAirports() {
         String requestURL = Constants.Voyager.Path.AIRPORTS;
-        LOGGER.info(String.format("attempting to GET airports from: %s",requestURL));
+        LOGGER.debug(String.format("attempting to GET airports from: %s",requestURL));
         return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 
     @Override
     public Either<ServiceError, List<Airport>> getAirports(@NonNull AirportQuery airportQuery) {
-        LOGGER.info(String.format("attempting to GET airports from: %s",airportQuery.getRequestURL()));
+        LOGGER.debug(String.format("attempting to GET airports from: %s",airportQuery.getRequestURL()));
         return serviceUtils.fetch(airportQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 
     @Override
     public Either<ServiceError,Airport> getAirport(@NonNull String iata) {
         String requestURL = String.format("%s/%s",Constants.Voyager.Path.AIRPORTS,iata);
-        LOGGER.info(String.format("attempting to GET airport from: %s",requestURL));
+        LOGGER.debug(String.format("attempting to GET airport from: %s",requestURL));
         return serviceUtils.fetch(requestURL,HttpMethod.GET,Airport.class);
     }
 
     @Override
     public Either<ServiceError,Airport> patchAirport(@NonNull String iata, @NonNull AirportPatch airportPatch) {
         String requestURL = String.format("%s/%s",Constants.Voyager.Path.AIRPORTS,iata);
-        LOGGER.info(String.format("attempting to PATCH airport at: %s, with: '%s'",requestURL,airportPatch));
+        LOGGER.debug(String.format("attempting to PATCH airport at: %s, with: '%s'",requestURL,airportPatch));
         return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.PATCH,Airport.class,airportPatch);
     }
 
@@ -64,13 +64,13 @@ public class AirportServiceImpl implements AirportService {
         airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
         String requestURL = String.format("%s?" + "%s=%s",Constants.Voyager.Path.IATA,
                 Constants.Voyager.ParameterNames.TYPE_PARAM_NAME,typeJoiner);
-        LOGGER.info(String.format("attempting to GET iata codes from: %s",requestURL));
+        LOGGER.debug(String.format("attempting to GET iata codes from: %s",requestURL));
         return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<String>>(){});
     }
 
     @Override
     public Either<ServiceError, List<Airport>> getNearbyAirports(@NonNull NearbyAirportQuery nearbyAirportQuery) {
-        LOGGER.info(String.format("attempting to GET nearby airports from: %s",nearbyAirportQuery.getRequestURL()));
+        LOGGER.debug(String.format("attempting to GET nearby airports from: %s",nearbyAirportQuery.getRequestURL()));
         return serviceUtils.fetch(nearbyAirportQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Airport>>(){});
     }
 }

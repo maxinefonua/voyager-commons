@@ -5,7 +5,7 @@ import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.service.VerifyType;
-import org.voyager.utils.ConstantsLocal;
+import org.voyager.utils.ConstantsDatasync;
 
 import java.io.InputStream;
 import java.io.FileWriter;
@@ -21,15 +21,15 @@ import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.Collection;
 import java.util.MissingResourceException;
-import static org.voyager.utils.ConstantsLocal.IATA_FILE;
-import static org.voyager.utils.ConstantsLocal.CIVIL_FILE;
-import static org.voyager.utils.ConstantsLocal.MILITARY_FILE;
-import static org.voyager.utils.ConstantsLocal.HISTORICAL_FILE;
-import static org.voyager.utils.ConstantsLocal.ISSUES_FILE;
-import static org.voyager.utils.ConstantsLocal.SPECIAL_FILE;
-import static org.voyager.utils.ConstantsLocal.CIVIL_AIRPORT;
-import static org.voyager.utils.ConstantsLocal.MILITARY_AIRPORT;
-import static org.voyager.utils.ConstantsLocal.HISTORICAL_AIRPORT;
+import static org.voyager.utils.ConstantsDatasync.IATA_FILE;
+import static org.voyager.utils.ConstantsDatasync.CIVIL_FILE;
+import static org.voyager.utils.ConstantsDatasync.MILITARY_FILE;
+import static org.voyager.utils.ConstantsDatasync.HISTORICAL_FILE;
+import static org.voyager.utils.ConstantsDatasync.ISSUES_FILE;
+import static org.voyager.utils.ConstantsDatasync.SPECIAL_FILE;
+import static org.voyager.utils.ConstantsDatasync.CIVIL_AIRPORT;
+import static org.voyager.utils.ConstantsDatasync.MILITARY_AIRPORT;
+import static org.voyager.utils.ConstantsDatasync.HISTORICAL_AIRPORT;
 
 public class VerifyTypeLocalImpl implements VerifyType {
     private static Set<String> all, civil, military, historical,issue;
@@ -59,18 +59,18 @@ public class VerifyTypeLocalImpl implements VerifyType {
 
     @Override
     public void loadCodesToProcess() {
-        all = ConstantsLocal.loadAllCodesFromJson(IATA_FILE);
+        all = ConstantsDatasync.loadAllCodesFromJson(IATA_FILE);
 
-        civil = ConstantsLocal.loadCodesFromFile(CIVIL_FILE);
+        civil = ConstantsDatasync.loadCodesFromFile(CIVIL_FILE);
         civilStartSize = civil.size();
 
-        military = ConstantsLocal.loadCodesFromFile(MILITARY_FILE);
+        military = ConstantsDatasync.loadCodesFromFile(MILITARY_FILE);
         militaryStartSize = military.size();
 
-        historical = ConstantsLocal.loadCodesFromFile(HISTORICAL_FILE);
+        historical = ConstantsDatasync.loadCodesFromFile(HISTORICAL_FILE);
         historicalStartSize = historical.size();
 
-        issue = ConstantsLocal.loadCodesFromFile(ISSUES_FILE);
+        issue = ConstantsDatasync.loadCodesFromFile(ISSUES_FILE);
         issueStartSize = issue.size();
 
         specialMap = loadSpecialMapFromFile();
@@ -117,10 +117,10 @@ public class VerifyTypeLocalImpl implements VerifyType {
 
     @Override
     public void saveProcessed() {
-        ConstantsLocal.writeSetToFile(civil, CIVIL_FILE);
-        ConstantsLocal.writeSetToFile(military, MILITARY_FILE);
-        ConstantsLocal.writeSetToFile(historical, HISTORICAL_FILE);
-        ConstantsLocal.writeSetToFile(issue, ISSUES_FILE);
+        ConstantsDatasync.writeSetToFile(civil, CIVIL_FILE);
+        ConstantsDatasync.writeSetToFile(military, MILITARY_FILE);
+        ConstantsDatasync.writeSetToFile(historical, HISTORICAL_FILE);
+        ConstantsDatasync.writeSetToFile(issue, ISSUES_FILE);
         writeMapToFile(specialMap, SPECIAL_FILE);
     }
 

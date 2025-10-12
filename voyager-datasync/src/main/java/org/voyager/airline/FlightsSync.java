@@ -5,11 +5,12 @@ import io.vavr.control.Option;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.voyager.config.FlightSyncConfig;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
-import org.voyager.error.ServiceException;
 import org.voyager.model.Airline;
+import org.voyager.model.AirportQuery;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
 import org.voyager.model.flightRadar.search.AirportScheduleFR;
@@ -25,9 +26,8 @@ import org.voyager.service.AirportService;
 import org.voyager.service.RouteService;
 import org.voyager.service.FlightService;
 import org.voyager.service.FlightRadarService;
-import org.voyager.service.Voyager;
-import org.voyager.utils.ConstantsLocal;
-import org.voyager.utils.DatasyncProgramArguments;
+import org.voyager.service.impl.VoyagerServiceRegistry;
+import org.voyager.utils.ConstantsDatasync;
 
 import java.util.Set;
 import java.util.HashSet;
@@ -35,8 +35,7 @@ import java.util.List;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static org.voyager.utils.ConstantsLocal.*;
+import static org.voyager.utils.ConstantsDatasync.*;
 
 public class FlightsSync {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlightsSync.class);
@@ -46,15 +45,17 @@ public class FlightsSync {
 
     public static void main(String[] args) {
         System.out.println("printing from routes sync main");
-        DatasyncProgramArguments datasyncProgramArguments = new DatasyncProgramArguments(args);
-        Airline airline = datasyncProgramArguments.getAirline();
-        VoyagerConfig voyagerConfig = datasyncProgramArguments.getVoyagerConfig();
-        Voyager voyager = new Voyager(voyagerConfig);
-        routeService = voyager.getRouteService();
-        flightService = voyager.getFlightService();
-        airportService = voyager.getAirportService();
+        FlightSyncConfig flightSyncConfig = new FlightSyncConfig(args);
+        Airline airline = flightSyncConfig.getAirline();
+        VoyagerConfig voyagerConfig = flightSyncConfig.getVoyagerConfig();
+        VoyagerServiceRegistry.initialize(voyagerConfig);
+        VoyagerServiceRegistry voyagerServiceRegistry = VoyagerServiceRegistry.getInstance();
+        routeService = voyagerServiceRegistry.get(RouteService.class);
+        flightService = voyagerServiceRegistry.get(FlightService.class);
+        airportService = voyagerServiceRegistry.get(AirportService.class);
 
-        Either<ServiceError, List<Airport>> airportsEither = airportService.getAirports(AirportType.CIVIL);
+        AirportQuery airportQuery = AirportQuery.builder().withTypeList(List.of(AirportType.CIVIL)).build();
+        Either<ServiceError, List<Airport>> airportsEither = airportService.getAirports(airportQuery);
         if (airportsEither.isLeft()) {
             Exception exception = airportsEither.getLeft().getException();
             throw new RuntimeException(exception.getMessage(),exception);
@@ -64,15 +65,15 @@ public class FlightsSync {
     }
 
     private static void processSychronously(Airline airline, List<Airport> airports, boolean fromVoyagerAPI) {
-        Set<String> airlineAirports = ConstantsLocal.loadCodesFromListFile(AIRLINE_PROCESSED_FILE);
-        Set<String> nonAirlineAirports = ConstantsLocal.loadCodesFromListFile(NON_AIRLINE_PROCESSED_FILE);
+        Set<String> airlineAirports = ConstantsDatasync.loadCodesFromListFile(AIRLINE_PROCESSED_FILE);
+        Set<String> nonAirlineAirports = ConstantsDatasync.loadCodesFromListFile(NON_AIRLINE_PROCESSED_FILE);
         Set<String> toProcess;
         if (fromVoyagerAPI) {
             toProcess = airports.stream().map(Airport::getIata)
                     .filter(iata -> !airlineAirports.contains(iata) && !nonAirlineAirports.contains(iata))
                     .collect(Collectors.toSet());
         } else {
-            toProcess = ConstantsLocal.loadCodesFromListFile(ROUTE_AIRPORTS_FILE);
+            toProcess = ConstantsDatasync.loadCodesFromListFile(ROUTE_AIRPORTS_FILE);
         }
         LOGGER.info(String.format("%d airports to process, before removed pre-processed airports",
                 toProcess.size()));
@@ -134,8 +135,8 @@ public class FlightsSync {
         }
         if (requestRateLimited) {
             LOGGER.info("request rate limited, writing processed airports to target files");
-            ConstantsLocal.writeSetLineByLine(airlineAirports, AIRLINE_PROCESSED_FILE);
-            ConstantsLocal.writeSetLineByLine(nonAirlineAirports, NON_AIRLINE_PROCESSED_FILE);
+            ConstantsDatasync.writeSetLineByLine(airlineAirports, AIRLINE_PROCESSED_FILE);
+            ConstantsDatasync.writeSetLineByLine(nonAirlineAirports, NON_AIRLINE_PROCESSED_FILE);
         } else {
             LOGGER.info(String.format("successfully proccessed all airports with %d created flights," +
                     " %d patched flights, %d skipped flights",totalFlightCreates,totalFlightPatches,totalFlightSkips));
@@ -231,13 +232,6 @@ public class FlightsSync {
                                                               Airline airline,
                                                               FlightTimeFR flightTimeFR,
                                                               AtomicInteger createValue, boolean isOrigin) {
-        Either<ServiceError,List<Flight>> flightsEither = flightService.getFlights(routeId,flightNumber);
-        if (flightsEither.isLeft()) {
-            Exception exception = flightsEither.getLeft().getException();
-            LOGGER.error(exception.getMessage(),exception);
-            return Either.left(flightNumber);
-        }
-        List<Flight> flights = flightsEither.get();
         Long departureTimestamp = null;
         Long departureOffset = null;
         Long arrivalTimestamp = null;
@@ -250,7 +244,9 @@ public class FlightsSync {
             arrivalTimestamp = flightTimeFR.getTimestamp();
             arrivalOffset = flightTimeFR.getOffset();
         }
-        if (flights.isEmpty()) { // createFlight
+
+        Either<ServiceError, Flight> either = flightService.getFlight(routeId,flightNumber);
+        if (either.isLeft()) { // create flight
             FlightForm flightForm = FlightForm.builder()
                     .flightNumber(flightNumber)
                     .routeId(routeId)
@@ -271,13 +267,9 @@ public class FlightsSync {
             createValue.set(1);
             return Either.right(created.get());
         }
-        if (flights.size() > 1) {
-            LOGGER.error(String.format("route id '%d' and flight number '%s' returns multiple flights",
-                    routeId, flightNumber));
-            return Either.left(flightNumber);
-        }
+
         // check if patch needed
-        Flight existing = flights.get(0);
+        Flight existing = either.get();
         FlightPatch flightPatch = FlightPatch.builder()
                 .departureTimestamp(departureTimestamp)
                 .departureOffset(departureOffset)
@@ -288,7 +280,7 @@ public class FlightsSync {
         if (!existing.getIsActive().equals(flightPatch.getIsActive())
                 || (existing.getZonedDateTimeDeparture() == null && departureTimestamp != null)
                 || (existing.getZonedDateTimeArrival() == null && arrivalTimestamp != null)) {
-            Either<ServiceError, Flight> patchEither = flightService.patchFlight(existing, flightPatch);
+            Either<ServiceError, Flight> patchEither = flightService.patchFlight(existing.getId(), flightPatch);
             if (patchEither.isLeft()) {
                 Exception exception = patchEither.getLeft().getException();
                 LOGGER.error(exception.getMessage(),exception);
@@ -306,25 +298,17 @@ public class FlightsSync {
     private static Either<ServiceError,Route> fetchOrCreateRoute(String origin,
                                                     String destination,
                                                     RouteService routeService) {
-        Either<ServiceError, List<Route>> routesEither = routeService.getRoutes(origin, destination);
-        if (routesEither.isLeft())
-            return Either.left(routesEither.getLeft());
-        List<Route> routeList = routesEither.get();
-        if (routeList.isEmpty()) { // return exception
-            Airport startAirport = airportService.getAirport(origin).get();
-            Airport endAirport = airportService.getAirport(destination).get();
-            Double distanceKm = Airport.calculateDistanceKm(startAirport.getLatitude(),startAirport.getLongitude(),endAirport.getLatitude(),endAirport.getLongitude());
-            RouteForm routeForm = RouteForm.builder()
-                    .origin(origin)
-                    .destination(destination)
-                    .distanceKm(distanceKm)
-                    .build();
-            return routeService.createRoute(routeForm);
-        }
-        if (routeList.size() > 1)
-            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                new ServiceException(String.format("%s origin and %s destination returned multiple routes",
-                        origin,destination))));
-        return Either.right(routeList.get(0));
+        Either<ServiceError, Route> either = routeService.getRoute(origin, destination);
+        if (either.isRight()) return either;
+        // create route
+        Airport startAirport = airportService.getAirport(origin).get();
+        Airport endAirport = airportService.getAirport(destination).get();
+        Double distanceKm = Airport.calculateDistanceKm(startAirport.getLatitude(),startAirport.getLongitude(),endAirport.getLatitude(),endAirport.getLongitude());
+        RouteForm routeForm = RouteForm.builder()
+                .origin(origin)
+                .destination(destination)
+                .distanceKm(distanceKm)
+                .build();
+        return routeService.createRoute(routeForm);
     }
 }

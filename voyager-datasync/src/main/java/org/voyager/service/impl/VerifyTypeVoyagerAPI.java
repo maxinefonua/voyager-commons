@@ -4,8 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.model.airport.AirportType;
 import org.voyager.service.VerifyType;
-import org.voyager.utils.ConstantsUtils;
-
+import org.voyager.utils.Constants;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,9 +17,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.voyager.utils.ConstantsUtils.AUTH_TOKEN_HEADER_NAME;
-import static org.voyager.utils.ConstantsUtils.VOYAGER_API_KEY;
-
 public class VerifyTypeVoyagerAPI implements VerifyType {
     Set<String> all = new HashSet<>(),civil = new HashSet<>(),military = new HashSet<>(),historical = new HashSet<>(),other = new HashSet<>();
     private static String IATA_ENDPOINT = "http://localhost:3000/iata";
@@ -28,7 +24,7 @@ public class VerifyTypeVoyagerAPI implements VerifyType {
     private static final HttpClient CLIENT = HttpClient.newBuilder().build();
     @Override
     public void run() {
-        ConstantsUtils.validateEnvironVars(List.of(VOYAGER_API_KEY));
+        Constants.validateSystemProperty(List.of(Constants.Voyager.VOYAGER_API_KEY));
         loadCodesToProcess();
         filterProcessed();
     }
@@ -79,7 +75,7 @@ public class VerifyTypeVoyagerAPI implements VerifyType {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(fullURL))
-                    .headers(AUTH_TOKEN_HEADER_NAME, System.getenv(VOYAGER_API_KEY))
+                    .headers(Constants.Voyager.Headers.AUTH_TOKEN_HEADER_NAME, System.getenv(Constants.Voyager.VOYAGER_API_KEY))
                     .GET()
                     .build();
             HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());

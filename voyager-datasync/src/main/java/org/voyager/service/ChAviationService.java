@@ -1,11 +1,12 @@
 package org.voyager.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.model.airport.AirportType;
@@ -20,11 +21,7 @@ public class ChAviationService {
     private static final String SSSID_VALUE = "38d2dfdbb29532455f26cb3945e44606";
     private static final String GUEST_SESS_ID = "GUEST_SESSION_ID";
     private static final String GUEST_SESS_VALUE = "ab33a85d87dfd9ec26cddd6593fc244f";
-    private final int maxThreads;
-
-    public ChAviationService(int maxThreads) {
-        this.maxThreads = maxThreads;
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChAviationService.class);
 
     private enum Direction {
         S,
@@ -65,10 +62,9 @@ public class ChAviationService {
                         else if (type.contains("Military")) airportCH.setType(AirportType.MILITARY);
                         else if (type.contains("Airport no longer in use")) airportCH.setType(AirportType.HISTORICAL);
                         else {
-                            System.out.println("*****************");
-                            System.out.println(value);
+                            LOGGER.info(String.format(
+                                    "ChService returned %s with aiport type '%s'. Setting to OTHER.",iata,type));
                             airportCH.setType(AirportType.OTHER);
-                            System.out.println("*****************");
                         }
                         break;
                     }

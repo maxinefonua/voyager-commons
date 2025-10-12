@@ -3,6 +3,7 @@ package org.voyager;
 import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.voyager.config.CountriesSyncConfig;
 import org.voyager.config.Protocol;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
@@ -15,9 +16,8 @@ import org.voyager.model.nominatim.FeatureSearch;
 import org.voyager.service.CountryService;
 import org.voyager.service.GeoNamesService;
 import org.voyager.service.NominatimService;
-import org.voyager.service.Voyager;
-import org.voyager.utils.DatasyncProgramArguments;
-
+import org.voyager.service.impl.VoyagerServiceRegistry;
+import org.voyager.config.DatasyncConfig;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,18 +31,15 @@ public class CountriesSync {
 
     public static void main(String[] args) {
         LOGGER.info("printing from countries sync main");
-        DatasyncProgramArguments datasyncProgramArguments = new DatasyncProgramArguments(args);
-        Integer maxConcurrentRequests = datasyncProgramArguments.getThreadCount();
-        String host = datasyncProgramArguments.getHostname();
-        int port = datasyncProgramArguments.getPort();
-        String voyagerAuthorizationToken = datasyncProgramArguments.getAccessToken();
-        int processLimit = datasyncProgramArguments.getProcessLimit();
-
-        VoyagerConfig voyagerConfig = new VoyagerConfig(Protocol.HTTP,host,port,maxConcurrentRequests,voyagerAuthorizationToken);
-
+        CountriesSyncConfig countriesSyncConfig = new CountriesSyncConfig(args);
+        Integer maxConcurrentRequests = countriesSyncConfig.getThreadCount();
+        String host = countriesSyncConfig.getHostname();
+        int port = countriesSyncConfig.getPort();
+        String voyagerAuthorizationToken = countriesSyncConfig.getAccessToken();
+        VoyagerConfig voyagerConfig = new VoyagerConfig(Protocol.HTTP,host,port,voyagerAuthorizationToken);
+        VoyagerServiceRegistry.initialize(voyagerConfig);
         executorService = Executors.newFixedThreadPool(maxConcurrentRequests);
-        Voyager voyager = new Voyager(voyagerConfig);
-        countryService = voyager.getCountryService();
+        countryService = VoyagerServiceRegistry.getInstance().get(CountryService.class);
 
         // load countries from files/fetch from urls
         Either<ServiceError, List<CountryGN>> geoCountriesEither = GeoNamesService.getCountryGNList();
@@ -126,7 +123,7 @@ public class CountriesSync {
         Integer skippedExisting = !countryCodes.isEmpty() ? countryCodes.size() - countryFormList.size() : 0;
         AtomicInteger created = new AtomicInteger(0);
         AtomicReference<List<CountryForm>> failedForms = new AtomicReference<>(new ArrayList<>());
-        List<CountryForm> toProcess = countryFormList.stream().limit(processLimit).toList();
+        List<CountryForm> toProcess = countryFormList.stream().toList();
         LOGGER.info(String.format("Processing %d country forms", toProcess.size()));
         toProcess.forEach(countryForm -> processCountry(countryForm,created,failedForms));
         failedCountryGNList.forEach(countryGN -> LOGGER.error(

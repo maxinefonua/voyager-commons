@@ -3,10 +3,10 @@ package org.voyager.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.service.VerifyAirline;
-import org.voyager.utils.ConstantsLocal;
+import org.voyager.utils.ConstantsDatasync;
 import java.util.Set;
 
-import static org.voyager.utils.ConstantsLocal.*;
+import static org.voyager.utils.ConstantsDatasync.*;
 
 public class VerifyAirlineLocalImpl implements VerifyAirline {
     private static int limit;
@@ -32,24 +32,24 @@ public class VerifyAirlineLocalImpl implements VerifyAirline {
 
     @Override
     public void loadCodesToProcess() {
-        all = ConstantsLocal.loadCodesFromListFile(DELTA_ALL_FILE);
+        all = ConstantsDatasync.loadCodesFromListFile(DELTA_ALL_FILE);
 
-        deltaCurrent = ConstantsLocal.loadCodesFromListFile(DELTA_CURRENT_FILE);
+        deltaCurrent = ConstantsDatasync.loadCodesFromListFile(DELTA_CURRENT_FILE);
         deltaCurrentSize = deltaCurrent.size();
 
-        deltaHub = ConstantsLocal.loadCodesFromListFile(DELTA_HUB_FILE);
+        deltaHub = ConstantsDatasync.loadCodesFromListFile(DELTA_HUB_FILE);
         deltaHubSize = deltaHub.size();
 
-        deltaFormer = ConstantsLocal.loadCodesFromListFile(DELTA_FORMER_FILE);
+        deltaFormer = ConstantsDatasync.loadCodesFromListFile(DELTA_FORMER_FILE);
         deltaFormerSize = deltaFormer.size();
 
-        deltaFuture = ConstantsLocal.loadCodesFromListFile(DELTA_FUTURE_FILE);
+        deltaFuture = ConstantsDatasync.loadCodesFromListFile(DELTA_FUTURE_FILE);
         deltaFutureSize = deltaFuture.size();
 
-        deltaSeasonal = ConstantsLocal.loadCodesFromListFile(DELTA_SEASONAL_FILE);
+        deltaSeasonal = ConstantsDatasync.loadCodesFromListFile(DELTA_SEASONAL_FILE);
         deltaSeasonalSize = deltaSeasonal.size();
 
-        deltaFocus = ConstantsLocal.loadCodesFromListFile(DELTA_FOCUS_FILE);
+        deltaFocus = ConstantsDatasync.loadCodesFromListFile(DELTA_FOCUS_FILE);
         deltaFocusSize = deltaFocus.size();
     }
 
@@ -72,14 +72,14 @@ public class VerifyAirlineLocalImpl implements VerifyAirline {
 
     @Override
     public void saveProcessed() {
-        ConstantsLocal.writeSetToFileForDBInsertion(deltaCurrent, DELTA_ALL_DB);
-        ConstantsLocal.writeSetToFileForDBInsertion(deltaFormer, DELTA_FORMER_DB);
-        ConstantsLocal.writeSetToFile(deltaCurrent, DELTA_ALL_FILE);
-        ConstantsLocal.writeSetToFile(deltaFormer, DELTA_FORMER_FILE);
-        ConstantsLocal.writeSetToFile(deltaHub, DELTA_HUB_FILE);
-        ConstantsLocal.writeSetToFile(deltaHub, DELTA_HUB_FILE);
-        ConstantsLocal.writeSetToFile(deltaFuture, DELTA_FUTURE_FILE);
-        ConstantsLocal.writeSetToFile(deltaSeasonal, DELTA_SEASONAL_FILE);
-        ConstantsLocal.writeSetToFile(deltaFocus, DELTA_FOCUS_FILE);
+        ConstantsDatasync.writeSetToFileForDBInsertion(deltaCurrent, DELTA_ALL_DB);
+        ConstantsDatasync.writeSetToFileForDBInsertion(deltaFormer, DELTA_FORMER_DB);
+        ConstantsDatasync.writeSetToFile(deltaCurrent, DELTA_ALL_FILE);
+        ConstantsDatasync.writeSetToFile(deltaFormer, DELTA_FORMER_FILE);
+        ConstantsDatasync.writeSetToFile(deltaHub, DELTA_HUB_FILE);
+        ConstantsDatasync.writeSetToFile(deltaHub, DELTA_HUB_FILE);
+        ConstantsDatasync.writeSetToFile(deltaFuture, DELTA_FUTURE_FILE);
+        ConstantsDatasync.writeSetToFile(deltaSeasonal, DELTA_SEASONAL_FILE);
+        ConstantsDatasync.writeSetToFile(deltaFocus, DELTA_FOCUS_FILE);
     }
 }

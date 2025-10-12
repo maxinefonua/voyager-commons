@@ -3,6 +3,7 @@ package org.voyager.airline;
 import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.voyager.config.AirlineSyncConfig;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.model.Airline;
@@ -10,9 +11,9 @@ import org.voyager.model.flight.Flight;
 import org.voyager.model.route.Route;
 import org.voyager.service.FlightService;
 import org.voyager.service.RouteService;
-import org.voyager.service.Voyager;
-import org.voyager.utils.ConstantsLocal;
-import org.voyager.utils.DatasyncProgramArguments;
+import org.voyager.service.impl.VoyagerServiceRegistry;
+import org.voyager.utils.ConstantsDatasync;
+import org.voyager.config.DatasyncConfig;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,12 +26,13 @@ public class AirlineSync {
 
     public static void main(String[] args) {
         System.out.println("printing from airline sync main");
-        DatasyncProgramArguments datasyncProgramArguments = new DatasyncProgramArguments(args);
-        Airline airline = datasyncProgramArguments.getAirline();
-        VoyagerConfig voyagerConfig = datasyncProgramArguments.getVoyagerConfig();
-        Voyager voyager = new Voyager(voyagerConfig);
-        flightService = voyager.getFlightService();
-        routeService = voyager.getRouteService();
+        AirlineSyncConfig airlineSyncConfig = new AirlineSyncConfig(args);
+        Airline airline = airlineSyncConfig.getAirline();
+        VoyagerConfig voyagerConfig = airlineSyncConfig.getVoyagerConfig();
+        VoyagerServiceRegistry.initialize(voyagerConfig);
+        VoyagerServiceRegistry voyagerServiceRegistry = VoyagerServiceRegistry.getInstance();
+        flightService = voyagerServiceRegistry.get(FlightService.class);
+        routeService = voyagerServiceRegistry.get(RouteService.class);
 
         Either<ServiceError, List<Flight>> flightsEither = flightService.getFlights();
         if (flightsEither.isLeft()) {
@@ -59,7 +61,7 @@ public class AirlineSync {
             airlineCodes.add(route.getOrigin());
             airlineCodes.add(route.getDestination());
         });
-        ConstantsLocal.writeSetToFileForDBInsertionWithAirline(airlineCodes,airline,true,ConstantsLocal.FLIGHT_AIRPORTS_FILE);
-        ConstantsLocal.writeSetLineByLine(failedFlightNumbers,ConstantsLocal.FAILED_FLIGHT_NUMS_FILE);
+        ConstantsDatasync.writeSetToFileForDBInsertionWithAirline(airlineCodes,airline,true, ConstantsDatasync.FLIGHT_AIRPORTS_FILE);
+        ConstantsDatasync.writeSetLineByLine(failedFlightNumbers, ConstantsDatasync.FAILED_FLIGHT_NUMS_FILE);
     }
 }

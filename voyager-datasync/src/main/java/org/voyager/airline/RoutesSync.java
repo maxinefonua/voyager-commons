@@ -4,6 +4,7 @@ import io.vavr.control.Either;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.voyager.config.RoutesSyncConfig;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
@@ -18,8 +19,9 @@ import org.voyager.model.route.Route;
 import org.voyager.model.route.RouteForm;
 import org.voyager.model.route.RoutePatch;
 import org.voyager.service.*;
-import org.voyager.utils.ConstantsLocal;
-import org.voyager.utils.DatasyncProgramArguments;
+import org.voyager.service.impl.VoyagerServiceRegistry;
+import org.voyager.utils.ConstantsDatasync;
+import org.voyager.config.DatasyncConfig;
 
 import java.time.ZoneId;
 import java.util.List;
@@ -30,8 +32,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.voyager.utils.ConstantsLocal.MISSING_AIRPORTS_FILE;
-import static org.voyager.utils.ConstantsLocal.ROUTE_AIRPORTS_FILE;
+import static org.voyager.utils.ConstantsDatasync.MISSING_AIRPORTS_FILE;
+import static org.voyager.utils.ConstantsDatasync.ROUTE_AIRPORTS_FILE;
 
 public class RoutesSync {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutesSync.class);
@@ -40,12 +42,13 @@ public class RoutesSync {
 
     public static void main(String[] args) {
         System.out.println("printing from routes sync main");
-        DatasyncProgramArguments datasyncProgramArguments = new DatasyncProgramArguments(args);
-        Airline airline = datasyncProgramArguments.getAirline();
-        VoyagerConfig voyagerConfig = datasyncProgramArguments.getVoyagerConfig();
-        Voyager voyager = new Voyager(voyagerConfig);
-        routeService = voyager.getRouteService();
-        airportService = voyager.getAirportService();
+        RoutesSyncConfig routesSyncConfig = new RoutesSyncConfig(args);
+        Airline airline = routesSyncConfig.getAirline();
+        VoyagerConfig voyagerConfig = routesSyncConfig.getVoyagerConfig();
+        VoyagerServiceRegistry.initialize(voyagerConfig);
+        VoyagerServiceRegistry voyagerServiceRegistry = VoyagerServiceRegistry.getInstance();
+        routeService = voyagerServiceRegistry.get(RouteService.class);
+        airportService = voyagerServiceRegistry.get(AirportService.class);
 
         Either<ServiceError,List<RouteFR>> either = FlightRadarService.extractAirlineRoutes(airline);
         if (either.isLeft()) {
@@ -57,8 +60,8 @@ public class RoutesSync {
             processRoutes(docRoutes,missingAirports);
             Set<String> airlineAirports = new HashSet<>();
             docRoutes.forEach(routeFR -> airlineAirports.add(routeFR.getAirport1().getIata()));
-            ConstantsLocal.writeSetLineByLine(airlineAirports,ROUTE_AIRPORTS_FILE);
-            if (!missingAirports.isEmpty()) ConstantsLocal.writeSetToFileForDBInsertionAirports(missingAirports,MISSING_AIRPORTS_FILE);
+            ConstantsDatasync.writeSetLineByLine(airlineAirports,ROUTE_AIRPORTS_FILE);
+            if (!missingAirports.isEmpty()) ConstantsDatasync.writeSetToFileForDBInsertionAirports(missingAirports,MISSING_AIRPORTS_FILE);
         }
     }
 
