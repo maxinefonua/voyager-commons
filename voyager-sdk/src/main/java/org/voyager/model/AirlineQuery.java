@@ -3,7 +3,7 @@ package org.voyager.model;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
-import org.voyager.model.validate.AllStringsMatchRegex;
+import org.voyager.model.validate.annotations.AllStringsMatchRegex;
 import org.voyager.utils.Constants;
 import org.voyager.utils.JakartaValidationUtil;
 import java.util.List;

@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
@@ -18,10 +20,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class HttpRequestUtils {
     private static final ObjectMapper om = new ObjectMapper();
     private static final HttpClient CLIENT = HttpClient.newBuilder().build();
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequestUtils.class);
+
     private static Either<ServiceError,Document> getHTMLDocFromURL(String URL, Map<String,String> headers) throws URISyntaxException, IOException, InterruptedException {
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(new URI(URL))
@@ -29,13 +35,51 @@ public class HttpRequestUtils {
         headers.forEach(requestBuilder::setHeader);
         HttpResponse<String> response = CLIENT.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR, new ServiceException(
-                    String.format("Non-200 status returned from endpoint '%s'\nStatus Code: %d\nResponse: %s",
-                            URL,response.statusCode(),
-                            response.body()))));
+            return Either.left(new ServiceError(HttpStatus.getStatusFromCode(response.statusCode()), new ServiceException(
+                    String.format("request to '%s' returned %s, response: %s",URL,response.statusCode(), response.body()))));
         }
         return Either.right(Jsoup.parse(response.body()));
     }
+
+    public static Either<ServiceError,Document> fetchDocumentFromURLWithRetry(String routesURL) {
+        try {
+            return getHTMLDocFromURLWithRetry(routesURL, Map.of());
+        } catch (URISyntaxException | IOException | InterruptedException e) {
+            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage(),e));
+        }
+    }
+
+    private static Either<ServiceError,Document> getHTMLDocFromURLWithRetry(String URL, Map<String,String> headers)
+            throws URISyntaxException, IOException, InterruptedException {
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                .uri(new URI(URL))
+                .GET();
+        headers.forEach(requestBuilder::setHeader);
+        HttpResponse<String> response = CLIENT.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+        Set<Integer> retryableCodes = Set.of(429,408,409,500,502,503,504);
+        if (retryableCodes.contains(response.statusCode())) {
+            int maxRetries = 3;
+            int attempt = 0;
+            while (attempt < maxRetries) {
+                attempt++;
+                long delay = 1000L;
+                Optional<String> retryValue = response.headers().firstValue("Retry-After");
+                if (retryValue.isPresent())
+                    delay = Integer.parseInt(retryValue.get()) * 1000L;
+                LOGGER.info(String.format("will attempt %d/%d retries after %dms (%dsec) to %s",
+                        attempt, maxRetries, delay,delay/1000, URL));
+                Thread.sleep(delay);
+                response = CLIENT.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 429) break;
+            }
+        }
+        if (response.statusCode() != 200) {
+            return Either.left(new ServiceError(HttpStatus.getStatusFromCode(response.statusCode()), new ServiceException(
+                    String.format("request to '%s' returned %s, response: %s",URL,response.statusCode(), response.body()))));
+        }
+        return Either.right(Jsoup.parse(response.body()));
+    }
+
 
     public static Either<ServiceError,Document> fetchDocumentFromURL(String routesURL) {
         try {
@@ -50,9 +94,8 @@ public class HttpRequestUtils {
             HttpRequest request = HttpRequest.newBuilder(new URI(requestURL)).headers(headers.toArray(String[]::new)).build();
             HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                        new ServiceException(String.format("Non-200 response from requestURL %s, status: %d, body: %s",
-                                requestURL,response.statusCode(),response.body()))));
+                return Either.left(new ServiceError(HttpStatus.getStatusFromCode(response.statusCode()), new ServiceException(
+                                String.format("request to '%s' returned %s, response: %s",requestURL,response.statusCode(), response.body()))));
             }
             return Either.right(response.body());
         } catch (URISyntaxException e) {
@@ -69,9 +112,8 @@ public class HttpRequestUtils {
             HttpRequest request = HttpRequest.newBuilder(new URI(requestURL)).build();
             HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                        new ServiceException(String.format("Non-200 response from requestURL %s, status: %d, body: %s",
-                                requestURL,response.statusCode(),response.body()))));
+                return Either.left(new ServiceError(HttpStatus.getStatusFromCode(response.statusCode()), new ServiceException(
+                                String.format("request to '%s' returned %s, response: %s",requestURL,response.statusCode(), response.body()))));
             }
             String jsonBody = response.body();
             return extractResponseClass(jsonBody, classType);
@@ -89,8 +131,8 @@ public class HttpRequestUtils {
             HttpRequest request = HttpRequest.newBuilder(new URI(requestURL)).headers(headers.toArray(String[]::new)).build();
             HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                return Either.left(new org.voyager.error.ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                        new ServiceException(String.format("Non-200 response from requestURL %s, status: %d, body: %s",
+                return Either.left(new org.voyager.error.ServiceError(HttpStatus.getStatusFromCode(response.statusCode()),
+                        new ServiceException(String.format("request to '%s' returned %s, response: %s",
                                 requestURL,response.statusCode(),response.body()))));
             }
             String jsonBody = response.body();
@@ -109,9 +151,9 @@ public class HttpRequestUtils {
             HttpRequest request = HttpRequest.newBuilder(new URI(requestURL)).build();
             HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
-                        new ServiceException(String.format("Non-200 response from requestURL %s, status: %d, body: %s",
-                                requestURL,response.statusCode(),response.body()))));
+                return Either.left(new ServiceError(HttpStatus.getStatusFromCode(response.statusCode()),
+                        new ServiceException(String.format("request to '%s' returned %s, response: %s",
+                                requestURL,response.statusCode(), response.body()))));
             }
             String jsonBody = response.body();
             return extractResponseClass(jsonBody, typeReference);

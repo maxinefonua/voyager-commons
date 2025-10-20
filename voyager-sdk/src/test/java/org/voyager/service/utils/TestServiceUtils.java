@@ -6,7 +6,7 @@ import org.voyager.config.VoyagerConfig;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
 import org.voyager.http.VoyagerHttpFactoryTestImpl;
-import org.voyager.model.Airline;
+import org.voyager.model.airline.Airline;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportPatch;
 import org.voyager.model.airport.AirportType;
@@ -23,7 +23,6 @@ import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.RouteAirline;
 import org.voyager.model.route.AirlinePath;
 import org.voyager.model.route.RoutePath;
-import org.voyager.utils.Constants;
 import org.voyager.utils.ServiceUtilsDefault;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -78,7 +77,7 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 ROUTE.setOrigin("HNL");
                 ROUTE.setDestination("HND");
                 return Either.right((T) ROUTE);
-            case "/search-attribution":
+            case "/search/attribution":
                 return Either.right((T) LookupAttribution.builder().build());
             case "/search/test-source-id":
                 return Either.right((T) ResultSearchFull.builder().build());
@@ -121,7 +120,7 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/nearby-airports?latitude=1.0&longitude=-1.0&limit=3&airline=AIRNZ&type=UNVERIFIED":
                 Airport nearby = AIRPORT.toBuilder().type(AirportType.UNVERIFIED).build();
                 return Either.right((T) List.of(nearby));
-            case "/airport-airlines?iata=HEL":
+            case "/airlines?iata=HEL":
                 return Either.right((T)List.of(Airline.DELTA,Airline.JAPAN));
             case "/countries":
                 return Either.right((T)List.of(COUNTRY));
@@ -131,9 +130,9 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/locations?limit=20":
             case "/locations":
                 return Either.right((T)List.of(LOCATION));
-            case "/path-airline?origin=SJC&destination=SLC":
+            case "/airline-path?origin=SJC&destination=SLC":
                 return Either.right((T)PATH_RESPONSE);
-            case "/path?origin=SJC&destination=SLC":
+            case "/route-path?origin=SJC&destination=SLC":
                 return Either.right((T)List.of(RoutePath.builder().routeAirlineList(List.of(
                         RouteAirline.builder().airlines(List.of(Airline.DELTA,Airline.UNITED)).build())).build()));
             case "/routes?origin=SJC":

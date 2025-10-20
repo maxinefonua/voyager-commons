@@ -1,6 +1,7 @@
 package org.voyager.model;
 
 import org.junit.jupiter.api.Test;
+import org.voyager.model.airline.Airline;
 import org.voyager.model.airport.AirportType;
 import java.util.ArrayList;
 import java.util.List;

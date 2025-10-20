@@ -3,16 +3,8 @@ package org.voyager.config;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.voyager.model.Airline;
-import org.voyager.model.SyncStep;
 
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 public abstract class DatasyncConfig {
     public static class Flag {
@@ -20,7 +12,8 @@ public abstract class DatasyncConfig {
         public static final String HOSTNAME = "-h";
         public static final String PORT = "-p";
         public static final String AUTH_TOKEN = "-at";
-        public static final String STEP_SYNC = "-st";
+        public static final String GEONAMES_USERNAME = "-gn";
+        public static final String SYNC_MODE = "-sy";
     }
 
     public static class Defaults {
@@ -28,27 +21,41 @@ public abstract class DatasyncConfig {
         public static final int PORT_MAX = 65535;
         public static final int THREAD_COUNT = 10;
         public static final int THREAD_COUNT_MAX = 1000;
-        public static final List<SyncStep> STEP_LIST_DEFAULT = List.of(SyncStep.ROUTES_SYNC,SyncStep.FLIGHTS_SYNC,SyncStep.AIRLINE_SYNC);
     }
 
     public static class Messages {
-        private static final String MISSING_FLAG = "Missing required %s flag '%s'";
+        private static final String MISSING_FLAG = "required %s flag '%s' is missing";
         public static String getMissingMessage(String flagName, String flagKey) {
             return String.format(MISSING_FLAG,flagName,flagKey);
         }
 
-        private static final String INVALID_LIST = "Required %s flag '%s' must be a nonempty list from accepted values: %s";
+        private static final String INVALID_LIST = "%s flag '%s' must be a nonempty list of valid values: %s";
         public static String getInvalidListMessage(String flagName, String flagKey, List<String> acceptableValueList) {
             StringJoiner valueJoiner = new StringJoiner(",");
             acceptableValueList.forEach(valueJoiner::add);
             return String.format(INVALID_LIST,flagName,flagKey,valueJoiner);
         }
 
-        private static final String INVALID_VALUE = "Required %s flag '%s' has invalid value '%s'. Valid values must be from the following: %s";
+        private static final String LIST_REGEX = "%s flag '%s' requires a nonempty list where each value %s";
+        public static String getEmptyListConstraintElems(String flagName, String flagKey, String elemConstraint) {
+            return String.format(LIST_REGEX,flagName,flagKey,elemConstraint);
+        }
+
+        private static final String INVALID_LIST_REGEX = "%s flag '%s' requires a nonempty list where each value %s, but contains invalid value: '%s'";
+        public static String getInvalidListConstraintViolation(String flagName, String flagKey, String elemConstraint, String invalidValue) {
+            return String.format(INVALID_LIST_REGEX,flagName,flagKey,elemConstraint,invalidValue);
+        }
+
+        private static final String INVALID_VALUE = "%s flag '%s' has invalid value '%s'. Valid values must be from the following: %s";
         public static String getInvalidValueMessage(String flagName, String flagKey, String invalidValue, List<String> acceptableValueList) {
             StringJoiner valueJoiner = new StringJoiner(",");
             acceptableValueList.forEach(valueJoiner::add);
             return String.format(INVALID_VALUE,flagName,flagKey,invalidValue,valueJoiner);
+        }
+
+        private static final String BLANK_VALUE = "%s flag '%s' cannot be blank.";
+        public static String getBlankValueMessage(String flagName, String flagKey) {
+            return String.format(BLANK_VALUE,flagName,flagKey);
         }
     }
 
@@ -56,16 +63,31 @@ public abstract class DatasyncConfig {
 
     protected Map<String,Object> optionMap = new HashMap<>(Map.of(
             Flag.THREAD_COUNT,Defaults.THREAD_COUNT,
-            Flag.PORT,Defaults.PORT,
-            Flag.STEP_SYNC,Defaults.STEP_LIST_DEFAULT
+            Flag.PORT,Defaults.PORT
     ));
 
-    protected Map<String,Object> addtionalOptions = new HashMap<>();
+    protected Map<String,Object> additionalOptions = new HashMap<>();
 
     private Set<String> requiredFlags = Set.of(
             Flag.HOSTNAME,
             Flag.AUTH_TOKEN
     );
+
+    protected void validateGeoNamesUser() {
+        if (!this.additionalOptions.containsKey(Flag.GEONAMES_USERNAME)) {
+            throw new RuntimeException(DatasyncConfig.Messages.getMissingMessage("GeoNames username",
+                    Flag.GEONAMES_USERNAME));
+        }
+        String value = (String) this.additionalOptions.get(Flag.GEONAMES_USERNAME);
+        if (StringUtils.isBlank(value)) {
+            throw new RuntimeException(DatasyncConfig.Messages.getBlankValueMessage("GeoNames username",
+                    Flag.GEONAMES_USERNAME));
+        }
+    }
+
+    public String getGNUsername() {
+        return (String) this.additionalOptions.get(Flag.GEONAMES_USERNAME);
+    }
 
     public DatasyncConfig(String[] args) {
         for (String arg : args) {
@@ -73,9 +95,6 @@ public abstract class DatasyncConfig {
                 String[] tokens = arg.split("=");
                 if (tokens.length != 2)
                     throw new RuntimeException(String.format("Malformatted program argument '%s'. Accepted format '-flag=VALUE'", arg));
-                if (!optionMap.containsKey(tokens[0]) && !requiredFlags.contains(tokens[0])) {
-                    addtionalOptions.put(tokens[0],tokens[1]);
-                }
                 processFlag(tokens[0],tokens[1]);
             } else {
                 LOGGER.info(String.format("Ignoring unflagged program argument: %s",arg));
@@ -109,19 +128,16 @@ public abstract class DatasyncConfig {
         optionMap.put(Flag.THREAD_COUNT,threadCountMax);
     }
 
-    public List<SyncStep> getStepList() {
-        return ((List<SyncStep>) optionMap.get(Flag.STEP_SYNC));
-    }
-
     public String[] toArgs() {
         List<String> argsList = new ArrayList<>();
-        optionMap.forEach((flag, objectValue) -> {
-            if (flag.equals(Flag.STEP_SYNC)) {
-                StringJoiner stepJoiner = new StringJoiner(",");
-                ((List<SyncStep>) optionMap.get(Flag.STEP_SYNC)).forEach(syncStep -> stepJoiner.add(syncStep.name()));
-                argsList.add(flag.concat("=").concat(stepJoiner.toString()));
+        optionMap.forEach((flag, objectValue) -> argsList.add(flag.concat("=").concat(objectValue.toString())));
+        additionalOptions.forEach((flag, objectValue)-> {
+            if (objectValue instanceof Collection<?>) {
+                StringJoiner elemJoiner = new StringJoiner(",");
+                ((Collection<?>) objectValue).forEach(elem -> elemJoiner.add(elem.toString()));
+                argsList.add(String.format("%s=%s",flag,elemJoiner));
             } else {
-                argsList.add(flag.concat("=").concat(objectValue.toString()));
+                argsList.add(String.format("%s=%s", flag, objectValue.toString()));
             }
         });
         return argsList.toArray(new String[0]);
@@ -147,10 +163,8 @@ public abstract class DatasyncConfig {
             case Flag.AUTH_TOKEN -> {
                 optionMap.put(Flag.AUTH_TOKEN,token);
             }
-            case Flag.STEP_SYNC -> {
-                List<SyncStep> stepList = Arrays.stream(token.split(","))
-                        .map(step -> SyncStep.valueOf(step.toUpperCase())).toList();
-                optionMap.put(Flag.STEP_SYNC,stepList);
+            default -> {
+                additionalOptions.put(flag,token);
             }
         }
     }

@@ -4,9 +4,9 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.error.ServiceError;
-import org.voyager.model.Airline;
-import org.voyager.model.PathAirlineQuery;
-import org.voyager.model.PathQuery;
+import org.voyager.model.airline.Airline;
+import org.voyager.model.AirlinePathQuery;
+import org.voyager.model.RoutePathQuery;
 import org.voyager.model.route.AirlinePath;
 import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.RoutePath;
@@ -38,7 +38,7 @@ class PathServiceImplTest {
     void getAirlinePathResponse() {
         assertThrows(NullPointerException.class, ()->pathService.getAirlinePathResponse(null));
         Either<ServiceError, PathResponse<AirlinePath>> either = pathService.getAirlinePathResponse(
-                PathAirlineQuery.builder().withOriginIATAList(List.of("SJC"))
+                AirlinePathQuery.builder().withOriginIATAList(List.of("SJC"))
                         .withDestinationIATAList(List.of("SLC")).build());
         assertNotNull(either);
         assertTrue(either.isRight());
@@ -53,7 +53,7 @@ class PathServiceImplTest {
     void getRoutePathList() {
         assertThrows(NullPointerException.class, ()->pathService.getRoutePathList(null));
         Either<ServiceError, List<RoutePath>> either = pathService.getRoutePathList(
-                PathQuery.builder().withOriginIATAList(List.of("SJC"))
+                RoutePathQuery.builder().withOriginIATAList(List.of("SJC"))
                         .withDestinationIATAList(List.of("SLC")).build());
         assertNotNull(either);
         assertTrue(either.isRight());

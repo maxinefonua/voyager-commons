@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data @NoArgsConstructor
-@ToString(includeFieldNames = false)
+@ToString
 public class RouteFR {
     AirportFR airport1;
     AirportFR airport2;

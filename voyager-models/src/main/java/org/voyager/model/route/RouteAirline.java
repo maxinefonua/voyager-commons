@@ -2,7 +2,7 @@ package org.voyager.model.route;
 
 import lombok.Builder;
 import lombok.Data;
-import org.voyager.model.Airline;
+import org.voyager.model.airline.Airline;
 
 import java.util.ArrayList;
 import java.util.List;

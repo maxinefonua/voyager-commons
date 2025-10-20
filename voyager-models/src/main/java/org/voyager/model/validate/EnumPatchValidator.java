@@ -2,6 +2,7 @@ package org.voyager.model.validate;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.voyager.model.validate.annotations.ValidEnum;
 
 import java.util.Arrays;
 import java.util.List;

@@ -79,6 +79,26 @@ public class ServiceUtilsDefault implements ServiceUtils {
     }
 
     @Override
+    public <T> Either<ServiceError, T> fetchWithRequestBody(String requestURL, HttpMethod httpMethod, TypeReference<T> typeReference, Object requestBody) {
+        try {
+            URI uri = buildURI(requestURL);
+            String jsonPayload = om.writeValueAsString(requestBody);
+            HttpRequest request = getRequestWithBody(uri,httpMethod,jsonPayload);
+            Either<ServiceError, HttpResponse<String>> responseEither = sendRequest(request);
+            if (responseEither.isLeft()) return Either.left(responseEither.getLeft());
+            return ServiceUtilsDefault.extractMappedResponse(responseEither.get(),typeReference,requestURL);
+        } catch (URISyntaxException e) {
+            String message = String.format("Exception thrown when building URI of %s",requestURL);
+            LOGGER.error(message);
+            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
+        } catch (JsonProcessingException e) {
+            String message = String.format("Exception thrown when writing json payload of request body %s",requestBody);
+            LOGGER.error(message);
+            return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,message,e));
+        }
+    }
+
+    @Override
     public Either<ServiceError, Void> fetchNoResponseBody(String requestURL, HttpMethod httpMethod) {
         return fetchRequest(requestURL,httpMethod).flatMap(httpResponse ->
                 confirmValidResponse(httpResponse,requestURL));

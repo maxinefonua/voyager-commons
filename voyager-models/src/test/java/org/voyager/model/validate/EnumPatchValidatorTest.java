@@ -2,6 +2,7 @@ package org.voyager.model.validate;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.Test;
+import org.voyager.model.validate.annotations.ValidEnum;
 
 import java.lang.annotation.Annotation;
 

@@ -33,6 +33,6 @@ class AirlineQueryTest {
         AirlineQuery airlineQuery = AirlineQuery.builder().withIATAList(List.of("abc","def")).build();
         String requestURL = airlineQuery.getRequestURL();
         assertNotNull(requestURL);
-        assertEquals("/airport-airlines?iata=ABC,DEF", requestURL);
+        assertEquals("/airlines?iata=ABC,DEF", requestURL);
     }
 }

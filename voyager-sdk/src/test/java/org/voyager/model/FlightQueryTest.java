@@ -1,6 +1,8 @@
 package org.voyager.model;
 
 import org.junit.jupiter.api.Test;
+import org.voyager.model.airline.Airline;
+
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 import org.voyager.error.ServiceError;
 import org.voyager.model.FlightQuery;
+import org.voyager.model.airline.Airline;
 import org.voyager.model.flight.Flight;
 import org.voyager.model.flight.FlightForm;
 import org.voyager.model.flight.FlightPatch;
@@ -18,4 +19,5 @@ public interface FlightService {
     Either<ServiceError, Flight> getFlight(@NonNull Integer routeId, @Valid @NotBlank String flightNumber);
     Either<ServiceError, Flight> createFlight(@NonNull @Valid FlightForm flightForm);
     Either<ServiceError, Flight> patchFlight(@NonNull Integer id, @NonNull @Valid FlightPatch flightPatch);
+    Either<ServiceError, Integer> batchDeleteAirline(@NonNull Airline airline);
 }

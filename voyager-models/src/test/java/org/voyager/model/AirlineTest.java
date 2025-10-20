@@ -1,6 +1,7 @@
 package org.voyager.model;
 
 import org.junit.jupiter.api.Test;
+import org.voyager.model.airline.Airline;
 
 import static org.junit.jupiter.api.Assertions.*;
 

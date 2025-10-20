@@ -6,8 +6,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
+import org.voyager.model.airline.Airline;
 import org.voyager.model.airport.AirportType;
-import org.voyager.model.validate.NonNullElements;
+import org.voyager.model.validate.annotations.NonNullElements;
 import org.voyager.utils.Constants;
 import org.voyager.utils.JakartaValidationUtil;
 

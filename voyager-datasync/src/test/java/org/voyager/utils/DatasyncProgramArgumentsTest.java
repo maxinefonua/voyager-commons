@@ -3,7 +3,6 @@ package org.voyager.utils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.voyager.config.*;
-import org.voyager.model.Airline;
 import org.voyager.model.airport.AirportType;
 import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class DatasyncProgramArgumentsTest {
     private static final String HOST = "TEST_HOST";
     private static final String VALID_HOST_ARG = String.format("%s=%s",DatasyncConfig.Flag.HOSTNAME,HOST);
+    private static final String GEONAMES_USER = "TEST_USER";
+    private static final String VALID_GN_ARG = String.format("%s=%s",CountriesSyncConfig.Flag.GEONAMES_USERNAME,GEONAMES_USER);
     private static final String ACCESS_TOKEN = "TEST_ACCESS";
     private static final String VALID_ACCESS_TOKEN_ARG = String.format("%s=%s", DatasyncConfig.Flag.AUTH_TOKEN,ACCESS_TOKEN);
 
@@ -32,25 +33,22 @@ class DatasyncProgramArgumentsTest {
         String expectedToken = "accessToken";
         String atArg = String.format("%s=%s", DatasyncConfig.Flag.AUTH_TOKEN,expectedToken);
 
-        Airline expectedAirline = Airline.DELTA;
-        String aArg = String.format("%s=%s", AirlineSyncConfig.Flag.AIRLINE,"delta");
+        String tpArg = String.format("%s=%s,%s", AirportSyncConfig.Flag.AIRPORT_TYPES,AirportType.OTHER,AirportType.UNVERIFIED);
 
-        String tpArg = String.format("%s=%s,%s",AirportsSyncConfig.Flag.AIRPORT_TYPES,AirportType.OTHER,AirportType.UNVERIFIED);
+        AirportSyncConfig airportSyncConfig = new AirportSyncConfig(new String[]{
+                tcArg,hArg,pArg,atArg,tpArg});
 
-        AirportsSyncConfig airportsSyncConfig = new AirportsSyncConfig(new String[]{
-                tcArg,hArg,pArg,atArg,aArg,tpArg});
-
-        assertEquals(expectedThreadCount,airportsSyncConfig.getThreadCount());
-        assertEquals(expectedHost,airportsSyncConfig.getHostname());
-        assertEquals(expectedPort,airportsSyncConfig.getPort());
-        assertEquals(expectedToken,airportsSyncConfig.getAccessToken());
+        assertEquals(expectedThreadCount, airportSyncConfig.getThreadCount());
+        assertEquals(expectedHost, airportSyncConfig.getHostname());
+        assertEquals(expectedPort, airportSyncConfig.getPort());
+        assertEquals(expectedToken, airportSyncConfig.getAccessToken());
     }
 
     @Test
     @DisplayName("default constructor")
     void constructorDefault() {
         CountriesSyncConfig datasynced = new CountriesSyncConfig(new String[]{
-                VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG});
+                VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG,VALID_GN_ARG});
         assertEquals(DatasyncConfig.Defaults.THREAD_COUNT,datasynced.getThreadCount());
         assertEquals(DatasyncConfig.Defaults.PORT,datasynced.getPort());
     }
@@ -60,7 +58,7 @@ class DatasyncProgramArgumentsTest {
     void ignoreNonFlag() {
         String nonFlagArg = "nonFlagArg";
         CountriesSyncConfig datasynced = new CountriesSyncConfig(new String[]{
-                nonFlagArg,VALID_ACCESS_TOKEN_ARG,VALID_HOST_ARG});
+                nonFlagArg,VALID_ACCESS_TOKEN_ARG,VALID_HOST_ARG,VALID_GN_ARG});
     }
 
     @Test
@@ -98,7 +96,7 @@ class DatasyncProgramArgumentsTest {
         try {
             new FlightSyncConfig(new String[]{VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG});
         } catch (RuntimeException e) {
-            assertTrue(e.getMessage().contains(AirlineSyncConfig.Flag.AIRLINE));
+            assertTrue(e.getMessage().contains(CountriesSyncConfig.Flag.GEONAMES_USERNAME));
         }
     }
 
@@ -106,13 +104,13 @@ class DatasyncProgramArgumentsTest {
     @Test
     @DisplayName("missing airport types on default")
     void constructorDefaultMissingAirportTypes() {
-        assertThrows(RuntimeException.class,() -> new AirportsSyncConfig(new String[]{
+        assertThrows(RuntimeException.class,() -> new AirportSyncConfig(new String[]{
                 VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG
         }));
         try {
-            new AirportsSyncConfig(new String[]{VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG});
+            new AirportSyncConfig(new String[]{VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG});
         } catch (RuntimeException e) {
-            assertTrue(e.getMessage().contains(AirportsSyncConfig.Flag.AIRPORT_TYPES));
+            assertTrue(e.getMessage().contains(AirportSyncConfig.Flag.AIRPORT_TYPES));
         }
     }
 
@@ -121,7 +119,7 @@ class DatasyncProgramArgumentsTest {
     void unrecognizedFlaggedArg() {
         String unrecognized = "-unknown=flag";
         assertDoesNotThrow(() -> new CountriesSyncConfig(new String[]{
-                VALID_ACCESS_TOKEN_ARG,unrecognized,VALID_HOST_ARG
+                VALID_ACCESS_TOKEN_ARG,unrecognized,VALID_HOST_ARG,VALID_GN_ARG
         }));
     }
 
@@ -132,14 +130,14 @@ class DatasyncProgramArgumentsTest {
         int expected = 1;
         String tcArg = String.format("%s=%d",DatasyncConfig.Flag.THREAD_COUNT,invalid);
         CountriesSyncConfig datasynced = new CountriesSyncConfig(new String[]{
-                tcArg,VALID_ACCESS_TOKEN_ARG,VALID_HOST_ARG});
+                tcArg,VALID_ACCESS_TOKEN_ARG,VALID_HOST_ARG,VALID_GN_ARG});
         assertEquals(expected,datasynced.getThreadCount());
 
         invalid = 2000;
         expected = 1000;
         tcArg = String.format("%s=%d",DatasyncConfig.Flag.THREAD_COUNT,invalid);
         datasynced = new CountriesSyncConfig(new String[]{
-                tcArg,VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG});
+                tcArg,VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG,VALID_GN_ARG});
         assertEquals(expected,datasynced.getThreadCount());
     }
 
@@ -169,12 +167,12 @@ class DatasyncProgramArgumentsTest {
     @DisplayName("invalid airline")
     void airlineInvalid() {
         String invalid = "invalid";
-        String aArg = String.format("%s=%s",AirlineSyncConfig.Flag.AIRLINE,invalid);
-        assertThrows(RuntimeException.class,() -> new RoutesSyncConfig(new String[]{aArg,VALID_HOST_ARG}));
+        String aArg = String.format("%s=%s", FlightSyncConfig.Flag.AIRLINE_LIST,invalid);
+        assertThrows(RuntimeException.class,() -> new FlightSyncConfig(new String[]{aArg,VALID_ACCESS_TOKEN_ARG,VALID_HOST_ARG,VALID_GN_ARG}));
         try {
-            new RoutesSyncConfig(new String[]{aArg,VALID_HOST_ARG});
+            new FlightSyncConfig(new String[]{aArg,VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG,VALID_GN_ARG});
         } catch (RuntimeException e) {
-            assertTrue(e.getMessage().contains(AirlineSyncConfig.Flag.AIRLINE));
+            assertTrue(e.getMessage().contains(FlightSyncConfig.Flag.AIRLINE_LIST));
         }
     }
 
@@ -204,7 +202,7 @@ class DatasyncProgramArgumentsTest {
     @DisplayName("back to args")
     void convertBackToArgs() {
         DatasyncConfig datasynced = new CountriesSyncConfig(new String[]{
-                VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG
+                VALID_HOST_ARG,VALID_ACCESS_TOKEN_ARG,VALID_GN_ARG
         });
         String[] actual = datasynced.toArgs();
         assertTrue(Arrays.stream(actual).anyMatch(arg -> arg.equals(DatasyncConfig.Flag.THREAD_COUNT.concat("=").concat(String.valueOf(DatasyncConfig.Defaults.THREAD_COUNT)))));

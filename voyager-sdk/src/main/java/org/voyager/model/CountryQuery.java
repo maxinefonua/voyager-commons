@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.model.country.Continent;
-import org.voyager.model.validate.NonNullElements;
+import org.voyager.model.validate.annotations.NonNullElements;
 import org.voyager.utils.Constants;
 import org.voyager.utils.JakartaValidationUtil;
 import java.util.List;

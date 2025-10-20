@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.voyager.model.Airline;
+import org.voyager.model.airline.Airline;
 
 import java.util.List;
 

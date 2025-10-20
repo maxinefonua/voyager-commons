@@ -8,12 +8,13 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ToString(includeFieldNames = false)
+@ToString
 public class AirportFR {
-    String country;
     String iata;
     String icao;
+    String name;
+    String city;
     Double lat;
     Double lon;
-    String name;
+    String country;
 }

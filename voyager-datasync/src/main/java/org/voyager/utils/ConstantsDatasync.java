@@ -1,6 +1,6 @@
 package org.voyager.utils;
 
-import org.voyager.model.Airline;
+import org.voyager.model.airline.Airline;
 import org.voyager.model.airport.Airport;
 
 import java.io.IOException;
@@ -9,42 +9,13 @@ import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileWriter;
-import java.util.Scanner;
-import java.util.StringJoiner;
-import java.util.Set;
-import java.util.MissingResourceException;
-import java.util.HashSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ConstantsDatasync {
-    public static final String IATA_FILE = "airports/iata.txt";
-    public static final String CIVIL_FILE = "airports/civil.txt";
-    public static final String MILITARY_FILE = "airports/military.txt";
-    public static final String HISTORICAL_FILE = "airports/historical.txt";
-    public static final String ISSUES_FILE = "airports/issues.txt";
-    public static final String SPECIAL_FILE = "airports/special.txt";
-    public static final String DELTA_ALL_FILE = "airports/delta.txt";
-    public static final String DELTA_ALL_DB = "airports/delta-allDB.txt";
-    public static final String DELTA_CURRENT_FILE = "airports/delta-current.txt";
-    public static final String DELTA_HUB_FILE = "airports/delta-hub.txt";
-    public static final String DELTA_SEASONAL_FILE = "airports/delta-seasonal.txt";
-    public static final String DELTA_FORMER_FILE = "airports/delta-former.txt";
-    public static final String AIRLINE_PROCESSED_FILE = "airline/airline-processed.txt";
-    public static final String NON_AIRLINE_PROCESSED_FILE = "airline/non-airline-processed.txt";
-    public static final String ROUTE_AIRPORTS_FILE = "airline/route-airports.txt";
-    public static final String FAILED_FLIGHT_NUMS_FILE = "airline/failed-flights.txt";
-    public static final String FLIGHT_AIRPORTS_FILE = "airline/flight-airports.sql";
-    public static final String MISSING_AIRPORTS_FILE = "airline/missing-airports.sql";
-    public static final String DELTA_FORMER_DB = "airports/delta-formerDB.txt";
-    public static final String DELTA_FUTURE_FILE = "airports/delta-future.txt";
-    public static final String DELTA_FOCUS_FILE = "airports/delta-focus.txt";
-    public static final String CURRENCY_RETRIES_FILE = "currency/retries.txt";
-    public static final String LANGUAGE_ISO_FILE = "countries/isolanguages.txt";
-
-    public static final String CIVIL_AIRPORT = "Civil Airport";
-    public static final String MILITARY_AIRPORT = "Military Airport";
-    public static final String HISTORICAL_AIRPORT = "Airport no longer in use";
-
+    public static final String FAILED_AIRPORT_SCHEDULE_FILE = "flights/failed-airport-schedules.txt";
+    public static final String MISSING_AIRPORTS_FILE = "flights/missing-airports.txt";
+    public static final String NON_CIVIL_AIRPORTS_FILE = "flights/non-civil-airports.txt";
     public static Set<String> loadCodesFromFile(String fileName) {
         InputStream is = ConstantsDatasync.class.getClassLoader().getResourceAsStream(fileName);
         if (is == null) throw new MissingResourceException(
@@ -71,6 +42,28 @@ public class ConstantsDatasync {
                     fileName,e.getMessage()),e);
         }
     }
+
+    public static List<String> loadStringListFromListFile(String fileName) {
+        InputStream is = ConstantsDatasync.class.getClassLoader().getResourceAsStream(fileName);
+        if (is == null) throw new MissingResourceException(
+                String.format("Required file missing from resources directory: %s",fileName),
+                ConstantsDatasync.class.getName(),fileName);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        List<String> stringList = new ArrayList<>();
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String code = line.trim();
+                if (code.isEmpty()) continue;
+                stringList.add(code);
+            }
+            return stringList;
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Error reading list of strings from file: %s\nError message: %s",
+                    fileName,e.getMessage()),e);
+        }
+    }
+
 
     public static Set<String> loadCodesFromListFile(String fileName) {
         InputStream is = ConstantsDatasync.class.getClassLoader().getResourceAsStream(fileName);

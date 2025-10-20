@@ -15,7 +15,7 @@ import org.voyager.error.ServiceHttpException;
 import org.voyager.http.HttpMethod;
 import org.voyager.http.MockHttpResponse;
 import org.voyager.http.VoyagerHttpFactory;
-import org.voyager.model.Airline;
+import org.voyager.model.airline.Airline;
 import org.voyager.model.country.Country;
 import org.voyager.model.flight.Flight;
 import org.voyager.model.flight.FlightForm;

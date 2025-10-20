@@ -7,6 +7,7 @@ import java.util.Map;
 
 @Data
 public class PlannedFR {
+    AirlineFR airline;
     @JsonProperty("utc")
     Map<String, FlightTimeFR> dateToTimeMap;
 }

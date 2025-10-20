@@ -2,6 +2,7 @@ package org.voyager.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.vavr.control.Either;
+import org.voyager.config.external.NominatimConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.error.ServiceException;
@@ -13,14 +14,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class NominatimService {
-    private static final String baseURL = "https://nominatim.openstreetmap.org";
-
-    private static final String searchPath = "/search";
-    private static final String searchParams = "?q=%s&format=jsonv2";
+    private static NominatimConfig nominatimConfig = new NominatimConfig();
 
     public static Either<ServiceError, FeatureSearch> searchCountryName(String countryName) {
         String encodedCountryName = URLEncoder.encode(countryName, StandardCharsets.UTF_8);
-        String requestURL = baseURL.concat(searchPath).concat(String.format(searchParams,encodedCountryName));
+        String requestURL = String.format("%s/%s?%s",nominatimConfig.getBaseURL(),nominatimConfig.getSearchPath(),
+                String.format(nominatimConfig.getSearchParams(),encodedCountryName));
         return HttpRequestUtils.getRequestBody(requestURL,new TypeReference<List<FeatureSearch>>(){}).flatMap(
                 featureSearchList -> {
                     if (featureSearchList.size() > 1) {

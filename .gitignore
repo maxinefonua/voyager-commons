@@ -16,5 +16,7 @@ target/
 *.env
 *.env_local
 *.env_dev
+*.log
 voyager-datasync/scripts/data/*
 voyager-datasync/scripts/postgres/logs/*
+*dependency-reduced-pom.xml

@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.voyager.model.validate.ValidEnum;
+import org.voyager.model.validate.annotations.ValidEnum;
 import org.voyager.utils.Constants;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,8 @@ public class LocationForm {
     String subdivision;
 
     @NotBlank
-    @Pattern(regexp = Constants.Voyager.Regex.COUNTRY_CODE_ALPHA2, message = "must be a valid two-letter ISO 3166-1 alpha-2 country code")
+    @Pattern(regexp = Constants.Voyager.Regex.COUNTRY_CODE_ALPHA2_CASE_SENSITIVE,
+            message = Constants.Voyager.ConstraintMessage.COUNTRY_CODE_CASE_SENSITIVE)
     String countryCode;
 
     @NotNull

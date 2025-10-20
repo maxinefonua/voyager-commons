@@ -23,10 +23,6 @@ public class Constants {
             public static final String LIMIT_PARAM_NAME = "limit";
             public static final String CONTINENT_PARAM_NAME = "continent";
             public static final String COUNTRY_CODE_PARAM_NAME = "countryCode";
-            public static final String LANGUAGE_ISO6391_PARAM_NAME = "iso6391";
-            public static final String LANGUAGE_ISO6392_PARAM_NAME = "iso6392";
-            public static final String LANGUAGE_ISO6393_PARAM_NAME = "iso6393";
-            public static final String CURRENCY_CODE_PARAM_NAME = "currencyCode";
             public static final String TYPE_PARAM_NAME = "type";
             public static final String AIRLINE_PARAM_NAME = "airline";
             public static final String ROUTE_ID_PARAM_NAME = "routeId";
@@ -48,7 +44,7 @@ public class Constants {
         public static class Path {
             public static final String HEALTH = "/actuator/health";
             public static final String IATA = "/iata";
-            public static final String AIRLINES = "/airport-airlines";
+            public static final String AIRLINES = "/airlines";
             public static final String AIRPORTS = "/airports";
             public static final String NEARBY_AIRPORTS = "/nearby-airports";
             public static final String COUNTRIES = "/countries";
@@ -56,26 +52,30 @@ public class Constants {
             public static final String FLIGHT = "/flight";
             public static final String LOCATIONS = "/locations";
             public static final String LOCATION = "/location";
-            public static final String PATH_AIRLINE = "/path-airline";
-            public static final String PATH = "/path";
+            public static final String AIRLINE_PATH = "/airline-path";
+            public static final String ROUTE_PATH = "/route-path";
             public static final String ROUTES = "/routes";
             public static final String ROUTE = "/route";
             public static final String SEARCH = "/search";
-            public static final String ATTRIBUTION = "/search-attribution";
-            // TODO: make sub calls /search/fetch, /search/attribution
-            public static final String FETCH = "/fetch";
+            public static final String ATTRIBUTION = "/search/attribution";
+            public static final String FETCH = "/search/fetch";
         }
 
         public static class Regex {
             public static final String IATA_CODE_ALPHA3 = "^[a-zA-Z]{3}$";
+            public static final String IATA_CODE_ALPHA3_CASE_SENSITIVE = "^[A-Z]{3}$";
             public static final String COUNTRY_CODE_ALPHA2 = "^[a-zA-Z]{2}$";
+            public static final String COUNTRY_CODE_ALPHA2_CASE_SENSITIVE = "^[A-Z]{2}$";
             public static final String NOEMPTY_NOWHITESPACE = "^\\S+$";
         }
 
         public static class ConstraintMessage {
             public static final String IATA_CODE = "must be a valid three-letter ISO 3166-1 alpha-3 IATA code";
+            public static final String IATA_CODE_CASE_SENSITIVE = "must be a valid uppercase three-letter ISO 3166-1 alpha-3 IATA code";
             public static final String IATA_CODE_ELEMENTS = "all elements must be a valid three-letter ISO 3166-1 alpha-3 IATA code";
+            public static final String IATA_CODE_ELEMENTS_CASE_SENSITIVE = "all elements must be a valid uppercase three-letter ISO 3166-1 alpha-3 IATA code";
             public static final String COUNTRY_CODE = "must be a valid two-letter ISO 3166-1 alpha-2 IATA code";
+            public static final String COUNTRY_CODE_CASE_SENSITIVE = "must be a valid uppercase two-letter ISO 3166-1 alpha-2 IATA code";
             public static final String COUNTRY_CODE_ELEMENTS = "all elements must be a valid two-letter ISO 3166-1 alpha-2 IATA code";
             public static final String NOEMPTY_NOWHITESPACE = "cannot be empty or contain whitespaces";
         }
@@ -87,9 +87,9 @@ public class Constants {
 
     private static final String ENV_VAR_LITERAL = "${%s}";
 
-    public static void validateSystemProperty(List<String> envVarKeys) {
+    public void validateEnvVars(List<String> envVarKeys) {
         for (String key : envVarKeys) {
-            String envVarVal = System.getProperty(key);
+            String envVarVal = getEnvVariable(key);
             if (StringUtils.isEmpty(envVarVal) || String.format(ENV_VAR_LITERAL,key).equals(envVarVal))
                 throw new IllegalArgumentException(getUndefiniedSystemPropertyMessage(key));
         }
@@ -98,5 +98,9 @@ public class Constants {
     private static final String UNDEFINED_SYSTEM_PROP = "System property '%s' must be defined.";
     public static String getUndefiniedSystemPropertyMessage(String envVarKey){
         return String.format(UNDEFINED_SYSTEM_PROP,envVarKey);
+    }
+
+    protected String getEnvVariable(String key) {
+        return System.getenv(key);
     }
 }

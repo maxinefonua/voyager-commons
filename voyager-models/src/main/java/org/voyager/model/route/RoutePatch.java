@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.voyager.model.validate.ValidPatch;
+import org.voyager.model.validate.annotations.ValidPatch;
 
 @Data
 @NoArgsConstructor

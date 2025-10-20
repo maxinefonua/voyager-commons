@@ -1,5 +1,0 @@
-The airport operates with two IATA codes because of its unique bi-national status. Flights from the French part of the airport show as operating from MLH (Mulhouse).=BSL
-The airport operates with two IATA codes because of its unique bi-national status. Flights from the Swiss part of the airport show as operating from BSL (Basle).=MLH
-Heliport=SGG,TFT,POV
-Sea Plane Base=CXH,KWP,AYM,KKI,NYS,HYL,KQA,YWH,CGA,KWK
-Future Airport (not yet in use)=KTI,DXN

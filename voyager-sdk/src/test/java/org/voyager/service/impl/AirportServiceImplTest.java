@@ -4,7 +4,8 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.error.ServiceError;
-import org.voyager.model.Airline;
+import org.voyager.model.IataQuery;
+import org.voyager.model.airline.Airline;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportPatch;
 import org.voyager.model.airport.AirportType;
@@ -70,7 +71,8 @@ class AirportServiceImplTest {
     @Test
     void getIATACodes() {
         assertThrows(NullPointerException.class,()->airportService.getIATACodes(null));
-        Either<ServiceError,List<String>> either = airportService.getIATACodes(List.of(AirportType.HISTORICAL));
+        IataQuery iataQuery = IataQuery.builder().withAirportTypeList(List.of(AirportType.HISTORICAL)).build();
+        Either<ServiceError,List<String>> either = airportService.getIATACodes(iataQuery);
         assertNotNull(either);
         assertTrue(either.isRight());
         assertFalse(either.get().isEmpty());

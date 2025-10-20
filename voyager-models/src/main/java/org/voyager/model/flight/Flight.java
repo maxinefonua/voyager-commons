@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.voyager.model.Airline;
+import org.voyager.model.airline.Airline;
 import java.time.ZonedDateTime;
 import java.time.Duration;
 
@@ -19,6 +19,7 @@ public class Flight {
     private ZonedDateTime zonedDateTimeArrival;
     private Boolean isActive;
     private Airline airline;
+    // TODO: add duration to db table
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Duration duration;
 }

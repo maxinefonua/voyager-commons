@@ -3,7 +3,7 @@ package org.voyager.model.flightRadar;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
-import org.voyager.model.Airline;
+import org.voyager.model.airline.Airline;
 
 @Data
 @Builder @ToString

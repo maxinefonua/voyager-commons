@@ -2,6 +2,8 @@ package org.voyager.model.validate;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.voyager.model.validate.annotations.AllStringsMatchRegex;
+
 import java.util.Collection;
 import java.util.regex.Pattern;
 

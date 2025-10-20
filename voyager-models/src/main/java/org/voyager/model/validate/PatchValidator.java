@@ -2,6 +2,8 @@ package org.voyager.model.validate;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.voyager.model.validate.annotations.ValidPatch;
+
 import java.lang.reflect.Field;
 
 public class PatchValidator implements ConstraintValidator<ValidPatch,Object> {
@@ -11,11 +13,16 @@ public class PatchValidator implements ConstraintValidator<ValidPatch,Object> {
         Field[] declaredFields = object.getClass().getDeclaredFields();
         for (Field field : declaredFields) {
             try {
+                setFieldAccessible(field);
                 if (field.get(object) != null) return true;
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e.getMessage(),e);
             }
         }
         return false;
+    }
+
+    protected void setFieldAccessible(Field field) {
+        field.setAccessible(true);
     }
 }

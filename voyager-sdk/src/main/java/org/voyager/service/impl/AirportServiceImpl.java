@@ -8,8 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
 import org.voyager.model.AirportQuery;
+import org.voyager.model.IataQuery;
 import org.voyager.model.NearbyAirportQuery;
 import org.voyager.model.airport.Airport;
+import org.voyager.model.airport.AirportForm;
 import org.voyager.model.airport.AirportPatch;
 import org.voyager.model.airport.AirportType;
 import org.voyager.service.AirportService;
@@ -59,13 +61,23 @@ public class AirportServiceImpl implements AirportService {
     }
 
     @Override
-    public Either<ServiceError,List<String>> getIATACodes(@NonNull List<AirportType> airportTypeList) {
-        StringJoiner typeJoiner = new StringJoiner(",");
-        airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
-        String requestURL = String.format("%s?" + "%s=%s",Constants.Voyager.Path.IATA,
-                Constants.Voyager.ParameterNames.TYPE_PARAM_NAME,typeJoiner);
+    public Either<ServiceError, Airport> createAirport(@NonNull AirportForm airportForm) {
+        String requestURL = Constants.Voyager.Path.AIRPORTS;
+        LOGGER.debug("attempting to POST at {} with airportForm {}",requestURL,airportForm);
+        return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.POST,Airport.class,airportForm);
+    }
+
+    @Override
+    public Either<ServiceError, List<String>> getIATACodes() {
+        String requestURL = Constants.Voyager.Path.IATA;
         LOGGER.debug(String.format("attempting to GET iata codes from: %s",requestURL));
         return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<String>>(){});
+    }
+
+    @Override
+    public Either<ServiceError, List<String>> getIATACodes(@NonNull IataQuery iataQuery) {
+        LOGGER.debug(String.format("attempting to GET iata codes from: %s",iataQuery.getRequestURL()));
+        return serviceUtils.fetch(iataQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<String>>(){});
     }
 
     @Override

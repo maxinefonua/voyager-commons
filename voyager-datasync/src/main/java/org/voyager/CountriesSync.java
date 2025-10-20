@@ -17,7 +17,6 @@ import org.voyager.service.CountryService;
 import org.voyager.service.GeoNamesService;
 import org.voyager.service.NominatimService;
 import org.voyager.service.impl.VoyagerServiceRegistry;
-import org.voyager.config.DatasyncConfig;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,42 +25,22 @@ import java.util.stream.Collectors;
 
 public class CountriesSync {
     private static CountryService countryService;
-    private static ExecutorService executorService;
     private static final Logger LOGGER = LoggerFactory.getLogger(CountriesSync.class);
 
     public static void main(String[] args) {
         LOGGER.info("printing from countries sync main");
-        CountriesSyncConfig countriesSyncConfig = new CountriesSyncConfig(args);
-        Integer maxConcurrentRequests = countriesSyncConfig.getThreadCount();
-        String host = countriesSyncConfig.getHostname();
-        int port = countriesSyncConfig.getPort();
-        String voyagerAuthorizationToken = countriesSyncConfig.getAccessToken();
-        VoyagerConfig voyagerConfig = new VoyagerConfig(Protocol.HTTP,host,port,voyagerAuthorizationToken);
-        VoyagerServiceRegistry.initialize(voyagerConfig);
-        executorService = Executors.newFixedThreadPool(maxConcurrentRequests);
-        countryService = VoyagerServiceRegistry.getInstance().get(CountryService.class);
+        initCountriesSync(args);
+        Set<String> countryCodeSet = loadCountriesFromAPI();
+        List<CountryGN> countryGNList = loadCountriesFromGN();
+        processCountries(countryCodeSet,countryGNList);
+    }
 
-        // load countries from files/fetch from urls
-        Either<ServiceError, List<CountryGN>> geoCountriesEither = GeoNamesService.getCountryGNList();
-        if (geoCountriesEither.isLeft()) {
-            Exception exception = geoCountriesEither.getLeft().getException();
-            LOGGER.error(String.format("Failed to get countries from GeoNames, error: %s",exception.getMessage()),exception);
-            return;
-        }
-        Either<ServiceError, List<Country>> voyagerCountriesEither = countryService.getCountries();
-        if (voyagerCountriesEither.isLeft()) {
-            Exception exception = voyagerCountriesEither.getLeft().getException();
-            LOGGER.error(String.format("Failed to get countries from Voyager API, error: %s",exception.getMessage()),exception);
-            return;
-        }
-        // load countries from API
-        List<Country> countryList = voyagerCountriesEither.get();
-        Set<String> countryCodes = countryList.stream().map(Country::getCode).collect(Collectors.toSet());
+    private static void processCountries(Set<String> countryCodeSet, List<CountryGN> countryGNList) {
         Set<String> nominatimCountryCodes = Set.of("NZ","US");
         List<CountryForm> countryFormList = new ArrayList<>();
         Map<CountryGN,CompletableFuture<Either<ServiceError,Object>>> completableFutureList = new HashMap<>();
-        geoCountriesEither.get().stream()
-                .filter(countryGN -> !countryCodes.contains(countryGN.getCountryCode()))
+        countryGNList.stream()
+                .filter(countryGN -> !countryCodeSet.contains(countryGN.getCountryCode()))
                 .forEach(countryGN -> {
                     if (nominatimCountryCodes.contains(countryGN.getCountryCode()))
                         completableFutureList.put(countryGN,
@@ -73,54 +52,13 @@ public class CountriesSync {
                 });
         List<CountryGN> failedCountryGNList = new ArrayList<>();
         completableFutureList.forEach((countryGN,cf) -> {
-            try {
-                Either<ServiceError, Object> either = cf.get();
-                if (either.isLeft()) {
-                    Exception exception = either.getLeft().getException();
-                    LOGGER.error(exception.getMessage(),exception);
-                    failedCountryGNList.add(countryGN);
-                    return;
-                }
-                if (nominatimCountryCodes.contains(countryGN.getCountryCode())) {
-                    FeatureSearch featureSearch = (FeatureSearch) either.get();
-                    countryFormList.add(CountryForm.builder()
-                            .countryCode(countryGN.getCountryCode())
-                            .countryName(countryGN.getCountryName())
-                            .capitalCity(countryGN.getCapital())
-                            .languages(Arrays.stream(countryGN.getLanguages().split(",")).toList())
-                            .continent(Continent.fromDisplayText(countryGN.getContinentName()).name())
-                            .population(Long.parseLong(countryGN.getPopulation()))
-                            .currencyCode(countryGN.getCurrencyCode())
-                            .areaInSqKm(Double.parseDouble(countryGN.getAreaInSqKm()))
-                            .west((countryGN.getCountryCode().equals("NZ"))?
-                                    Math.abs(featureSearch.getBoundingbox()[2]) : featureSearch.getBoundingbox()[2])
-                            .south(featureSearch.getBoundingbox()[0])
-                            .east(featureSearch.getBoundingbox()[3])
-                            .north(featureSearch.getBoundingbox()[1])
-                            .build());
-                    return;
-                }
-                GeoNameFull geoNameFull = (GeoNameFull) either.get();
-                countryFormList.add(CountryForm.builder()
-                        .countryCode(countryGN.getCountryCode())
-                        .countryName(countryGN.getCountryName())
-                        .capitalCity(countryGN.getCapital())
-                        .languages(Arrays.stream(countryGN.getLanguages().split(",")).toList())
-                        .continent(Continent.fromDisplayText(countryGN.getContinentName()).name())
-                        .population(Long.parseLong(countryGN.getPopulation()))
-                        .currencyCode(countryGN.getCurrencyCode())
-                        .areaInSqKm(Double.parseDouble(countryGN.getAreaInSqKm()))
-                        .west(geoNameFull.getBoundingBox().getWest())
-                        .south(geoNameFull.getBoundingBox().getSouth())
-                        .east(geoNameFull.getBoundingBox().getEast())
-                        .north(geoNameFull.getBoundingBox().getNorth())
-                        .build());
-            } catch (InterruptedException | ExecutionException e) {
-                LOGGER.error(e.getMessage(),e);
-                failedCountryGNList.add(countryGN);
-            }
+            processGNCompletableFuture(countryGN,cf,failedCountryGNList,nominatimCountryCodes,countryFormList);
         });
-        Integer skippedExisting = !countryCodes.isEmpty() ? countryCodes.size() - countryFormList.size() : 0;
+        printResults(countryCodeSet,countryFormList,failedCountryGNList);
+    }
+
+    private static void printResults(Set<String> countryCodeSet, List<CountryForm> countryFormList, List<CountryGN> failedCountryGNList) {
+        Integer skippedExisting = !countryCodeSet.isEmpty() ? countryCodeSet.size() - countryFormList.size() : 0;
         AtomicInteger created = new AtomicInteger(0);
         AtomicReference<List<CountryForm>> failedForms = new AtomicReference<>(new ArrayList<>());
         List<CountryForm> toProcess = countryFormList.stream().toList();
@@ -132,6 +70,90 @@ public class CountriesSync {
                 LOGGER.error(String.format("failed country form: %s",countryForm)));
         LOGGER.info(String.format("created %d countries, skipped %d existing, %d processed, %d failed creates, %d failed fetch full geoname",
                 created.get(),skippedExisting,toProcess.size(),failedForms.get().size(),failedCountryGNList.size()));
+    }
+
+    private static void processGNCompletableFuture(CountryGN countryGN,
+                                                   CompletableFuture<Either<ServiceError, Object>> cf,
+                                                   List<CountryGN> failedCountryGNList,
+                                                   Set<String> nominatimCountryCodes,
+                                                   List<CountryForm> countryFormList) {
+        try {
+            Either<ServiceError, Object> either = cf.get();
+            if (either.isLeft()) {
+                Exception exception = either.getLeft().getException();
+                LOGGER.error(exception.getMessage(),exception);
+                failedCountryGNList.add(countryGN);
+                return;
+            }
+            if (nominatimCountryCodes.contains(countryGN.getCountryCode())) {
+                FeatureSearch featureSearch = (FeatureSearch) either.get();
+                countryFormList.add(CountryForm.builder()
+                        .countryCode(countryGN.getCountryCode())
+                        .countryName(countryGN.getCountryName())
+                        .capitalCity(countryGN.getCapital())
+                        .continent(Continent.fromDisplayText(countryGN.getContinentName()).name())
+                        .population(Long.parseLong(countryGN.getPopulation()))
+                        .currencyCode(countryGN.getCurrencyCode())
+                        .areaInSqKm(Double.parseDouble(countryGN.getAreaInSqKm()))
+                        .west((countryGN.getCountryCode().equals("NZ"))?
+                                Math.abs(featureSearch.getBoundingbox()[2]) : featureSearch.getBoundingbox()[2])
+                        .south(featureSearch.getBoundingbox()[0])
+                        .east(featureSearch.getBoundingbox()[3])
+                        .north(featureSearch.getBoundingbox()[1])
+                        .build());
+                return;
+            }
+            GeoNameFull geoNameFull = (GeoNameFull) either.get();
+            countryFormList.add(CountryForm.builder()
+                    .countryCode(countryGN.getCountryCode())
+                    .countryName(countryGN.getCountryName())
+                    .capitalCity(countryGN.getCapital())
+                    .continent(Continent.fromDisplayText(countryGN.getContinentName()).name())
+                    .population(Long.parseLong(countryGN.getPopulation()))
+                    .currencyCode(countryGN.getCurrencyCode())
+                    .areaInSqKm(Double.parseDouble(countryGN.getAreaInSqKm()))
+                    .west(geoNameFull.getBoundingBox().getWest())
+                    .south(geoNameFull.getBoundingBox().getSouth())
+                    .east(geoNameFull.getBoundingBox().getEast())
+                    .north(geoNameFull.getBoundingBox().getNorth())
+                    .build());
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error(e.getMessage(),e);
+            failedCountryGNList.add(countryGN);
+        }
+    }
+
+    private static List<CountryGN> loadCountriesFromGN() {
+        Either<ServiceError, List<CountryGN>> either = GeoNamesService.getCountryGNList();
+        if (either.isLeft()) {
+            Exception exception = either.getLeft().getException();
+            throw new RuntimeException(String.format("Failed to get countries from GeoNames, error: %s",
+                    exception.getMessage()),exception);
+        }
+        return either.get();
+    }
+
+    private static Set<String> loadCountriesFromAPI() {
+        Either<ServiceError, List<Country>> voyagerCountriesEither = countryService.getCountries();
+        if (voyagerCountriesEither.isLeft()) {
+            Exception exception = voyagerCountriesEither.getLeft().getException();
+            throw new RuntimeException(String.format("Failed to get countries from Voyager API, error: %s",exception.getMessage()),exception);
+        }
+        // load countries from API
+        List<Country> countryList = voyagerCountriesEither.get();
+        return countryList.stream().map(Country::getCode).collect(Collectors.toSet());
+    }
+
+    private static void initCountriesSync(String[] args) {
+        CountriesSyncConfig countriesSyncConfig = new CountriesSyncConfig(args);
+        String host = countriesSyncConfig.getHostname();
+        int port = countriesSyncConfig.getPort();
+        String voyagerAuthorizationToken = countriesSyncConfig.getAccessToken();
+        GeoNamesService.initialize(countriesSyncConfig.getGNUsername());
+
+        VoyagerConfig voyagerConfig = new VoyagerConfig(Protocol.HTTP,host,port,voyagerAuthorizationToken);
+        VoyagerServiceRegistry.initialize(voyagerConfig);
+        countryService = VoyagerServiceRegistry.getInstance().get(CountryService.class);
     }
 
     private static void processCountry(CountryForm countryForm, AtomicInteger created,

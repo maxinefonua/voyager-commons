@@ -8,6 +8,7 @@ import lombok.NonNull;
 import org.voyager.error.ServiceError;
 import org.voyager.http.HttpMethod;
 import org.voyager.model.FlightQuery;
+import org.voyager.model.airline.Airline;
 import org.voyager.model.flight.Flight;
 import org.voyager.model.flight.FlightForm;
 import org.voyager.model.flight.FlightPatch;
@@ -63,5 +64,12 @@ public class FlightServiceImpl implements FlightService {
     public Either<ServiceError, Flight> patchFlight(@NonNull Integer id,@NonNull @Valid FlightPatch flightPatch) {
         String requestURL = String.format("%s/%s",Constants.Voyager.Path.FLIGHTS,id);
         return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.PATCH,Flight.class,flightPatch);
+    }
+
+    @Override
+    public Either<ServiceError, Integer> batchDeleteAirline(@NonNull Airline airline) {
+        String requestURL = String.format("%s?%s=%s",Constants.Voyager.Path.FLIGHTS,
+                Constants.Voyager.ParameterNames.AIRLINE_PARAM_NAME,airline.name());
+        return serviceUtils.fetch(requestURL,HttpMethod.DELETE, Integer.class);
     }
 }

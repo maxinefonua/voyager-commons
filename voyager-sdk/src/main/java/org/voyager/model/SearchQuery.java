@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.utils.Constants;
 import org.voyager.utils.JakartaValidationUtil;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.StringJoiner;
 
 public class SearchQuery {
@@ -35,7 +39,7 @@ public class SearchQuery {
     public String getRequestURL() {
         StringJoiner paramsJoiner = new StringJoiner("&");
         paramsJoiner.add(String.format("%s=%s",
-                Constants.Voyager.ParameterNames.QUERY_PARAM_NAME,query));
+                Constants.Voyager.ParameterNames.QUERY_PARAM_NAME,URLEncoder.encode(query, StandardCharsets.UTF_8)));
 
         if (skipRowCount != null) {
             paramsJoiner.add(String.format("%s=%s",

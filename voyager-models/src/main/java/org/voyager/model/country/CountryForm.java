@@ -11,10 +11,8 @@ import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.voyager.model.validate.ValidEnum;
+import org.voyager.model.validate.annotations.ValidEnum;
 import org.voyager.utils.Constants;
-import java.util.ArrayList;
-import java.util.List;
 
 @Builder
 @Data
@@ -23,7 +21,8 @@ import java.util.List;
 @ToString(includeFieldNames = false)
 public class CountryForm {
     @NotBlank
-    @Pattern(regexp = Constants.Voyager.Regex.COUNTRY_CODE_ALPHA2)
+    @Pattern(regexp = Constants.Voyager.Regex.COUNTRY_CODE_ALPHA2_CASE_SENSITIVE,
+    message = Constants.Voyager.ConstraintMessage.COUNTRY_CODE_CASE_SENSITIVE)
     private String countryCode;
 
     @NotBlank
@@ -37,18 +36,15 @@ public class CountryForm {
     @Min(0)
     private Double areaInSqKm;
 
+    @NotNull
     @ValidEnum(enumClass = Continent.class)
     private String continent;
 
-    @NotNull
+    @NotBlank
     private String capitalCity;
 
-    @NotNull
+    @NotBlank
     private String currencyCode;
-
-    @NotNull
-    @Builder.Default
-    private List<String> languages = new ArrayList<>();
 
     @NotNull
     @DecimalMin(value = "-180.0")

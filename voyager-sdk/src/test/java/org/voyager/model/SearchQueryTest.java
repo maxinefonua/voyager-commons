@@ -14,7 +14,7 @@ class SearchQueryTest {
 
         SearchQuery searchQuery = SearchQuery.builder().withQuery("test query").build();
         assertEquals("test query",searchQuery.getQuery());
-        assertEquals("/search?q=test query",searchQuery.getRequestURL());
+        assertEquals("/search?q=test+query",searchQuery.getRequestURL());
     }
 
     @Test
@@ -23,7 +23,7 @@ class SearchQueryTest {
 
         SearchQuery searchQuery = SearchQuery.builder().withQuery("test query").withLimit(10)
                 .withSkipRowCount(25).build();
-        assertEquals("/search?q=test query&skipRowCount=25&limit=10",searchQuery.getRequestURL());
+        assertEquals("/search?q=test+query&skipRowCount=25&limit=10",searchQuery.getRequestURL());
     }
 
     @Test
@@ -34,7 +34,7 @@ class SearchQueryTest {
 
         SearchQuery searchQuery = SearchQuery.builder().withQuery("test query").withSkipRowCount(10).build();
         assertEquals(10,searchQuery.getSkipRowCount());
-        assertEquals("/search?q=test query&skipRowCount=10",searchQuery.getRequestURL());
+        assertEquals("/search?q=test+query&skipRowCount=10",searchQuery.getRequestURL());
     }
 
     @Test
@@ -45,6 +45,6 @@ class SearchQueryTest {
 
         SearchQuery searchQuery = SearchQuery.builder().withQuery("test query").withLimit(10).build();
         assertEquals(10,searchQuery.getLimit());
-        assertEquals("/search?q=test query&limit=10",searchQuery.getRequestURL());
+        assertEquals("/search?q=test+query&limit=10",searchQuery.getRequestURL());
     }
 }

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.lang.reflect.Field;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,12 +48,18 @@ class PatchValidatorTest {
 
     @Test
     void isValidThrowsException() throws Exception {
+        class PatchValidatorTestClass extends PatchValidator {
+            @Override
+            protected void setFieldAccessible(Field field) {
+                // do nothing to trigger exception
+            }
+        }
         Object testObject = new Object() {
             @SuppressWarnings("unused")
             private String field1 = null;
             @SuppressWarnings("unused")
             private String field2 = "hasValue";
         };
-        assertThrows(RuntimeException.class,() -> patchValidator.isValid(testObject, null));
+        assertThrows(RuntimeException.class,() -> new PatchValidatorTestClass().isValid(testObject, null));
     }
 }
