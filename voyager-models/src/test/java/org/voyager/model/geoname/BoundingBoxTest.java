@@ -1,6 +1,7 @@
 package org.voyager.model.geoname;
 
 import org.junit.jupiter.api.Test;
+import org.voyager.commons.model.geoname.BoundingBox;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

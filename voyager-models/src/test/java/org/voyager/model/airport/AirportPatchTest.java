@@ -2,6 +2,8 @@ package org.voyager.model.airport;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.voyager.commons.model.airport.AirportPatch;
+import org.voyager.commons.model.airport.AirportType;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

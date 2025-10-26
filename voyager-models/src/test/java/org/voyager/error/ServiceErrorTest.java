@@ -3,6 +3,9 @@ package org.voyager.error;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.voyager.commons.error.HttpStatus;
+import org.voyager.commons.error.ServiceError;
+import org.voyager.commons.error.ServiceException;
 
 import javax.naming.AuthenticationException;
 

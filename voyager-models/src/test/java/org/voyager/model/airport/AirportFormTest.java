@@ -1,7 +1,7 @@
 package org.voyager.model.airport;
 
 import org.junit.jupiter.api.Test;
-import org.voyager.model.validate.LatitudeValidator;
+import org.voyager.commons.model.airport.AirportForm;
 
 import static org.junit.jupiter.api.Assertions.*;
 class AirportFormTest {
