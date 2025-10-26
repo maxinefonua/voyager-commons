@@ -4,8 +4,11 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.validate.CountryCodeValidator;
-
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 @Documented
 @Constraint(validatedBy = CountryCodeValidator.class)

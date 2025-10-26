@@ -1,9 +1,20 @@
 package org.voyager.commons.model.geoname.query;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.voyager.commons.model.country.Continent;
-import org.voyager.commons.model.geoname.fields.*;
+import org.voyager.commons.model.geoname.fields.DocumentEncoding;
+import org.voyager.commons.model.geoname.fields.ResponseType;
+import org.voyager.commons.model.geoname.fields.SearchOperator;
+import org.voyager.commons.model.geoname.fields.FeatureClass;
+import org.voyager.commons.model.geoname.fields.CitySize;
+import org.voyager.commons.model.geoname.fields.XmlVerbosity;
+import org.voyager.commons.model.geoname.fields.FeatureCode;
+import org.voyager.commons.model.geoname.fields.SearchOrder;
 import java.util.List;
 
 @Builder

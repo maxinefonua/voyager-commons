@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.validate.annotations.ValidFlightNumberCollection;
-
 import java.util.Collection;
 
 public class FlightNumberCollectionValidator implements ConstraintValidator<ValidFlightNumberCollection,

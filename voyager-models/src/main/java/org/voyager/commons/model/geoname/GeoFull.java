@@ -1,11 +1,13 @@
 package org.voyager.commons.model.geoname;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.*;
-
+import lombok.Setter;
+import lombok.Getter;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.voyager.commons.model.country.Continent;
-
 import java.util.List;
 
 @Builder

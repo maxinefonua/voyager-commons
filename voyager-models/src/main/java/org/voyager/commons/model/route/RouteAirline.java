@@ -3,7 +3,6 @@ package org.voyager.commons.model.route;
 import lombok.Builder;
 import lombok.Data;
 import org.voyager.commons.model.airline.Airline;
-
 import java.util.ArrayList;
 import java.util.List;
 

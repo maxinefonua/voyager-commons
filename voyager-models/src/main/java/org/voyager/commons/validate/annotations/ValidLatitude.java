@@ -3,7 +3,6 @@ package org.voyager.commons.validate.annotations;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import org.voyager.commons.validate.LatitudeValidator;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

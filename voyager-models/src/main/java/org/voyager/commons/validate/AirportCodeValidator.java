@@ -5,7 +5,6 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.validate.annotations.ValidAirportCode;
 
-
 public class AirportCodeValidator implements ConstraintValidator<ValidAirportCode, String> {
     private boolean allowNull;
     private boolean caseSensitive;

@@ -3,7 +3,6 @@ package org.voyager.commons.validate;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.voyager.commons.validate.annotations.NonNullElements;
-
 import java.util.Collection;
 import java.util.Objects;
 

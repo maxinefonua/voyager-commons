@@ -5,12 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.validate.annotations.ValidAirportCodeCollection;
 import org.voyager.commons.validate.annotations.ValidEnum;
 import org.voyager.commons.validate.annotations.ValidPatch;
-
 import java.util.List;
 
 @Data @NoArgsConstructor

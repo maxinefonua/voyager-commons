@@ -1,6 +1,7 @@
 package org.voyager.commons.model.geoname.fields;
 
 public enum FeatureCode {
+    // TODO: finish filling out
     //    A country, state, region,...
     ADM1,	// first-order administrative division	a primary administrative division of a country, such as a state in the United States
     ADM1H,	// historical first-order administrative division	a former first-order administrative division

@@ -5,7 +5,6 @@ import org.voyager.commons.constants.GeoNames;
 import org.voyager.commons.model.geoname.query.GeoNearbyQuery;
 import org.voyager.commons.model.geoname.query.GeoSearchQuery;
 import org.voyager.commons.model.geoname.query.GeoTimezoneQuery;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;

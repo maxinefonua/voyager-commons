@@ -1,6 +1,9 @@
 package org.voyager.commons.model.flight;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.validate.annotations.ValidBoolean;
 import org.voyager.commons.validate.annotations.ValidEnum;

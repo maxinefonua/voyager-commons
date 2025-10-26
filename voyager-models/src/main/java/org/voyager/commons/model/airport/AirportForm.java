@@ -1,12 +1,18 @@
 package org.voyager.commons.model.airport;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.voyager.commons.validate.annotations.*;
+import org.voyager.commons.constants.Regex;
+import org.voyager.commons.validate.annotations.ValidAirportCode;
+import org.voyager.commons.validate.annotations.ValidEnum;
+import org.voyager.commons.validate.annotations.ValidCountryCode;
+import org.voyager.commons.validate.annotations.ValidLatitude;
+import org.voyager.commons.validate.annotations.ValidLongitude;
+import org.voyager.commons.validate.annotations.ValidZoneId;
 
 @Builder @Getter
 @ToString @NoArgsConstructor @AllArgsConstructor
@@ -14,13 +20,16 @@ public class AirportForm {
     @ValidAirportCode
     private String iata;
 
-    @NotBlank
+    @Pattern(regexp = Regex.NONEMPTY_TRIMMED,
+            message = Regex.ConstraintMessage.NONEMPTY_TRIMMED)
     private String name;
 
-    @NotBlank
+    @Pattern(regexp = Regex.NONEMPTY_TRIMMED,
+            message = Regex.ConstraintMessage.NONEMPTY_TRIMMED)
     private String city;
 
-    @NotBlank
+    @Pattern(regexp = Regex.NONEMPTY_TRIMMED,
+            message = Regex.ConstraintMessage.NONEMPTY_TRIMMED)
     private String subdivision;
 
     @ValidCountryCode

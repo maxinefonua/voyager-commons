@@ -1,6 +1,11 @@
 package org.voyager.commons.model.geoname.response;
 
-import lombok.*;
+import lombok.Setter;
+import lombok.Getter;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Builder
 @AllArgsConstructor

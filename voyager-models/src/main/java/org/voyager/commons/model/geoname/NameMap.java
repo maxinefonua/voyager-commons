@@ -2,7 +2,6 @@ package org.voyager.commons.model.geoname;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.AllArgsConstructor;
