@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.StringJoiner;
-import java.util.Set;
 import java.util.Collection;
 
 public abstract class DatasyncConfig {
@@ -44,7 +43,7 @@ public abstract class DatasyncConfig {
         }
 
         private static final String LIST_REGEX = "%s flag '%s' requires a nonempty list where each value %s";
-        public static String getEmptyListConstraintElems(String flagName, String flagKey, String elemConstraint) {
+        public static String getEmptyListConstraintElements(String flagName, String flagKey, String elemConstraint) {
             return String.format(LIST_REGEX,flagName,flagKey,elemConstraint);
         }
 
@@ -59,7 +58,7 @@ public abstract class DatasyncConfig {
         }
 
         private static final String INVALID_VALUE_LIST = "%s flag '%s' has invalid value '%s'. Valid values must be from the following: %s";
-        public static String getInvaliValueListValidMessage(String flagName, String flagKey, String invalidValue, List<String> acceptableValueList) {
+        public static String getInvalidValueListValidMessage(String flagName, String flagKey, String invalidValue, List<String> acceptableValueList) {
             StringJoiner valueJoiner = new StringJoiner(",");
             acceptableValueList.forEach(valueJoiner::add);
             return String.format(INVALID_VALUE_LIST,flagName,flagKey,invalidValue,valueJoiner);
@@ -80,11 +79,6 @@ public abstract class DatasyncConfig {
 
     protected Map<String,Object> additionalOptions = new HashMap<>();
 
-    private Set<String> requiredFlags = Set.of(
-            Flag.HOSTNAME,
-            Flag.AUTH_TOKEN
-    );
-
     protected void validateGeoNamesUser() {
         if (!this.additionalOptions.containsKey(Flag.GEONAMES_USERNAME)) {
             throw new RuntimeException(DatasyncConfig.Messages.getMissingMessage("GeoNames username",
@@ -102,10 +96,10 @@ public abstract class DatasyncConfig {
             if (arg.startsWith("-")) {
                 String[] tokens = arg.split("=");
                 if (tokens.length != 2)
-                    throw new RuntimeException(String.format("Malformatted program argument '%s'. Accepted format '-flag=VALUE'", arg));
+                    throw new RuntimeException(String.format("Malformed program argument '%s'. Accepted format '-flag=VALUE'", arg));
                 processFlag(tokens[0],tokens[1]);
             } else {
-                LOGGER.info(String.format("Ignoring unflagged program argument: %s",arg));
+                LOGGER.info("ignoring un-flagged program argument: {}", arg);
             }
         }
         if (!optionMap.containsKey(Flag.HOSTNAME)) {
@@ -161,19 +155,13 @@ public abstract class DatasyncConfig {
                 int value = extractThreadCount(token);
                 optionMap.put(Flag.THREAD_COUNT,value);
             }
-            case Flag.HOSTNAME -> {
-                optionMap.put(Flag.HOSTNAME,token);
-            }
+            case Flag.HOSTNAME -> optionMap.put(Flag.HOSTNAME,token);
             case Flag.PORT -> {
                 int value = extractPort(token);
                 optionMap.put(Flag.PORT,value);
             }
-            case Flag.AUTH_TOKEN -> {
-                optionMap.put(Flag.AUTH_TOKEN,token);
-            }
-            default -> {
-                additionalOptions.put(flag,token);
-            }
+            case Flag.AUTH_TOKEN -> optionMap.put(Flag.AUTH_TOKEN,token);
+            default -> additionalOptions.put(flag,token);
         }
     }
 
@@ -183,22 +171,21 @@ public abstract class DatasyncConfig {
             throw new RuntimeException(String.format("Invalid port '%d' for '%s' flag. " +
                     "Acceptable values range from [0,65535]",value, Flag.PORT));
         }
-        LOGGER.debug(String.format("Setting port to provided value %d", value));
+        LOGGER.debug("Setting port to provided value {}", value);
         return value;
     }
 
     private static int extractThreadCount(String token) {
         int value = parseIntegerFromValue(token, Flag.THREAD_COUNT);
         if (value > Defaults.THREAD_COUNT_MAX) {
-            LOGGER.info(String.format("Provided thread count %d exceeds maximum. " +
-                            "Setting thread count to maximum: %d", value,Defaults.THREAD_COUNT_MAX));
+            LOGGER.info("provided thread count {} exceeds maximum. Setting thread count to maximum: {}",
+                    value, Defaults.THREAD_COUNT_MAX);
             return Defaults.THREAD_COUNT_MAX;
         } else if (value < 1) {
-            LOGGER.info(String.format("Provided thread count %d is fewer than allowed. " +
-                            "Setting thread count to %d", value,1));
+            LOGGER.info("Provided thread count {} is fewer than allowed. Setting thread count to {}", value, 1);
             return 1;
         }
-        LOGGER.debug(String.format("Setting thread count to provided value %d", value));
+        LOGGER.debug("Setting thread count to provided value {}", value);
         return value;
     }
 

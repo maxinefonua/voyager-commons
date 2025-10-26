@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class NominatimService {
-    private static NominatimConfig nominatimConfig = new NominatimConfig();
+    private static final NominatimConfig nominatimConfig = new NominatimConfig();
 
     public static Either<ServiceError, FeatureSearch> searchCountryName(String countryName) {
         String encodedCountryName = URLEncoder.encode(countryName, StandardCharsets.UTF_8);

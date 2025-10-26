@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FlightSyncConfig extends DatasyncConfig {
-    private static Logger LOGGER = LoggerFactory.getLogger(FlightSyncConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlightSyncConfig.class);
 
     public static class Flag extends DatasyncConfig.Flag {
         public static String AIRLINE_LIST = "-al";
@@ -50,7 +50,7 @@ public class FlightSyncConfig extends DatasyncConfig {
                     Flag.RETRY_FILE));
         }
         String file = (String) this.additionalOptions.get(Flag.RETRY_FILE);
-        try (InputStream is = new FileInputStream(file)) {
+        try (InputStream ignored = new FileInputStream(file)) {
             LOGGER.info("successfully loaded retry file: {}",file);
         } catch (IOException e) {
             throw new RuntimeException(DatasyncConfig.Messages.getInvalidValueMessage("retry file",
@@ -66,7 +66,7 @@ public class FlightSyncConfig extends DatasyncConfig {
         String listString = (String) this.additionalOptions.get(Flag.AIRLINE_LIST);
         String[] tokens = listString.split(",");
         if (tokens.length == 0) {
-            throw new RuntimeException(DatasyncConfig.Messages.getEmptyListConstraintElems("airline list",
+            throw new RuntimeException(DatasyncConfig.Messages.getEmptyListConstraintElements("airline list",
                     Flag.AIRLINE_LIST,"is a valid airline enum"));
         }
         List<Airline> airlineList = new ArrayList<>();
@@ -101,7 +101,7 @@ public class FlightSyncConfig extends DatasyncConfig {
             try {
                 this.additionalOptions.put(DatasyncConfig.Flag.SYNC_MODE,SyncMode.valueOf(syncModeString));
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(DatasyncConfig.Messages.getInvaliValueListValidMessage(
+                throw new IllegalArgumentException(DatasyncConfig.Messages.getInvalidValueListValidMessage(
                         "sync mode",DatasyncConfig.Flag.SYNC_MODE,syncModeString,Arrays.stream(SyncMode.values())
                                 .map(SyncMode::name).toList()));
             }
@@ -114,6 +114,7 @@ public class FlightSyncConfig extends DatasyncConfig {
         return (String) this.additionalOptions.get(Flag.RETRY_FILE);
     }
 
+    @SuppressWarnings("unchecked")
     public List<Airline> getAirlineList() {
         return (List<Airline>) this.additionalOptions.get(Flag.AIRLINE_LIST);
     }

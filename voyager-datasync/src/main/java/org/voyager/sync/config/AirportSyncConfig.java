@@ -1,7 +1,5 @@
 package org.voyager.sync.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.model.airport.AirportType;
 import java.util.ArrayList;
@@ -9,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AirportSyncConfig extends DatasyncConfig{
-    private static Logger LOGGER = LoggerFactory.getLogger(AirportSyncConfig.class);
     public static class Flag extends DatasyncConfig.Flag {
         public static final String AIRPORT_TYPES = "-tl";
         public static final String IATA_LIST = "-il";
@@ -53,7 +50,7 @@ public class AirportSyncConfig extends DatasyncConfig{
         String iataListString = (String) this.additionalOptions.get(Flag.IATA_LIST);
         String[] codes = iataListString.split(",");
         if (codes.length == 0) {
-            throw new RuntimeException(Messages.getEmptyListConstraintElems("iata list",
+            throw new RuntimeException(Messages.getEmptyListConstraintElements("iata list",
                     Flag.IATA_LIST, Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY));
         }
         List<String> iataList = new ArrayList<>();
@@ -105,6 +102,7 @@ public class AirportSyncConfig extends DatasyncConfig{
         }
     }
 
+    @SuppressWarnings("unchecked")
     public List<AirportType> getAirportTypeList() {
         return (List<AirportType>) this.additionalOptions.get(Flag.AIRPORT_TYPES);
     }
@@ -113,6 +111,7 @@ public class AirportSyncConfig extends DatasyncConfig{
         return (SyncMode) this.additionalOptions.get(Flag.SYNC_MODE);
     }
 
+    @SuppressWarnings("unchecked")
     public List<String> getIataList() {
         return (List<String>) this.additionalOptions.get(Flag.IATA_LIST);
     }

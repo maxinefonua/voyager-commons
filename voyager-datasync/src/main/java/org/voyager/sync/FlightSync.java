@@ -100,27 +100,25 @@ public class FlightSync {
         CompletionService<Either<AirportScheduleFailure,AirportScheduleResult>> completionService =
                 new ExecutorCompletionService<>(executorService);
 
-        routeMap.forEach((airportCode1,destinationSet)->{
-            destinationSet.forEach(airportCode2 -> {
-                Callable<Either<AirportScheduleFailure,AirportScheduleResult>> airportScheduleTask = ()->
-                        FlightRadarService.extractAirportResponseWithRetry(airportCode1,airportCode2)
-                                .mapLeft(serviceError ->
-                                        new AirportScheduleFailure(airportCode1,airportCode2,serviceError))
-                                .flatMap(
-                                        airportScheduleFROption -> {
-                                            if (airportScheduleFROption.isEmpty()) {
-                                                LOGGER.info("{}:{} returned no flights",airportCode1,airportCode2);
-                                                return right(new AirportScheduleResult(airportCode1,airportCode2,
-                                                        0,0,0,Set.of(),List.of()));
-                                            }
-                                            return processAirportSchedule(airportCode1,airportCode2,
-                                                    airportScheduleFROption.get(),flightService,routeService,
-                                                    airportService);
+        routeMap.forEach((airportCode1,destinationSet)->
+                destinationSet.forEach(airportCode2 -> {
+                    Callable<Either<AirportScheduleFailure,AirportScheduleResult>> airportScheduleTask = ()->
+                            FlightRadarService.extractAirportResponseWithRetry(airportCode1,airportCode2)
+                                    .mapLeft(serviceError ->
+                                            new AirportScheduleFailure(airportCode1,airportCode2,serviceError))
+                                    .flatMap(airportScheduleFROption -> {
+                                        if (airportScheduleFROption.isEmpty()) {
+                                            LOGGER.info("{}:{} returned no flights",airportCode1,airportCode2);
+                                            return right(new AirportScheduleResult(airportCode1,airportCode2,
+                                                    0,0,0,Set.of(),List.of()));
                                         }
-                                );
-                futureList.add(completionService.submit(airportScheduleTask));
-            });
-        });
+                                        return processAirportSchedule(airportCode1,airportCode2,
+                                                airportScheduleFROption.get(),flightService,routeService,
+                                                airportService);
+                                    }
+                            );
+            futureList.add(completionService.submit(airportScheduleTask));
+        }));
 
         int totalTasks = futureList.size();
         int completedTasks = 0;
@@ -195,34 +193,33 @@ public class FlightSync {
                 return Either.left(new AirportScheduleFailure(airportCode1,airportCode2,either.getLeft()));
             }
             Integer routeId = either.get().getId();
-            airportScheduleFR.getArrivals().forEach((countryName, countryFR) -> {
-                countryFR.getIataToFlightsMap().get(airportCode2).getFlightNumberToPlannedMap()
-                        .forEach((flightNumber,plannedFR)->{
-                            AirlineFR airlineFR = plannedFR.getAirline();
-                            try {
-                                Airline airline = Airline.fromPathVariableFR(airlineFR.getUrl());
-                                if (flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.AIRLINE_SYNC)
-                                        && !flightSyncConfig.getAirlineList().contains(airline)) {
-                                    LOGGER.debug("in {} mode, skipping flight of excluded airline {}",
-                                            flightSyncConfig.getSyncMode().name(),airline.name());
-                                    return;
-                                }
-                                Either<String, Integer> processEither = processFlightArrivalAt(airportCode2,
+            airportScheduleFR.getArrivals().forEach((countryName, countryFR) ->
+                    countryFR.getIataToFlightsMap().get(airportCode2).getFlightNumberToPlannedMap()
+                            .forEach((flightNumber,plannedFR)->{
+                                AirlineFR airlineFR = plannedFR.getAirline();
+                                try {
+                                    Airline airline = Airline.fromPathVariableFR(airlineFR.getUrl());
+                                    if (flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.AIRLINE_SYNC)
+                                            && !flightSyncConfig.getAirlineList().contains(airline)) {
+                                        LOGGER.debug("in {} mode, skipping flight of excluded airline {}",
+                                                flightSyncConfig.getSyncMode().name(),airline.name());
+                                        return;
+                                    }
+                                    Either<String, Integer> processEither = processFlightArrivalAt(airportCode2,
                                         airportCode1, airline, airlineSet, flightNumber, plannedFR, routeId,
                                         flightService);
-                                if (processEither.isLeft()) {
-                                    failedFlightNumbers.add(processEither.getLeft());
-                                } else {
-                                    int value = processEither.get();
-                                    if (value > 0) flightCreates.getAndIncrement();
-                                    else if (value < 0) flightPatches.getAndIncrement();
-                                    else flightSkips.getAndIncrement();
+                                    if (processEither.isLeft()) {
+                                        failedFlightNumbers.add(processEither.getLeft());
+                                    } else {
+                                        int value = processEither.get();
+                                        if (value > 0) flightCreates.getAndIncrement();
+                                        else if (value < 0) flightPatches.getAndIncrement();
+                                        else flightSkips.getAndIncrement();
+                                    }
+                                } catch (IllegalArgumentException e) {
+                                    LOGGER.trace("ignoring unmapped airline {} flight",airlineFR.getName());
                                 }
-                            } catch (IllegalArgumentException e) {
-                                LOGGER.trace("ignoring unmapped airline {} flight",airlineFR.getName());
-                            }
-                        });
-            });
+                            }));
         }
 
         if (airportScheduleFR.getDepartures() == null || airportScheduleFR.getDepartures().isEmpty()) {
@@ -235,33 +232,32 @@ public class FlightSync {
                 return Either.left(new AirportScheduleFailure(airportCode1,airportCode2,either.getLeft()));
             }
             Integer routeId = either.get().getId();
-            airportScheduleFR.getDepartures().forEach((countryName, countryFR) -> {
-                countryFR.getIataToFlightsMap().get(airportCode2).getFlightNumberToPlannedMap()
-                        .forEach((flightNumber,plannedFR)->{
-                            AirlineFR airlineFR = plannedFR.getAirline();
-                            try {
-                                Airline airline = Airline.fromPathVariableFR(airlineFR.getUrl());
-                                if (flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.AIRLINE_SYNC)
-                                        && !flightSyncConfig.getAirlineList().contains(airline)) {
-                                    LOGGER.info("in {} mode, skipping flight of excluded airline {}",
-                                            flightSyncConfig.getSyncMode().name(),airline.name());
-                                    return;
+            airportScheduleFR.getDepartures().forEach((countryName, countryFR) ->
+                    countryFR.getIataToFlightsMap().get(airportCode2).getFlightNumberToPlannedMap()
+                            .forEach((flightNumber, plannedFR) -> {
+                                AirlineFR airlineFR = plannedFR.getAirline();
+                                try {
+                                    Airline airline = Airline.fromPathVariableFR(airlineFR.getUrl());
+                                    if (flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.AIRLINE_SYNC)
+                                            && !flightSyncConfig.getAirlineList().contains(airline)) {
+                                        LOGGER.info("in {} mode, skipping flight of excluded airline {}",
+                                                flightSyncConfig.getSyncMode().name(), airline.name());
+                                        return;
+                                    }
+                                    Either<String, Integer> processEither = processFlightDepartureFrom(airportCode2,
+                                            airportCode1, airline, airlineSet, flightNumber, plannedFR, routeId, flightService);
+                                    if (processEither.isLeft()) {
+                                        failedFlightNumbers.add(processEither.getLeft());
+                                    } else {
+                                        int value = processEither.get();
+                                        if (value > 0) flightCreates.getAndIncrement();
+                                        else if (value < 0) flightPatches.getAndIncrement();
+                                        else flightSkips.getAndIncrement();
+                                    }
+                                } catch (IllegalArgumentException e) {
+                                    LOGGER.trace("ignoring unmapped airline {} flight", airlineFR.getName());
                                 }
-                                Either<String,Integer> processEither = processFlightDepartureFrom(airportCode2,
-                                        airportCode1,airline,airlineSet,flightNumber,plannedFR,routeId,flightService);
-                                if (processEither.isLeft()) {
-                                    failedFlightNumbers.add(processEither.getLeft());
-                                } else {
-                                    int value = processEither.get();
-                                    if (value > 0) flightCreates.getAndIncrement();
-                                    else if (value < 0) flightPatches.getAndIncrement();
-                                    else flightSkips.getAndIncrement();
-                                }
-                            } catch (IllegalArgumentException e) {
-                                LOGGER.trace("ignoring unmapped airline {} flight",airlineFR.getName());
-                            }
-                        });
-            });
+                            }));
         }
         return Either.right(new AirportScheduleResult(airportCode1,airportCode2,flightCreates.get(),flightPatches.get(),
                 flightSkips.get(),airlineSet,failedFlightNumbers));
@@ -477,7 +473,7 @@ public class FlightSync {
                     String[] tokens = item.split(":");
                     if (tokens.length != 2) {
                         throw new RuntimeException(String.format("Retry source file %s must be formatted line by " +
-                                "line with a valid route, ie 'HNL:HND'",ConstantsDatasync.FAILED_AIRPORT_SCHEDULE_FILE));
+                                "line with a valid route, ie 'HNL:HND'",flightSyncConfig.getFileName()));
                     }
                     Set<String> destinations = routeMap.getOrDefault(tokens[0],new HashSet<>());
                     destinations.add(tokens[1]);
@@ -525,16 +521,15 @@ public class FlightSync {
                 completedTasks++;
                 LOGGER.info("Airline progress: {}/{} task {} completed",
                         completedTasks,totalTasks,airlineRouteResult.airline);
-                int presize = finalRouteMap.size();
-                airlineRouteResult.originToDestinationSet.forEach((origin, destinationSet) -> {
-                    finalRouteMap.merge(origin, destinationSet, (oldSet, newSet) -> {
-                        oldSet.addAll(newSet);
-                        return oldSet;
-                    });
-                });
-                if (finalRouteMap.size() > presize) {
+                int preSize = finalRouteMap.size();
+                airlineRouteResult.originToDestinationSet.forEach((origin, destinationSet) ->
+                        finalRouteMap.merge(origin, destinationSet, (oldSet, newSet) -> {
+                            oldSet.addAll(newSet);
+                            return oldSet;
+                        }));
+                if (finalRouteMap.size() > preSize) {
                     LOGGER.debug("merged airline {}, {} additional origin keys",
-                            airlineRouteResult.airline,finalRouteMap.size()-presize);
+                            airlineRouteResult.airline,finalRouteMap.size()-preSize);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(String.format("exception thrown while fetching airline routes, only " +
@@ -624,9 +619,6 @@ public class FlightSync {
                     String.format("required latitude/longitude missing for %s airport creation with data: %s",
                             iata,airportFR))));
         }
-
-        //    private String subdivision;
-        //    private String zoneId;
         GeoNearbyQuery geoNearbyQuery = GeoNearbyQuery.builder().latitude(latitude).longitude(longitude).build();
         Either<ServiceError, List<GeoPlace>> geoNameEither = geoService.findNearbyPlaces(geoNearbyQuery);
         if (geoNameEither.isLeft()) {

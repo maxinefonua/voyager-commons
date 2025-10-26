@@ -57,9 +57,8 @@ public class CountrySync {
                                     .thenApply(either -> either.map(geoNameFull -> geoNameFull)));
                 });
         List<GeoCountry> failedGeoCountryList = new ArrayList<>();
-        completableFutureList.forEach((geoCountry, cf) -> {
-            processGNCompletableFuture(geoCountry,cf, failedGeoCountryList,nominatimCountryCodes,countryFormList);
-        });
+        completableFutureList.forEach((geoCountry, cf) ->
+                processGNCompletableFuture(geoCountry,cf, failedGeoCountryList,nominatimCountryCodes,countryFormList));
         printResults(countryCodeSet,countryFormList, failedGeoCountryList);
     }
 
@@ -68,14 +67,14 @@ public class CountrySync {
         AtomicInteger created = new AtomicInteger(0);
         AtomicReference<List<CountryForm>> failedForms = new AtomicReference<>(new ArrayList<>());
         List<CountryForm> toProcess = countryFormList.stream().toList();
-        LOGGER.info(String.format("Processing %d country forms", toProcess.size()));
+        LOGGER.info("Processing {} country forms", toProcess.size());
         toProcess.forEach(countryForm -> processCountry(countryForm,created,failedForms));
-        failedGeoCountryList.forEach(geoCountry -> LOGGER.error(
-                String.format("failed fetching full geoname for %s", geoCountry)));
-        failedForms.get().forEach(countryForm ->
-                LOGGER.error(String.format("failed country form: %s",countryForm)));
-        LOGGER.info(String.format("created %d countries, skipped %d existing, %d processed, %d failed creates, %d failed fetch full geoname",
-                created.get(),skippedExisting,toProcess.size(),failedForms.get().size(), failedGeoCountryList.size()));
+        failedGeoCountryList.forEach(geoCountry ->
+                LOGGER.error("failed fetching full geoname for {}", geoCountry));
+        failedForms.get().forEach(countryForm -> LOGGER.error("failed country form: {}", countryForm));
+        LOGGER.info("created {} countries, skipped {} existing, {} processed, {} failed creates, {} failed fetch full geoname",
+                created.get(), skippedExisting, toProcess.size(), failedForms.get().size(),
+                failedGeoCountryList.size());
     }
 
     private static void processGNCompletableFuture(GeoCountry geoCountry,
@@ -167,15 +166,15 @@ public class CountrySync {
         Either<ServiceError,Country> either = countryService.addCountry(countryForm);
         if (either.isLeft()) {
             Exception exception = either.getLeft().getException();
-            LOGGER.error(String.format("Failed to add country from form: %s, error: %s",
-                    countryForm,exception.getMessage()),exception);
+            LOGGER.error("Failed to add country from form: {}, error: {}",
+                    countryForm, exception.getMessage(), exception);
             failedForms.getAndUpdate(countryForms -> {
                 countryForms.add(countryForm);
                 return countryForms;
             });
             return;
         }
-        LOGGER.info(String.format("successfully created %s",either.get()));
+        LOGGER.info("successfully created {}", either.get());
         created.getAndIncrement();
     }
 

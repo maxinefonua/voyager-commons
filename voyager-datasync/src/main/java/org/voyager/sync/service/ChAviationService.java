@@ -13,6 +13,7 @@ import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airport.AirportType;
 import org.voyager.sync.model.chaviation.AirportCH;
 import java.io.IOException;
+import java.util.Objects;
 
 public class ChAviationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChAviationService.class);
@@ -28,9 +29,10 @@ public class ChAviationService {
     public static Either<ServiceError,AirportCH> getAirportCH(String iata) {
         String requestURL = String.format("%s/%s", chAviationConfig.getAirportsPath(),iata);
         try {
-            LOGGER.debug(String.format("fetching %s details from ChAviationService",iata));
+            LOGGER.debug("fetching {} details from ChAviationService", iata);
             Document doc = Jsoup.connect(requestURL).timeout(0).get();
-            String dataUrl  = doc.getElementsByAttributeValue("href","#overview").first().attr("data-url");
+            String dataUrl  = Objects.requireNonNull(doc.getElementsByAttributeValue("href", "#overview").first())
+                    .attr("data-url");
             String airportName = doc.select(".section__heading").text();
             return extractAirportDetails(dataUrl,iata,airportName);
         } catch (IOException e) {
@@ -49,22 +51,27 @@ public class ChAviationService {
             AirportCH airportCH = AirportCH.builder().iata(iata).name(airportName).build();
             elements.forEach(element -> {
                 Element parent = element.parent();
+                assert parent != null;
                 Element value = parent.selectFirst(".data-value");
                 switch (element.text()) {
                     case "Airport type": {
+                        assert value != null;
                         String type = value.text();
                         if (type.contains("Civil")) airportCH.setType(AirportType.CIVIL);
                         else if (type.contains("Military")) airportCH.setType(AirportType.MILITARY);
                         else if (type.contains("Airport no longer in use")) airportCH.setType(AirportType.HISTORICAL);
                         else {
-                            LOGGER.info(String.format(
-                                    "ChService returned %s with aiport type '%s'. Setting to OTHER.",iata,type));
+                            LOGGER.info("ChService returned {} with airport type '{}'. Setting to OTHER.", iata, type);
                             airportCH.setType(AirportType.OTHER);
                         }
                         break;
                     }
                     case "Country": {
-                        String countryLink = value.selectFirst(".link").attribute("href").getValue();
+                        assert value != null;
+                        String countryLink = Objects.requireNonNull(
+                                Objects.requireNonNull(value.selectFirst(".link"))
+                                        .attribute("href"))
+                                .getValue();
                         String countryString = "/countries/";
                         String code = countryLink.substring(countryLink.indexOf(countryString)+countryString.length());
                         airportCH.setCountryCode(code);
