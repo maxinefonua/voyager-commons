@@ -4,5 +4,5 @@ public enum Source {
     GEONAMES,
     PHOTON,
     NOMINATIM,
-    MANUAL;
+    MANUAL
 }

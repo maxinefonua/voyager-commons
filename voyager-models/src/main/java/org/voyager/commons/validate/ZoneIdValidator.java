@@ -20,7 +20,7 @@ public class ZoneIdValidator  implements ConstraintValidator<ValidZoneId, String
             return allowNull;
         }
         try {
-            ZoneId.of(value);
+            ZoneId ignored = ZoneId.of(value);
             return true;
         } catch (DateTimeException e) {
             return false;

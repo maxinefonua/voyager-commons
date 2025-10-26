@@ -5,5 +5,5 @@ public enum AirportType {
     CIVIL,
     MILITARY,
     HISTORICAL,
-    OTHER;
+    OTHER
 }

@@ -34,6 +34,7 @@ public class GeoFull {
     @JsonProperty("cc2")
     private String additionalCountryCode;
 
+    @SuppressWarnings("SpellCheckingInspection")
     @JsonProperty("astergdem")
     private Integer elevationAGDEM;
     private Integer elevation;
@@ -48,12 +49,15 @@ public class GeoFull {
     @JsonProperty("fclName")
     private String featureClassName;
 
+    @SuppressWarnings("SpellCheckingInspection")
     @JsonProperty("fcode")
     private String featureCode;
 
+    @SuppressWarnings("SpellCheckingInspection")
     @JsonProperty("fcodeName")
     private String featureCodeName;
 
+    @SuppressWarnings("SpellCheckingInspection")
     @JsonProperty("srtm3")
     private Integer elevationSRTM;
 
@@ -66,6 +70,7 @@ public class GeoFull {
     @JsonProperty("timezone")
     private TimezoneGN timezoneGN;
 
+    @SuppressWarnings("SpellCheckingInspection")
     @JsonProperty("bbox")
     private BoundingBox boundingBox;
 

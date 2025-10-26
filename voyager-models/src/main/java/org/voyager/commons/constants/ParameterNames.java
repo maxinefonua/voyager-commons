@@ -13,6 +13,7 @@ public class ParameterNames {
     public static final String AIRLINE_PARAM_NAME = "airline";
     public static final String ROUTE_ID_PARAM_NAME = "routeId";
     public static final String IATA_PARAM_NAME = "iata";
+    @SuppressWarnings("unused")
     public static final String ID_PATH_VAR_NAME = "id";
     public static final String FLIGHT_NUMBER_PARAM_NAME = "flightNumber";
     public static final String ORIGIN_PARAM_NAME = "origin";
@@ -22,7 +23,7 @@ public class ParameterNames {
     public static final String EXCLUDE_FLIGHT_PARAM_NAME = "excludeFlight";
     public static final String IS_ACTIVE_PARAM_NAME = "isActive";
     public static final String LOCATION_STATUS_PARAM_NAME = "status";
-    public static final String SOURCE_PROPERTY_NAME = SOURCE_PARAM_NAME;
     public static final String SOURCE_ID_PARAM_NAME = "sourceId";
+    @SuppressWarnings("unused")
     public static final String AIRPORTS_PROPERTY_NAME = "airports";
 }

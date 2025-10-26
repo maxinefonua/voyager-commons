@@ -35,7 +35,7 @@ public class GeoSearchQuery {
     private Integer startRow = 0; //startRow	integer (optional)	Used for paging results. If you want to get results 30 to 40, use startRow=30 and maxRows=10. Default is 0, the maximal allowed value is 5000 for the free services and 25000 for the premium services
 
     private List<String> countryList; //country	string : country code, ISO-3166 (optional)	Default is all countries. The country parameter may occur more than once, example: country=FR&country=GP
-    private String countryBias; //countryBias	string (option), two letter country code ISO-3166	records from the countryBias are listed first
+    private String countryBias; //countryBias	string (option), two-letter country code ISO-3166	records from the countryBias are listed first
     private Continent continentCode; //continentCode	string : continent code : AF,AS,EU,NA,OC,SA,AN (optional)	restricts the search for toponym of the given continent.
 
     private String adminCode1; //adminCode1, adminCode2, adminCode3, adminCode4, adminCode5	string : admin code (optional)	code of administrative subdivision
@@ -44,12 +44,15 @@ public class GeoSearchQuery {
     private String adminCode4;
     private String adminCode5;
 
-    private FeatureClass featureClass;//featureClass	character A,H,L,P,R,S,T,U,V (optional)	featureclass(es) (default= all feature classes); this parameter may occur more than once, example: featureClass=P&featureClass=A
-    private FeatureCode featureCode; //featureCode	string (optional)	featurecode(s) (default= all feature codes); this parameter may occur more than once, example: featureCode=PPLC&featureCode=PPLX
+    private FeatureClass featureClass;//featureClass	character A,H,L,P,R,S,T,U,V (optional)	feature class(es) (default= all feature classes); this parameter may occur more than once, example: featureClass=P&featureClass=A
+    // TODO: turn into a list of feature codes
+    @SuppressWarnings("SpellCheckingInspection")
+    private FeatureCode featureCode; //featureCode	string (optional)	feature code(s) (default= all feature codes); this parameter may occur more than once, example: featureCode=PPLC&featureCode=PPLX
     private CitySize cities; //cities	string (optional)	optional filter parameter with three possible values 'cities1000', 'cities5000','cities15000' used to categorize the populated places into three groups according to size/relevance. See the download readme for further infos
 
     // TODO: update to language datatype
     @Builder.Default
+    @SuppressWarnings("SpellCheckingInspection")
     private String lang = "en"; //lang	string ISO-639 2-letter language code; en,de,fr,it,es,zh,zh-Hant... (optional)	place name and country name will be returned in the specified language. Default is English. With the pseudo language code 'local' the local language will be returned. Feature classes and codes are only available in English and Bulgarian. Any help in translating is welcome.
 
     @Builder.Default
@@ -74,7 +77,8 @@ public class GeoSearchQuery {
     private Float south;
 
     // TODO: update to language datatype
-    private String searchLang; //searchlang	string (optional)	in combination with the name parameter, the search will only consider names in the specified language. Used for instance to query for IATA airport codes.
-    private SearchOrder orderBy; //orderby	string (optional)[population,elevation,relevance]	in combination with the name_startsWith, if set to 'relevance' than the result is sorted by relevance.
-    private Boolean inclBbox; //inclBbox include Bbox info, regardelss of style setting. (normally only included with style=FULL
+    private String searchLang; //search lang	string (optional)	in combination with the name parameter, the search will only consider names in the specified language. Used for instance to query for IATA airport codes.
+    private SearchOrder orderBy; //order by	string (optional)[population,elevation,relevance]	in combination with the name_startsWith, if set to 'relevance' than the result is sorted by relevance.
+    @SuppressWarnings("SpellCheckingInspection")
+    private Boolean inclBbox; //inclBbox include Bbox info, regardless of style setting. (normally only included with style=FULL
 }

@@ -9,6 +9,7 @@ import lombok.ToString;
 public class FeatureSearch {
     String name;
 
+    @SuppressWarnings("SpellCheckingInspection")
     @JsonProperty("addresstype")
     String addressType;
 
@@ -39,5 +40,7 @@ public class FeatureSearch {
     Integer placeRank;
 
     String licence;
+
+    @SuppressWarnings("SpellCheckingInspection")
     Double[] boundingbox;
 }

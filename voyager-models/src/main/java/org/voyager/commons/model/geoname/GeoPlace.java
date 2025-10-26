@@ -24,8 +24,10 @@ public class GeoPlace {
     private String fclName;
     private Map<String,String> adminCodes1;
     private String countryName;
+    @SuppressWarnings("SpellCheckingInspection")
     private String fcodeName;
     private String adminName1;
     private String lat;
+    @SuppressWarnings("SpellCheckingInspection")
     private String fcode;
 }

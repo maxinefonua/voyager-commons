@@ -1,7 +1,6 @@
 package org.voyager.commons.model.country;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import java.util.Arrays;
 
 public enum Continent {
@@ -13,7 +12,7 @@ public enum Continent {
     NA("North America"),
     EU("Europe");
 
-    private String displayText;
+    private final String displayText;
     Continent(String displayText) {
         this.displayText = displayText;
     }

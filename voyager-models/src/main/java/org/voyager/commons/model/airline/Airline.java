@@ -3,6 +3,8 @@ package org.voyager.commons.model.airline;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
+@Getter
+@SuppressWarnings("SpellCheckingInspection")
 public enum Airline {
     DELTA("Delta Air Lines","dl-dal"),
     JAPAN("Japan Airlines","jl-jal"),
@@ -29,11 +31,9 @@ public enum Airline {
     ASIANA("Asiana Airlines","oz-aar"),
     EMIRATES("Emirates","ek-uae");
 
-    @Getter
-    private String pathVariableFR;
+    private final String pathVariableFR;
 
-    @Getter
-    private String displayText;
+    private final String displayText;
 
     Airline(String displayText, String pathVariableFR) {
         this.displayText = displayText;

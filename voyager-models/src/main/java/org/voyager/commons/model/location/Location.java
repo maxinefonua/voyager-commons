@@ -17,6 +17,7 @@ public class Location {
     private String countryCode;
     private Double latitude;
     private Double longitude;
+    @SuppressWarnings("SpellCheckingInspection")
     private Double[] bbox;
     private Status status;
     private Source source;

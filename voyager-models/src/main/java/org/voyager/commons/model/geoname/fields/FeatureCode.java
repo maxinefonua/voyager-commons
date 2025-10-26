@@ -1,5 +1,6 @@
 package org.voyager.commons.model.geoname.fields;
 
+@SuppressWarnings("SpellCheckingInspection")
 public enum FeatureCode {
     // TODO: finish filling out
     //    A country, state, region,...
@@ -30,7 +31,7 @@ public enum FeatureCode {
 
 
     //    H stream, lake, ...
-    AIRS,	// seaplane landing area	a place on a waterbody where floatplanes land and take off
+    AIRS,	// seaplane landing area	a place on a water body where float planes land and take off
     ANCH,	// anchorage	an area where vessels may anchor
     BAY,    // bay	a coastal indentation between two capes or headlands, larger than a cove but smaller than a gulf
     BAYS,	// bays	coastal indentations between two capes or headlands, larger than a cove but smaller than a gulf
@@ -55,7 +56,7 @@ public enum FeatureCode {
     CNLSB,	// underground irrigation canal(s)	a gently inclined underground tunnel bringing water for irrigation from aquifers
     CNLX,	// section of canal
     COVE,	// cove(s)	a small coastal indentation, smaller than a bay
-    CRKT,	// tidal creek(s)	a meandering channel in a coastal wetland subject to bi-directional tidal currents
+    CRKT,	// tidal creek(s)	a meandering channel in a coastal wetland subject to bidirectional tidal currents
     CRNT,	// current	a horizontal flow of water in a given direction with uniform velocity
     CUTF,	// cutoff	a channel formed as a result of a stream cutting through a meander neck
     DCK,    // dock(s)	a waterway between two piers, or cut into the land for the berthing of ships
@@ -66,7 +67,7 @@ public enum FeatureCode {
     DTCHD,	// drainage ditch	a ditch which serves to drain the land
     DTCHI,	// irrigation ditch	a ditch which serves to distribute irrigation water
     DTCHM,	// ditch mouth(s)	an area where a drainage ditch enters a lagoon, lake or bay
-    ESTY,	// estuary	a funnel-shaped stream mouth or embayment where fresh water mixes with sea water under tidal influences
+    ESTY,	// estuary	a funnel-shaped stream mouth or embayment where fresh water mixes with seawater under tidal influences
     FISH,	// fishing area	a fishing ground, bank or area where fishermen go to catch fish
     FJD,    // fjord	a long, narrow, steep-walled, deep-water arm of the sea at high latitudes, usually along mountainous coasts
     FJDS,	// fjords	long, narrow, steep-walled, deep-water arms of the sea at high latitudes, usually along mountainous coasts
@@ -82,8 +83,8 @@ public enum FeatureCode {
     INLT,	// inlet	a narrow waterway extending into the land, or connecting a bay or lagoon with a larger body of water
     INLTQ,	// former inlet	an inlet which has been filled in, or blocked by deposits
     LBED,	// lake bed(s)	a dried up or drained area of a former lake
-    LGN,    // lagoon	a shallow coastal waterbody, completely or partly separated from a larger body of water by a barrier island, coral reef or other depositional feature
-    LGNS,	// lagoons	shallow coastal waterbodies, completely or partly separated from a larger body of water by a barrier island, coral reef or other depositional feature
+    LGN,    // lagoon	a shallow coastal water body, completely or partly separated from a larger body of water by a barrier island, coral reef or other depositional feature
+    LGNS,	// lagoons	shallow coastal water bodies, completely or partly separated from a larger body of water by a barrier island, coral reef or other depositional feature
     LGNX,	// section of lagoon
     LK,	    // lake	a large inland body of standing water
     LKC,    // crater lake	a lake in a crater or caldera
@@ -94,7 +95,7 @@ public enum FeatureCode {
     LKOI,	// intermittent oxbow lake
     LKS,    // lakes	large inland bodies of standing water
     LKSB,	// underground lake	a standing body of water in a cave
-    LKSC,	// crater lakes	lakes in a crater or caldera
+    LKSC,	// crater lakes:	lakes in a crater or caldera
     LKSI,	// intermittent lakes
     LKSN,	// salt lakes	inland bodies of salt water with no outlet
     LKSNI,	// intermittent salt lakes
@@ -106,12 +107,12 @@ public enum FeatureCode {
     MRSHN,	// salt marsh	a flat area, subject to periodic salt water inundation, dominated by grassy salt-tolerant plants
     NRWS,	// narrows	a navigable narrow part of a bay, strait, river, etc.
     OCN,	// ocean	one of the major divisions of the vast expanse of salt water covering part of the earth
-    OVF,	// overfalls	an area of breaking waves caused by the meeting of currents or by waves moving against the current
-    PND,	// pond	a small standing waterbody
+    OVF,	// over-falls	an area of breaking waves caused by the meeting of currents or by waves moving against the current
+    PND,	// pond:	a small, standing water body
     PNDI,	// intermittent pond
     PNDN,	// salt pond	a small standing body of salt water often in a marsh or swamp, usually along a seacoast
     PNDNI,	// intermittent salt pond(s)
-    PNDS,	// ponds	small standing waterbodies
+    PNDS,	// ponds	small standing water bodies
     PNDSF,	// fishponds	ponds or enclosures in which fish are kept or raised
     PNDSI,	// intermittent ponds
     PNDSN,	// salt ponds	small standing bodies of salt water often in a marsh or swamp, usually along a seacoast
@@ -134,10 +135,10 @@ public enum FeatureCode {
     SHOL,	// shoal(s)	a surface-navigation hazard composed of unconsolidated material
     SILL,	// sill	the low part of an underwater gap or saddle separating basins, including a similar feature at the mouth of a fjord
     SPNG,	// spring(s)	a place where ground water flows naturally out of the ground
-    SPNS,	// sulphur spring(s)	a place where sulphur ground water flows naturally out of the ground
-    SPNT,	// hot spring(s)	a place where hot ground water flows naturally out of the ground
+    SPNS,	// sulphur spring(s)	a place where sulphur groundwater flows naturally out of the ground
+    SPNT,	// hot spring(s)	a place where hot groundwater flows naturally out of the ground
     STM,	// stream	a body of running water moving to a lower level in a channel on land
-    STMA,	// anabranch	a diverging branch flowing out of a main stream and rejoining it downstream
+    STMA,	// ana-branch	a diverging branch flowing out of a main stream and rejoining it downstream
     STMB,	// stream bend	a conspicuously curved or bent segment of a stream
     STMC,	// canalized stream	a stream that has been substantially ditched, diked, or straightened
     STMD,	// distributary(-ies)	a branch which flows away from the main stream, as in a delta or irrigation canal
@@ -156,7 +157,7 @@ public enum FeatureCode {
     WAD,    // wadi	a valley or ravine, bounded by relatively steep banks, which in the rainy season becomes a watercourse; found primarily in North Africa and the Middle East
     WADB,	// wadi bend	a conspicuously curved or bent segment of a wadi
     WADJ,	// wadi junction	a place where two or more wadies join
-    WADM,	// wadi mouth	the lower terminus of a wadi where it widens into an adjoining floodplain, depression, or waterbody
+    WADM,	// wadi mouth	the lower terminus of a wadi where it widens into an adjoining floodplain, depression, or water body
     WADS,	// wadies	valleys or ravines, bounded by relatively steep banks, which in the rainy season become watercourses; found primarily in North Africa and the Middle East
     WADX,	// section of wadi
     WHRL,	// whirlpool	a turbulent, rotating movement of water in a stream
@@ -171,7 +172,7 @@ public enum FeatureCode {
 
     // L parks,area, ...
     AGRC,	// agricultural colony	a tract of land set aside for agricultural settlement
-    AMUS,	// amusement park	Amusement Park are theme parks, adventure parks offering entertainment, similar to funfairs but with a fix location
+    AMUS,	// amusement park:	Amusement Park are theme parks, adventure parks offering entertainment, similar to funfairs but with a fix location
     AREA,	// area	a tract of land without homogeneous character or boundaries
     BSND,	// drainage basin	an area drained by a stream
     BSNP,	// petroleum basin	an area underlain by an oil-rich structural basin
@@ -180,13 +181,13 @@ public enum FeatureCode {
     CMN,	// common	a park or pasture for community use
     CNS,	// concession area	a lease of land by a government for economic development, e.g., mining, forestry
     COLF,	// coalfield	a region in which coal deposits of possible economic value occur
-    CONT,	// continent	continent: Europe, Africa, Asia, North America, South America, Oceania, Antarctica
+    CONT,	// continent	Europe, Africa, Asia, North America, South America, Oceania, Antarctica
     CST,	// coast	a zone of variable width straddling the shoreline
     CTRB,	// business center	a place where a number of businesses are located
     DEVH,	// housing development	a tract of land on which many houses of similar design are built according to a development plan
     FLD,	// field(s)	an open as opposed to wooded area
     FLDI,	// irrigated field(s)	a tract of level or terraced land which is irrigated
-    GASF,	// gasfield	an area containing a subterranean store of natural gas of economic value
+    GASF,	// gas-field	an area containing a subterranean store of natural gas of economic value
     GRAZ,	// grazing area	an area of grasses and shrubs used for grazing
     GVL,	// gravel area	an area covered with gravel
     INDS,	// industrial area	an area characterized by industrial activity

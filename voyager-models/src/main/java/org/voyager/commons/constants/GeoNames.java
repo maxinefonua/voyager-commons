@@ -1,5 +1,6 @@
 package org.voyager.commons.constants;
 
+@SuppressWarnings("unused")
 public final class GeoNames {
     public static final String NEARBY_PLACES = "/admin/geonames/nearby";
     public static final String TIMEZONE = "/admin/geonames/timezone";
@@ -40,8 +41,11 @@ public final class GeoNames {
         public static final String WEST = "west";
         public static final String NORTH = "north";
         public static final String SOUTH = "south";
+        @SuppressWarnings("SpellCheckingInspection")
         public static final String SEARCH_LANG = "searchlang";
+        @SuppressWarnings("SpellCheckingInspection")
         public static final String ORDER_BY = "orderby";
+        @SuppressWarnings("SpellCheckingInspection")
         public static final String INCL_BBOX = "inclBbox";
     }
 }

@@ -12,14 +12,16 @@ public class EnumPatchValidator implements ConstraintValidator<ValidEnum,String>
 
     @Override
     public void initialize(ValidEnum constraintAnnotation) {
-        ConstraintValidator.super.initialize(constraintAnnotation);
+        this.allowNull = constraintAnnotation.allowNull();
         allowedValues = Arrays.stream(constraintAnnotation.enumClass().getEnumConstants())
                 .map(Enum::name).toList();
     }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
-        if (value == null) return true; // allows for null in patch objects, use @NotNull to disallow null values
+        if (value == null) {
+           return allowNull;
+        }
         return allowedValues.contains(value.toUpperCase()); // enables case insensitive validation
     }
 }

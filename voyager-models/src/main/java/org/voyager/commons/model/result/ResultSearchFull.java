@@ -15,6 +15,8 @@ import java.time.ZoneId;
 @ToString(includeFieldNames = false)
 public class ResultSearchFull {
     ResultSearch resultSearch;
+
+    @SuppressWarnings("SpellCheckingInspection")
     Double[] bbox;
     ZoneId zoneId;
 }

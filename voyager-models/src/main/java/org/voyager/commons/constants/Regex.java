@@ -1,10 +1,10 @@
 package org.voyager.commons.constants;
 
+@SuppressWarnings("unused")
 public final class Regex {
     public static final String COUNTRY_CODE = "^[A-Z]{2}$";
     public static final String COUNTRY_CODE_CASE_INSENSITIVE = "^[a-zA-Z]{2}$";
 
-    public static final String NOEMPTY_NOWHITESPACE = "^\\S+$";
     public static final String NONEMPTY_TRIMMED = "^\\S+(?:\\s+\\S+)*$";
 
     public static final String AIRPORT_CODE = "^[A-Z]{3}$";
@@ -30,8 +30,6 @@ public final class Regex {
         public static final String FLIGHT_NUMBER_ELEMENTS = "all elements must be valid flight numbers";
         public static final String FLIGHT_NUMBER_ELEMENTS_NONEMPTY = "must be a nonempty list of valid flight numbers";
 
-
-        public static final String NOEMPTY_NOWHITESPACE = "cannot be empty or contain whitespaces";
         public static final String NONEMPTY_TRIMMED = "cannot be empty or contain leading or trailing whitespace";
     }
 }
