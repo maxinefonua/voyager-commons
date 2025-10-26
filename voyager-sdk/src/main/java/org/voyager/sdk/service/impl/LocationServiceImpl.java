@@ -18,14 +18,15 @@ import org.voyager.sdk.utils.ServiceUtils;
 import org.voyager.sdk.utils.ServiceUtilsFactory;
 import java.util.List;
 
-public class LocationSerivceImpl implements LocationService {
+public class LocationServiceImpl implements LocationService {
     private final ServiceUtils serviceUtils;
 
-    LocationSerivceImpl() {
+    LocationServiceImpl() {
         this.serviceUtils = ServiceUtilsFactory.getInstance();
     }
 
-    LocationSerivceImpl(ServiceUtils serviceUtils) {
+    @SuppressWarnings("unused")
+    LocationServiceImpl(ServiceUtils serviceUtils) {
         this.serviceUtils = serviceUtils;
     }
 
@@ -33,12 +34,14 @@ public class LocationSerivceImpl implements LocationService {
     @Override
     public Either<ServiceError, List<Location>> getLocations() {
         String requestURL = Path.Admin.LOCATIONS;
-        return serviceUtils.fetch(requestURL, HttpMethod.GET, new TypeReference<List<Location>>() {});
+        return serviceUtils.fetch(requestURL, HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, List<Location>> getLocations(LocationQuery locationQuery) {
-        return serviceUtils.fetch(locationQuery.getRequestURL(), HttpMethod.GET, new TypeReference<List<Location>>() {});
+        return serviceUtils.fetch(locationQuery.getRequestURL(), HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override

@@ -12,20 +12,17 @@ import org.voyager.sdk.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
+@Getter
 public class FlightQuery {
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid route ids") // allows null list
-    private List<Integer> routeIdList;
+    private final List<Integer> routeIdList;
 
-    @Getter
     @ValidFlightNumber(allowNull = true)
-    private String flightNumber;
+    private final String flightNumber;
 
-    @Getter
-    private Airline airline;
+    private final Airline airline;
 
-    @Getter
-    private Boolean isActive;
+    private final Boolean isActive;
 
     FlightQuery(List<Integer> routeIdList,String flightNumber,Airline airline,Boolean isActive) {
         this.routeIdList = routeIdList;

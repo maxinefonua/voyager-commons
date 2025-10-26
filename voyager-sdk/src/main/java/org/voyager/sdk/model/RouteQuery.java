@@ -10,19 +10,17 @@ import org.voyager.commons.validate.annotations.ValidAirportCode;
 import org.voyager.sdk.utils.JakartaValidationUtil;
 import java.util.StringJoiner;
 
+@Getter
 public class RouteQuery {
-    @Getter
     @ValidAirportCode(allowNull = true,caseSensitive = false,
             message = Regex.AIRPORT_CODE_CASE_INSENSITIVE)
     private String origin;
 
-    @Getter
     @ValidAirportCode(allowNull = true,caseSensitive = false,
             message = Regex.AIRPORT_CODE_CASE_INSENSITIVE)
     private String destination;
 
-    @Getter
-    private Airline airline;
+    private final Airline airline;
 
     RouteQuery(String origin, String destination, Airline airline) {
         this.origin = origin;

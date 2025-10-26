@@ -10,14 +10,13 @@ import org.voyager.commons.validate.annotations.NonNullElements;
 import java.util.List;
 import java.util.StringJoiner;
 
+@Getter
 public class IataQuery {
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid airlines") // allows null List
-    private List<Airline> airlineList;
+    private final List<Airline> airlineList;
 
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid airport types") // allows null List
-    private List<AirportType> airportTypeList;
+    private final List<AirportType> airportTypeList;
 
     IataQuery(List<Airline> airlineList, List<AirportType> airportTypeList) {
         this.airlineList = airlineList;

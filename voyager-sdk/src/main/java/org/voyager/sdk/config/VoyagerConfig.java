@@ -6,12 +6,11 @@ import lombok.Setter;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+@Getter
 public class VoyagerConfig {
-    @Getter
     private final String baseURL;
-    @Getter
     private final String authorizationToken;
-    @Getter @Setter
+    @Setter
     private Boolean testMode = false;
 
     public VoyagerConfig(@NonNull Protocol protocol, @NonNull String host, int port, @NonNull String authorizationToken) {

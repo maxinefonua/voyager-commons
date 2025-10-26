@@ -23,6 +23,7 @@ public class CountryServiceImpl implements CountryService {
         this.serviceUtils = ServiceUtilsFactory.getInstance();
     }
 
+    @SuppressWarnings("unused")
     CountryServiceImpl(ServiceUtils serviceUtils) {
         this.serviceUtils = serviceUtils;
     }
@@ -30,12 +31,14 @@ public class CountryServiceImpl implements CountryService {
     @Override
     public Either<ServiceError, List<Country>> getCountries() {
         String requestURL = Path.COUNTRIES;
-        return serviceUtils.fetch(requestURL, HttpMethod.GET,new TypeReference<List<Country>>(){});
+        return serviceUtils.fetch(requestURL, HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, List<Country>> getCountries(@NonNull CountryQuery countryQuery) {
-        return serviceUtils.fetch(countryQuery.getRequestURL(), HttpMethod.GET,new TypeReference<List<Country>>(){});
+        return serviceUtils.fetch(countryQuery.getRequestURL(), HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override

@@ -14,41 +14,36 @@ import org.voyager.sdk.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
+@Getter
 public class RoutePathQuery {
-    @Getter
     @ValidAirportCodeCollection(allowNullCollection = false,
             allowEmptyCollection = false,
             caseSensitive = false,
             message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
     private List<String> originIATAList;
 
-    @Getter
     @ValidAirportCodeCollection(allowNullCollection = false,
             allowEmptyCollection = false,
             caseSensitive = false,
             message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
     private List<String> destinationIATAList;
 
-    @Getter
     @ValidAirportCodeCollection(allowNullCollection = true,
             allowEmptyCollection = false,
             caseSensitive = false,
             message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_CASE_INSENSITIVE)
     private List<String> excludeIATAList;
 
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid route ids to exclude")
     private final List<Integer> excludeRouteIdList;
 
-    @Getter
     @ValidFlightNumberCollection(allowNullCollection = true,
             allowEmptyCollection = false,
             message = Regex.ConstraintMessage.FLIGHT_NUMBER_ELEMENTS_NONEMPTY)
     private List<String> excludeFlightNumberList;
 
-    @Getter
     @Min(1) @Max(25)
-    private Integer limit;
+    private final Integer limit;
 
     RoutePathQuery(@NonNull List<String> originIATAList, @NonNull List<String> destinationIATAList,
                    List<String> excludeIATAList, List<Integer> excludeRouteIdList, List<String> excludeFlightNumberList,

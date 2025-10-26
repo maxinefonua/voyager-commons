@@ -26,6 +26,7 @@ public class AirlineServiceImpl implements AirlineService {
         this.serviceUtils = ServiceUtilsFactory.getInstance();
     }
 
+    @SuppressWarnings("unused")
     AirlineServiceImpl(ServiceUtils serviceUtils){
         this.serviceUtils = serviceUtils;
     }
@@ -33,29 +34,32 @@ public class AirlineServiceImpl implements AirlineService {
     @Override
     public Either<ServiceError, List<Airline>> getAirlines() {
         String requestURL = Path.AIRLINES;
-        LOGGER.debug(String.format("attempting to GET %s",requestURL));
-        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airline>>(){});
+        LOGGER.debug("attempting to GET {}", requestURL);
+        return serviceUtils.fetch(requestURL,HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, List<Airline>> getAirlines(@NonNull AirlineQuery airlineQuery) {
-        LOGGER.debug(String.format("attempting to GET %s",airlineQuery.getRequestURL()));
-        return serviceUtils.fetch(airlineQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Airline>>(){});
+        LOGGER.debug("attempting to GET {}", airlineQuery.getRequestURL());
+        return serviceUtils.fetch(airlineQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, List<AirlineAirport>> batchUpsert(@NonNull AirlineBatchUpsert airlineBatchUpsert) {
         String requestURL = Path.Admin.AIRLINES;
-        LOGGER.debug(String.format("attempting to PATCH %s with body: %s",requestURL, airlineBatchUpsert));
+        LOGGER.debug("attempting to PATCH {} with body: {}", requestURL, airlineBatchUpsert);
         return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.POST,
-                new TypeReference<List<AirlineAirport>>(){}, airlineBatchUpsert);
+                new TypeReference<>() {
+                }, airlineBatchUpsert);
     }
 
     @Override
     public Either<ServiceError, Integer> batchDeleteAirline(@NonNull Airline airline) {
         String requestURL = String.format("%s?%s=%s",Path.Admin.AIRLINES,
                 ParameterNames.AIRLINE_PARAM_NAME,airline);
-        LOGGER.debug(String.format("attempting to DELETE %s",requestURL));
+        LOGGER.debug("attempting to DELETE {}", requestURL);
         return serviceUtils.fetch(requestURL,HttpMethod.DELETE,Integer.class);
     }
 }

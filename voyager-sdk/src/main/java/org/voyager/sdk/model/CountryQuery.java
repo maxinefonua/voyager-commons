@@ -10,10 +10,10 @@ import org.voyager.sdk.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
+@Getter
 public class CountryQuery {
-    @Getter
-    @NonNullElements(message = "must be a nonempty list of valid continents") // allows null List
-    private List<Continent> continentList;
+    @NonNullElements
+    private final List<Continent> continentList;
 
     CountryQuery(@NonNull List<Continent> continentList) {
         this.continentList = continentList;

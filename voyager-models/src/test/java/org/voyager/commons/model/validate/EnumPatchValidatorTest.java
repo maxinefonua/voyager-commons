@@ -62,6 +62,52 @@ class EnumPatchValidatorTest {
         assertTrue(enumPatchValidator.isValid("ACTIVE",mock(ConstraintValidatorContext.class)));
         assertTrue(enumPatchValidator.isValid("INACTIVE",mock(ConstraintValidatorContext.class)));
         assertTrue(enumPatchValidator.isValid("PENDING",mock(ConstraintValidatorContext.class)));
+        assertFalse(enumPatchValidator.isValid(null,mock(ConstraintValidatorContext.class)));
+        assertFalse(enumPatchValidator.isValid("TEST",mock(ConstraintValidatorContext.class)));
+    }
+
+    @Test
+    void testInitializeOpposite() {
+        ValidEnum validEnumAnnotation = new ValidEnum() {
+            @Override
+            public Class<? extends Enum<?>> enumClass() {
+                return TestEnum.class;
+            }
+
+            @Override
+            public String message() {
+                return "Invalid enum value";
+            }
+
+            @Override
+            public Class<?>[] groups() {
+                return new Class[0];
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public Class<? extends jakarta.validation.Payload>[] payload() {
+                return new Class[0];
+            }
+
+            @Override
+            public boolean allowNull() {
+                return true;
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return ValidEnum.class;
+            }
+        };
+
+        EnumPatchValidator enumPatchValidator = new EnumPatchValidator();
+        enumPatchValidator.initialize(validEnumAnnotation);
+
+        // Then
+        assertTrue(enumPatchValidator.isValid("ACTIVE",mock(ConstraintValidatorContext.class)));
+        assertTrue(enumPatchValidator.isValid("INACTIVE",mock(ConstraintValidatorContext.class)));
+        assertTrue(enumPatchValidator.isValid("PENDING",mock(ConstraintValidatorContext.class)));
         assertTrue(enumPatchValidator.isValid(null,mock(ConstraintValidatorContext.class)));
         assertFalse(enumPatchValidator.isValid("TEST",mock(ConstraintValidatorContext.class)));
     }

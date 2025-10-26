@@ -21,6 +21,7 @@ public class SearchServiceImpl implements SearchService {
         this.serviceUtils = ServiceUtilsFactory.getInstance();
     }
 
+    @SuppressWarnings("unused")
     SearchServiceImpl(ServiceUtils serviceUtils) {
         this.serviceUtils = serviceUtils;
     }
@@ -28,7 +29,8 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public Either<ServiceError, SearchResult<ResultSearch>> search(SearchQuery searchQuery) {
         return serviceUtils.fetch(searchQuery.getRequestURL(), HttpMethod.GET,
-                new TypeReference<SearchResult<ResultSearch>>(){});
+                new TypeReference<>() {
+                });
     }
 
     @Override

@@ -16,29 +16,25 @@ import org.voyager.sdk.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
+@Getter
 public class LocationQuery {
-    @Getter
-    private Source source;
+    private final Source source;
 
-    @Getter
     @Min(1)
     @Max(100)
-    private Integer limit;
+    private final Integer limit;
 
-    @Getter
     @ValidCountryCodeCollection(allowNullCollection = true,
             allowEmptyCollection = false,
             caseSensitive = false,
             message = Regex.ConstraintMessage.COUNTRY_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
     private List<String> countryCodeList;
 
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid status values") // allows null List
-    private List<Status> statusList;
+    private final List<Status> statusList;
 
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid continents")  // allows null List
-    private List<Continent> continentList;
+    private final List<Continent> continentList;
 
     LocationQuery(Source source, Integer limit, List<String> countryCodeList,
                   List<Status> statusList, List<Continent> continentList) {

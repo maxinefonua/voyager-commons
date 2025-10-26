@@ -10,8 +10,8 @@ import org.voyager.sdk.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
+@Getter
 public class AirlineQuery {
-    @Getter
     @ValidAirportCodeCollection(allowNullCollection = true,
             allowEmptyCollection = false,caseSensitive = false,
             message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)

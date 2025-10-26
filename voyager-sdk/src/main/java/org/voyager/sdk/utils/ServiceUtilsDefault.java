@@ -13,7 +13,7 @@ import org.voyager.sdk.config   .VoyagerConfig;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.error.ServiceException;
-import org.voyager.sdk.error.ServiceHttpException;
+import org.voyager.sdk.error.VoyagerServiceException;
 import org.voyager.sdk.http.HttpMethod;
 import org.voyager.sdk.http.VoyagerHttpFactory;
 import java.net.URI;
@@ -42,7 +42,7 @@ public class ServiceUtilsDefault implements ServiceUtils {
         if (testMode) return;
         Either<ServiceError, HttpResponse<String>> response = fetchRequest(Path.Admin.HEALTH,HttpMethod.GET);
         if (response.isLeft()) {
-            throw new RuntimeException(String.format("error occured while verifying API health at baseURL: %s. " +
+            throw new RuntimeException(String.format("error occurred while verifying API health at baseURL: %s. " +
                     "Confirm configuration details are correct.",baseURL));
         }
     }
@@ -137,7 +137,7 @@ public class ServiceUtilsDefault implements ServiceUtils {
     private static ServiceError buildServiceError(HttpResponse<String> response, String requestURL) {
         if (isNotBlank(response.body())) {
             try {
-                ServiceHttpException exception = om.readValue(response.body(), ServiceHttpException.class);
+                VoyagerServiceException exception = om.readValue(response.body(), VoyagerServiceException.class);
                 return new ServiceError(response.statusCode(),exception);
             } catch (JsonProcessingException e) { // TODO: implement alert for exceptions exposed via API
                 return new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,

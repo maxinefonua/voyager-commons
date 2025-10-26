@@ -21,6 +21,7 @@ public class PathServiceImpl implements PathService {
         this.serviceUtils = ServiceUtilsFactory.getInstance();
     }
 
+    @SuppressWarnings("unused")
     protected PathServiceImpl(ServiceUtils serviceUtils) {
         this.serviceUtils = serviceUtils;
     }

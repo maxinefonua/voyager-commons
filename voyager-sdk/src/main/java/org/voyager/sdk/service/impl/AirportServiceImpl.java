@@ -27,6 +27,7 @@ public class AirportServiceImpl implements AirportService {
         this.serviceUtils = ServiceUtilsFactory.getInstance();
     }
 
+    @SuppressWarnings("unused")
     AirportServiceImpl(ServiceUtils serviceUtils) {
         this.serviceUtils = serviceUtils;
     }
@@ -34,27 +35,29 @@ public class AirportServiceImpl implements AirportService {
     @Override
     public Either<ServiceError, List<Airport>> getAirports() {
         String requestURL = Path.AIRPORTS;
-        LOGGER.debug(String.format("attempting to GET airports from: %s",requestURL));
-        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Airport>>(){});
+        LOGGER.debug("attempting to GET airports from: {}", requestURL);
+        return serviceUtils.fetch(requestURL,HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, List<Airport>> getAirports(@NonNull AirportQuery airportQuery) {
-        LOGGER.debug(String.format("attempting to GET airports from: %s",airportQuery.getRequestURL()));
-        return serviceUtils.fetch(airportQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Airport>>(){});
+        LOGGER.debug("attempting to GET airports from: {}", airportQuery.getRequestURL());
+        return serviceUtils.fetch(airportQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError,Airport> getAirport(@NonNull String iata) {
         String requestURL = String.format("%s/%s",Path.AIRPORTS,iata);
-        LOGGER.debug(String.format("attempting to GET airport from: %s",requestURL));
+        LOGGER.debug("attempting to GET airport from: {}", requestURL);
         return serviceUtils.fetch(requestURL,HttpMethod.GET,Airport.class);
     }
 
     @Override
     public Either<ServiceError,Airport> patchAirport(@NonNull String iata, @NonNull AirportPatch airportPatch) {
         String requestURL = String.format("%s/%s",Path.Admin.AIRPORTS,iata);
-        LOGGER.debug(String.format("attempting to PATCH airport at: %s, with: '%s'",requestURL,airportPatch));
+        LOGGER.debug("attempting to PATCH airport at: {}, with: '{}'", requestURL, airportPatch);
         return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.PATCH,Airport.class,airportPatch);
     }
 
@@ -68,19 +71,22 @@ public class AirportServiceImpl implements AirportService {
     @Override
     public Either<ServiceError, List<String>> getIATACodes() {
         String requestURL = Path.IATA;
-        LOGGER.debug(String.format("attempting to GET iata codes from: %s",requestURL));
-        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<String>>(){});
+        LOGGER.debug("attempting to GET iata codes from: {}", requestURL);
+        return serviceUtils.fetch(requestURL,HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, List<String>> getIATACodes(@NonNull IataQuery iataQuery) {
-        LOGGER.debug(String.format("attempting to GET iata codes from: %s",iataQuery.getRequestURL()));
-        return serviceUtils.fetch(iataQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<String>>(){});
+        LOGGER.debug("attempting to GET iata codes from: {}", iataQuery.getRequestURL());
+        return serviceUtils.fetch(iataQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, List<Airport>> getNearbyAirports(@NonNull NearbyAirportQuery nearbyAirportQuery) {
-        LOGGER.debug(String.format("attempting to GET nearby airports from: %s",nearbyAirportQuery.getRequestURL()));
-        return serviceUtils.fetch(nearbyAirportQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Airport>>(){});
+        LOGGER.debug("attempting to GET nearby airports from: {}", nearbyAirportQuery.getRequestURL());
+        return serviceUtils.fetch(nearbyAirportQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
+        });
     }
 }

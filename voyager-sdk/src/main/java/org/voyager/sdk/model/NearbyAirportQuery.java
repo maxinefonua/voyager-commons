@@ -14,26 +14,22 @@ import org.voyager.sdk.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
+@Getter
 public class NearbyAirportQuery {
-    @Getter
     @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0")
-    private Double latitude;
+    private final Double latitude;
 
-    @Getter
     @DecimalMin(value = "-180.0") @DecimalMax(value = "180.0")
-    private Double longitude;
+    private final Double longitude;
 
-    @Getter
     @Min(1)
-    private Integer limit;
+    private final Integer limit;
 
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid airlines") // allows for null List
-    private List<Airline> airlineList;
+    private final List<Airline> airlineList;
 
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid airport types") // allows for null List
-    private List<AirportType> airportTypeList;
+    private final List<AirportType> airportTypeList;
 
     private NearbyAirportQuery(@NonNull Double latitude, @NonNull Double longitude,
                                Integer limit, List<Airline> airlineList, List<AirportType> airportTypeList) {

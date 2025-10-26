@@ -28,10 +28,10 @@ class LocationSerivceImplTest {
     static void setUp() {
         TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
         testServiceRegistry.registerTestImplementation(LocationService.class,
-                LocationSerivceImpl.class,ServiceUtilsTestFactory.getInstance());
+                LocationServiceImpl.class,ServiceUtilsTestFactory.getInstance());
         locationService = testServiceRegistry.get(LocationService.class);
         assertNotNull(locationService);
-        assertInstanceOf(LocationSerivceImpl.class,locationService);
+        assertInstanceOf(LocationServiceImpl.class,locationService);
     }
 
     @Test

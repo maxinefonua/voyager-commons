@@ -9,7 +9,7 @@ import lombok.Builder;
 @AllArgsConstructor @NoArgsConstructor
 @Data
 @Builder @EqualsAndHashCode(callSuper = false)
-public class ServiceHttpException extends RuntimeException {
+public class VoyagerServiceException extends RuntimeException {
     String timestamp;
     int status;
     String error;

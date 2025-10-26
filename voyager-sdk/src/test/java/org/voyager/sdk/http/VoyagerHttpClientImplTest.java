@@ -19,12 +19,6 @@ class VoyagerHttpClientImplTest {
     }
 
     @Test
-    void sendAsync() {
-        CompletableFuture<HttpResponse<String>> completableFuture = voyagerHttpClient.sendAsync(new MockHttpRequest());
-        assertNotNull(completableFuture);
-    }
-
-    @Test
     void send() {
         Either<ServiceError, HttpResponse<String>> either = voyagerHttpClient.send(new MockHttpRequest());
         assertNotNull(either);

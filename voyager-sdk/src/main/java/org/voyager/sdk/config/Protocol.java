@@ -1,12 +1,13 @@
 package org.voyager.sdk.config;
 
+import lombok.Getter;
+
+@Getter
 public enum Protocol {
+    HTTPS("https"),
     HTTP("http");
-    private String value;
+    private final String value;
     Protocol(String value) {
         this.value = value;
-    }
-    public String getValue() {
-        return this.value;
     }
 }

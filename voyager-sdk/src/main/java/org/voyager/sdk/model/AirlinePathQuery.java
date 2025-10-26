@@ -15,45 +15,39 @@ import org.voyager.sdk.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
+@Getter
 public class AirlinePathQuery {
-    @Getter
     @ValidAirportCodeCollection(allowNullCollection = true,
             allowEmptyCollection = false,
             caseSensitive = false,
             message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
     private List<String> originIATAList;
 
-    @Getter
     @ValidAirportCodeCollection(allowNullCollection = true,
             allowEmptyCollection = false,
             caseSensitive = false,
             message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
     private List<String> destinationIATAList;
 
-    @Getter
-    private Airline airline;
+    private final Airline airline;
 
-    @Getter
     @ValidAirportCodeCollection(allowNullCollection = true,
             allowEmptyCollection = false,
             caseSensitive = false,
     message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
     private List<String> excludeIATAList;
 
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid route ids")
-    private List<Integer> excludeRouteIdList;
+    private final List<Integer> excludeRouteIdList;
 
-    @Getter
     @ValidFlightNumberCollection(allowNullCollection = true,
             allowEmptyCollection = false,
             message = Regex.ConstraintMessage.FLIGHT_NUMBER_ELEMENTS_NONEMPTY)
     private List<String> excludeFlightNumberList;
 
-    @Getter
     @Min(1)
     @Max(15)
-    private Integer limit;
+    private final Integer limit;
 
     AirlinePathQuery(@NonNull List<String> originIATAList, @NonNull List<String> destinationIATAList, Airline airline,
                      List<String> excludeIATAList, List<Integer> excludeRouteIdList,

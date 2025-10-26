@@ -13,17 +13,15 @@ import org.voyager.sdk.utils.JakartaValidationUtil;
 import java.util.List;
 import java.util.StringJoiner;
 
+@Getter
 public class AirportQuery {
-    @Getter
     @ValidCountryCode(allowNull = true)
     private String countryCode;
 
-    @Getter
-    private Airline airline;
+    private final Airline airline;
 
-    @Getter
     @NonNullElements(message = "must be a nonempty list of valid airport types") // allows null List
-    private List<AirportType> airportTypeList;
+    private final List<AirportType> airportTypeList;
 
     private AirportQuery(String countryCode,Airline airline, List<AirportType> airportTypeList) {
         this.countryCode = countryCode;

@@ -11,19 +11,17 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
+@Getter
 public class SearchQuery {
-    @Getter
     @NotBlank
-    private String query;
+    private final String query;
 
-    @Getter
     @Min(1)
-    private Integer skipRowCount;
+    private final Integer skipRowCount;
 
-    @Getter
     @Min(1)
     // TODO: find out max for geonames
-    private Integer limit;
+    private final Integer limit;
 
     SearchQuery(@NonNull String query, Integer skipRowCount, Integer limit) {
         this.query = query;

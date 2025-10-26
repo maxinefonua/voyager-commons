@@ -25,18 +25,21 @@ public class RouteServiceImpl implements RouteService {
         this.serviceUtils = ServiceUtilsFactory.getInstance();
     }
 
+    @SuppressWarnings("unused")
     RouteServiceImpl(ServiceUtils serviceUtils) {
         this.serviceUtils = serviceUtils;
     }
 
     @Override
     public Either<ServiceError, List<Route>> getRoutes() {
-        return serviceUtils.fetch(Path.ROUTES,HttpMethod.GET, new TypeReference<List<Route>>(){});
+        return serviceUtils.fetch(Path.ROUTES,HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, List<Route>> getRoutes(RouteQuery routeQuery) {
-        return serviceUtils.fetch(routeQuery.getRequestURL(),HttpMethod.GET, new TypeReference<List<Route>>(){});
+        return serviceUtils.fetch(routeQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override

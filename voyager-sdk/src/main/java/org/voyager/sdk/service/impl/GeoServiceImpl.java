@@ -35,9 +35,11 @@ public class GeoServiceImpl implements GeoService {
         this.serviceUtils = ServiceUtilsFactory.getInstance();
     }
 
+    @SuppressWarnings("unused")
     GeoServiceImpl(ServiceUtils serviceUtils){
         this.serviceUtils = serviceUtils;
     }
+
     @Override
     public Either<ServiceError, List<GeoPlace>> findNearbyPlaces(@NonNull GeoNearbyQuery geoNearbyQuery) {
         JakartaValidationUtil.validate(geoNearbyQuery);
@@ -48,8 +50,9 @@ public class GeoServiceImpl implements GeoService {
             requestURL = requestURL.concat(String.format("&%s=%s",
                     GeoNames.ParameterNames.RADIUS,geoNearbyQuery.getRadius()));
         }
-        LOGGER.debug(String.format("attempting to GET %s",requestURL));
-        Either<ServiceError, GeoResponse<GeoPlace>> either = serviceUtils.fetch(requestURL, HttpMethod.GET,new TypeReference<GeoResponse<GeoPlace>>(){});
+        LOGGER.debug("attempting to GET {}", requestURL);
+        Either<ServiceError, GeoResponse<GeoPlace>> either = serviceUtils.fetch(requestURL, HttpMethod.GET, new TypeReference<>() {
+        });
         if (either.isLeft()) return Either.left(either.getLeft());
         GeoResponse<GeoPlace> geoPlaceGeoResponse = either.get();
         if (geoPlaceGeoResponse.getGeoStatus() != null) {
@@ -79,7 +82,7 @@ public class GeoServiceImpl implements GeoService {
             requestURL = requestURL.concat(String.format("&%s=%s",
                     GeoNames.ParameterNames.LANGUAGE,geoTimezoneQuery.getLanguage()));
         }
-        LOGGER.debug(String.format("attempting to GET %s",requestURL));
+        LOGGER.debug("attempting to GET {}", requestURL);
         return serviceUtils.fetch(requestURL,HttpMethod.GET,GeoTimezone.class);
     }
 
@@ -195,14 +198,15 @@ public class GeoServiceImpl implements GeoService {
             requestURL = requestURL.concat(String.format("&%s=%s",GeoNames.ParameterNames.INCL_BBOX,
                     geoSearchQuery.getInclBbox()));
         }
-        LOGGER.debug(String.format("attempting to GET %s",requestURL));
-        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<GeoPlace>>(){});
+        LOGGER.debug("attempting to GET {}", requestURL);
+        return serviceUtils.fetch(requestURL,HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, GeoFull> getFull(@NonNull Long geoNameId) {
         String requestURL = String.format("%s/%d",GeoNames.FETCH,geoNameId);
-        LOGGER.debug(String.format("attempting to GET %s",requestURL));
+        LOGGER.debug("attempting to GET {}", requestURL);
         return serviceUtils.fetch(requestURL, HttpMethod.GET,GeoFull.class);
     }
 
@@ -210,7 +214,8 @@ public class GeoServiceImpl implements GeoService {
     public Either<ServiceError, List<GeoCountry>> getCountries() {
         String requestURL = GeoNames.COUNTRIES;
         LOGGER.debug("attempting to GET {}",requestURL);
-        Either<ServiceError,GeoResponse<GeoCountry>> either = serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<GeoResponse<GeoCountry>>(){});
+        Either<ServiceError,GeoResponse<GeoCountry>> either = serviceUtils.fetch(requestURL,HttpMethod.GET, new TypeReference<>() {
+        });
         if (either.isLeft()) return Either.left(either.getLeft());
         GeoResponse<GeoCountry> geoCountryGeoResponse = either.get();
         if (geoCountryGeoResponse.getGeoStatus() != null) {

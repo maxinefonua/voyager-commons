@@ -129,6 +129,7 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/airports":
             case "/airports?countryCode=TO&airline=DELTA&type=CIVIL":
                 return Either.right((T) List.of(AIRPORT));
+            case "/iata?airline=JAPAN":
             case "/iata?type=HISTORICAL":
                 return Either.right((T) List.of("IATA"));
             case "/nearby-airports?latitude=1.0&longitude=-1.0&limit=3&airline=AIRNZ&type=UNVERIFIED":

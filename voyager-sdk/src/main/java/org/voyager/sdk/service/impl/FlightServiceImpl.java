@@ -26,6 +26,7 @@ public class FlightServiceImpl implements FlightService {
         this.serviceUtils = ServiceUtilsFactory.getInstance();
     }
 
+    @SuppressWarnings("unused")
     FlightServiceImpl(ServiceUtils serviceUtils) {
         this.serviceUtils = serviceUtils;
     }
@@ -34,12 +35,14 @@ public class FlightServiceImpl implements FlightService {
     @Override
     public Either<ServiceError, List<Flight>> getFlights() {
         String requestURL = Path.FLIGHTS;
-        return serviceUtils.fetch(requestURL,HttpMethod.GET,new TypeReference<List<Flight>>(){});
+        return serviceUtils.fetch(requestURL,HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override
     public Either<ServiceError, List<Flight>> getFlights(FlightQuery flightQuery) {
-        return serviceUtils.fetch(flightQuery.getRequestURL(),HttpMethod.GET,new TypeReference<List<Flight>>(){});
+        return serviceUtils.fetch(flightQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
+        });
     }
 
     @Override

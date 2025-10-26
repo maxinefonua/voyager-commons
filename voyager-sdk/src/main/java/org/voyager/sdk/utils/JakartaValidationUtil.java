@@ -3,19 +3,24 @@ package org.voyager.sdk.utils;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.hibernate.validator.HibernateValidator;
-import org.hibernate.validator.HibernateValidatorConfiguration;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JakartaValidationUtil {
+    private static final Validator VALIDATOR;
+
+    static {
+        try (ValidatorFactory factory = Validation.byProvider(HibernateValidator.class)
+                .configure()
+                .buildValidatorFactory()) {
+            VALIDATOR = factory.getValidator();
+        }
+    }
 
     public static Validator getValidator() {
-        // Manually configure Hibernate Validator
-        HibernateValidatorConfiguration configuration = Validation.byProvider(HibernateValidator.class)
-                .configure();
-
-        return configuration.buildValidatorFactory().getValidator();
+        return VALIDATOR;
     }
 
     public static <T> void validate(T object) {

@@ -13,7 +13,7 @@ import org.voyager.commons.constants.Headers;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.error.ServiceException;
-import org.voyager.sdk.error.ServiceHttpException;
+import org.voyager.sdk.error.VoyagerServiceException;
 import org.voyager.sdk.http.HttpMethod;
 import org.voyager.sdk.http.MockHttpResponse;
 import org.voyager.sdk.http.VoyagerHttpFactory;
@@ -132,7 +132,7 @@ class ServiceUtilsDefaultTest {
         either = serviceUtilsTestClass.fetch(SERVICE_EXCEPTION_URL,HttpMethod.GET,Country.class);
         assertNotNull(either);
         assertTrue(either.isLeft());
-        assertInstanceOf(ServiceHttpException.class,either.getLeft().getException());
+        assertInstanceOf(VoyagerServiceException.class,either.getLeft().getException());
     }
 
     @Test
@@ -206,7 +206,7 @@ class ServiceUtilsDefaultTest {
         Either<ServiceError, Country> either = serviceUtilsTestClass.fetch(SERVICE_EXCEPTION_URL,HttpMethod.GET,Country.class);
         assertNotNull(either);
         assertTrue(either.isLeft());
-        assertInstanceOf(ServiceHttpException.class,either.getLeft().getException());
+        assertInstanceOf(VoyagerServiceException.class,either.getLeft().getException());
     }
 
     @Test
