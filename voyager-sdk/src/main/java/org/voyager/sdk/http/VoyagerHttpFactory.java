@@ -2,7 +2,6 @@ package org.voyager.sdk.http;
 
 import org.apache.commons.lang3.StringUtils;
 import org.voyager.commons.constants.Headers;
-
 import java.net.URI;
 import java.net.http.HttpRequest;
 

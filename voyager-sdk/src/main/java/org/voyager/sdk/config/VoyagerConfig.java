@@ -3,7 +3,6 @@ package org.voyager.sdk.config;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 

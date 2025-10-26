@@ -11,7 +11,6 @@ import org.voyager.commons.validate.annotations.NonNullElements;
 import org.voyager.commons.validate.annotations.ValidAirportCodeCollection;
 import org.voyager.commons.validate.annotations.ValidFlightNumberCollection;
 import org.voyager.sdk.utils.JakartaValidationUtil;
-
 import java.util.List;
 import java.util.StringJoiner;
 

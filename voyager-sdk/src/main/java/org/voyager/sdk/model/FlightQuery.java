@@ -1,11 +1,9 @@
 package org.voyager.sdk.model;
 
-import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NonNull;
 import org.junit.platform.commons.util.StringUtils;
 import org.voyager.commons.constants.ParameterNames;
-import org.voyager.commons.constants.Regex;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.validate.annotations.NonNullElements;

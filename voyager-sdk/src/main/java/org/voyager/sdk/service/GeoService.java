@@ -10,7 +10,6 @@ import org.voyager.commons.model.geoname.GeoTimezone;
 import org.voyager.commons.model.geoname.query.GeoNearbyQuery;
 import org.voyager.commons.model.geoname.query.GeoSearchQuery;
 import org.voyager.commons.model.geoname.query.GeoTimezoneQuery;
-
 import java.util.List;
 
 public interface GeoService {

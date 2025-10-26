@@ -7,7 +7,6 @@ import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.AirportType;
 import org.voyager.commons.validate.annotations.NonNullElements;
-
 import java.util.List;
 import java.util.StringJoiner;
 

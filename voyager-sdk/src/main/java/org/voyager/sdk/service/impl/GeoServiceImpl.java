@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.constants.GeoNames;
 import org.voyager.commons.constants.ParameterNames;
-import org.voyager.commons.constants.Path;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.error.ServiceException;
@@ -26,7 +25,6 @@ import org.voyager.sdk.service.GeoService;
 import org.voyager.sdk.utils.JakartaValidationUtil;
 import org.voyager.sdk.utils.ServiceUtils;
 import org.voyager.sdk.utils.ServiceUtilsFactory;
-
 import java.util.List;
 
 public class GeoServiceImpl implements GeoService {
