@@ -1,7 +1,6 @@
 package org.voyager.sync.model.flightradar.search;
 
 import lombok.Data;
-
 import java.util.Map;
 
 @Data

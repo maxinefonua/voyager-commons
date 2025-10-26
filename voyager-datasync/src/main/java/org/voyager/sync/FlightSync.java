@@ -61,7 +61,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import static io.vavr.control.Either.right;
 
 public class FlightSync {

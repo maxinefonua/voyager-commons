@@ -2,9 +2,20 @@ package org.voyager.sync.utils;
 
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.Airport;
-
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.util.List;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.MissingResourceException;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 public class ConstantsDatasync {

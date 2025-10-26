@@ -8,7 +8,6 @@ import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.error.ServiceException;
 import org.voyager.commons.model.nominatim.FeatureSearch;
 import org.voyager.sync.utils.HttpRequestUtils;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;

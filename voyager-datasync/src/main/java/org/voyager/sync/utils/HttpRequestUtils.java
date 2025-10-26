@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.error.ServiceException;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;

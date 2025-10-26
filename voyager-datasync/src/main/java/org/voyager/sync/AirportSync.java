@@ -25,10 +25,15 @@ import org.voyager.commons.model.geoname.query.GeoTimezoneQuery;
 import org.voyager.sdk.service.impl.VoyagerServiceRegistry;
 import org.voyager.sync.service.ChAviationService;
 import org.voyager.sync.service.FlightRadarService;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 public class AirportSync {
     private static AirportService airportService;

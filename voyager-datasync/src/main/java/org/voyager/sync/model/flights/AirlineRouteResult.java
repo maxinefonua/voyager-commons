@@ -1,7 +1,6 @@
 package org.voyager.sync.model.flights;
 
 import org.voyager.commons.model.airline.Airline;
-
 import java.util.Map;
 import java.util.Set;
 
