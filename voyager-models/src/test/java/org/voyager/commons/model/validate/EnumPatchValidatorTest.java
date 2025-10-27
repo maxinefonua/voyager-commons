@@ -2,7 +2,7 @@ package org.voyager.commons.model.validate;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.Test;
-import org.voyager.commons.validate.EnumPatchValidator;
+import org.voyager.commons.validate.validators.EnumPatchValidator;
 import org.voyager.commons.validate.annotations.ValidEnum;
 
 import java.lang.annotation.Annotation;

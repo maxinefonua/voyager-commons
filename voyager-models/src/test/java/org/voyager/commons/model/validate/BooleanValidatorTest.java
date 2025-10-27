@@ -4,7 +4,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.voyager.commons.validate.BooleanValidator;
+import org.voyager.commons.validate.validators.BooleanValidator;
 import org.voyager.commons.validate.annotations.ValidBoolean;
 
 import java.lang.annotation.Annotation;

@@ -1,9 +1,8 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.model.country.Continent;
-import org.voyager.sdk.model.CountryQuery;
-
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,12 +16,10 @@ class CountryQueryTest {
         assertThrows(NullPointerException.class,()-> CountryQuery.builder().build());
         // fails on null field set
         assertThrows(NullPointerException.class,()->CountryQuery.builder().withContinentList(null).build());
-        // fails on empty list
-        List<Continent> continentList = new ArrayList<>();
-        assertThrows(IllegalArgumentException.class,()->CountryQuery.builder().withContinentList(continentList).build());
         // fails on null element
+        List<Continent> continentList = new ArrayList<>();
         continentList.add(null);
-        assertThrows(IllegalArgumentException.class,()->CountryQuery.builder().withContinentList(continentList).build());
+        assertThrows(ValidationException.class,()->CountryQuery.builder().withContinentList(continentList).build());
         continentList.remove(null);
 
         // valid field

@@ -2,8 +2,6 @@ package org.voyager.commons.model.location;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.voyager.commons.validate.annotations.ValidCountryCode;
 import org.voyager.commons.validate.annotations.ValidEnum;
+import org.voyager.commons.validate.annotations.ValidLatitude;
+import org.voyager.commons.validate.annotations.ValidLongitude;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,38 +35,25 @@ public class LocationForm {
     @NotBlank
     String subdivision;
 
-    @NotBlank
     @ValidCountryCode
     String countryCode;
 
-    @NotNull
-    @DecimalMin(value = "-90.0")
-    @DecimalMax(value = "90.0")
+    @ValidLatitude
     Double latitude;
 
-    @NotNull
-    @DecimalMin(value = "-180.0")
-    @DecimalMax(value = "180.0")
+    @ValidLongitude
     Double longitude;
 
-    @NotNull
-    @DecimalMin(value = "-180.0")
-    @DecimalMax(value = "180.0")
+    @ValidLongitude
     Double west;
 
-    @NotNull
-    @DecimalMin(value = "-90.0")
-    @DecimalMax(value = "90.0")
+    @ValidLatitude
     Double south;
 
-    @NotNull
-    @DecimalMin(value = "-180.0")
-    @DecimalMax(value = "180.0")
+    @ValidLongitude
     Double east;
 
-    @NotNull
-    @DecimalMin(value = "-90.0")
-    @DecimalMax(value = "90.0")
+    @ValidLatitude
     Double north;
 
     @NotNull

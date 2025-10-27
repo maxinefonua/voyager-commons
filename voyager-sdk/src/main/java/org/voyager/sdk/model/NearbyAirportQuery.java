@@ -3,14 +3,14 @@ package org.voyager.sdk.model;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.AirportType;
-import org.voyager.commons.validate.annotations.NonNullElements;
-import org.voyager.sdk.utils.JakartaValidationUtil;
+import org.voyager.commons.validate.ValidationUtils;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -25,11 +25,8 @@ public class NearbyAirportQuery {
     @Min(1)
     private final Integer limit;
 
-    @NonNullElements(message = "must be a nonempty list of valid airlines") // allows for null List
-    private final List<Airline> airlineList;
-
-    @NonNullElements(message = "must be a nonempty list of valid airport types") // allows for null List
-    private final List<AirportType> airportTypeList;
+    private final List<@NotNull Airline> airlineList;
+    private final List<@NotNull AirportType> airportTypeList;
 
     private NearbyAirportQuery(@NonNull Double latitude, @NonNull Double longitude,
                                Integer limit, List<Airline> airlineList, List<AirportType> airportTypeList) {
@@ -105,7 +102,7 @@ public class NearbyAirportQuery {
         public NearbyAirportQuery build() {
             NearbyAirportQuery nearbyAirportQuery =
                     new NearbyAirportQuery(latitude,longitude,limit,airlineList,airportTypeList);
-            JakartaValidationUtil.validate(nearbyAirportQuery);
+            ValidationUtils.validateAndThrow(nearbyAirportQuery);
             return nearbyAirportQuery;
         }
     }

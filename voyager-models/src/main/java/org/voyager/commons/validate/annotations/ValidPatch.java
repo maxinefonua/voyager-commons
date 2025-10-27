@@ -2,7 +2,7 @@ package org.voyager.commons.validate.annotations;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import org.voyager.commons.validate.PatchValidator;
+import org.voyager.commons.validate.validators.PatchValidator;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

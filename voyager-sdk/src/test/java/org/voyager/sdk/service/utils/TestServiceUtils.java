@@ -2,6 +2,9 @@ package org.voyager.sdk.service.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.vavr.control.Either;
+import org.voyager.commons.error.HttpStatus;
+import org.voyager.commons.error.ServiceException;
+import org.voyager.commons.model.geoname.response.GeoStatus;
 import org.voyager.sdk.config.VoyagerConfig;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.sdk.http.HttpMethod;
@@ -158,7 +161,7 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 return Either.right((T) SearchResult.builder().results(List.of(ResultSearch.builder().build())));
             case "/countries?countryCode=OC":
                 return Either.right((T) List.of(COUNTRY));
-            case "/admin/geonames/search?q=qr&maxRows=100&startRow=0lang=lg&type=xml&operator=AND&charset=UTF8&fuzzy=1.0&name=nm&name_equals=ne&name_startsWith=nsw&country=to&countryBias=cb&continentCode=OC&adminCode1=ac1&adminCode2=ac2&adminCode3=ac3&adminCode4=ac4&adminCode5=ac5&featureClass=P&featureCode=ADM2H&cities=cities1000&style=FULL&isNameRequired=true&tag=tg&east=1.000000&west=1.000000&north=1.000000&south=1.000000&searchlang=sl&orderby=population&inclBbox=true":
+            case "/admin/geonames/search?q=qr&maxRows=100&startRow=0lang=lg&type=xml&operator=AND&charset=UTF8&fuzzy=1.0&name=nm&name_equals=ne&name_startsWith=nsw&country=TO&countryBias=TO&continentCode=OC&adminCode1=ac1&adminCode2=ac2&adminCode3=ac3&adminCode4=ac4&adminCode5=ac5&featureClass=P&featureCode=ADM2H&cities=cities1000&style=FULL&isNameRequired=true&tag=tg&east=1.000000&west=1.000000&north=1.000000&south=1.000000&searchlang=sl&orderby=population&inclBbox=true":
             case "/admin/geonames/search?q=query&maxRows=100&startRow=0lang=en&type=xml&operator=AND&charset=UTF8&fuzzy=1.0":
             case "/admin/geonames/nearby?latitude=10.0&longitude=10.0&radius=1":
             case "/admin/geonames/nearby?latitude=10.0&longitude=10.0":
@@ -169,6 +172,14 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 return Either.right((T)GeoResponse.builder().totalResultsCount(1)
                         .results(new ArrayList<>(List.of(GeoCountry.builder().build())))
                         .build());
+            case "/admin/geonames/search?q=query&maxRows=100&startRow=0lang=en&type=xml&operator=AND&charset=UTF8&fuzzy=1.0&featureClass=L":
+                return Either.left(new ServiceError(HttpStatus.BAD_REQUEST,new ServiceException("forced error for testing")));
+            case "/admin/geonames/nearby?latitude=-1.0&longitude=19.0":
+                return Either.left(new ServiceError(HttpStatus.BAD_REQUEST,new ServiceException("forced error for testing")));
+            case "/admin/geonames/nearby?latitude=-1.0&longitude=19.0&radius=20":
+                return Either.right((T)GeoResponse.builder().geoStatus(GeoStatus.builder().value(19).message("testing too many requests").build()).build());
+            case "/admin/geonames/nearby?latitude=-1.0&longitude=19.0&radius=25":
+                return Either.right((T)GeoResponse.builder().geoStatus(GeoStatus.builder().value(10).message("testing other geonames error").build()).build());
             default:
                 throw new RuntimeException(String.format(
                     "ServiceUtilsTest fetch typeReference: '%s' not yet implemented for requestURL: %s",

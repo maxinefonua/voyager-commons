@@ -2,7 +2,8 @@ package org.voyager.commons.validate.annotations;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import org.voyager.commons.validate.LongitudeValidator;
+import org.voyager.commons.validate.validators.LongitudeDoubleValidator;
+import org.voyager.commons.validate.validators.LongitudeStringValidator;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
@@ -10,7 +11,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Documented
-@Constraint(validatedBy = LongitudeValidator.class)
+@Constraint(validatedBy = {LongitudeStringValidator.class, LongitudeDoubleValidator.class})
 @Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidLongitude {

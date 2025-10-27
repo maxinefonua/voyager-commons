@@ -7,7 +7,7 @@ import org.voyager.commons.constants.Path;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.validate.annotations.ValidAirportCode;
-import org.voyager.sdk.utils.JakartaValidationUtil;
+import org.voyager.commons.validate.ValidationUtils;
 import java.util.StringJoiner;
 
 @Getter
@@ -72,7 +72,7 @@ public class RouteQuery {
 
         public RouteQuery build() {
             RouteQuery routeQuery = new RouteQuery(origin,destination,airline);
-            JakartaValidationUtil.validate(routeQuery);
+            ValidationUtils.validateAndThrow(routeQuery);
             if (origin != null) routeQuery.origin = origin.toUpperCase();
             if (destination != null) routeQuery.destination = destination.toUpperCase();
             return routeQuery;

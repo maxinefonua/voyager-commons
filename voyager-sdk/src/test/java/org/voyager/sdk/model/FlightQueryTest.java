@@ -1,5 +1,6 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.sdk.model.FlightQuery;
@@ -18,9 +19,9 @@ class FlightQueryTest {
         // fails on null field set
         assertThrows(NullPointerException.class,()->FlightQuery.builder().withFlightNumber(null).build());
         // fails on empty string
-        assertThrows(IllegalArgumentException.class,()->FlightQuery.builder().withFlightNumber("").build());
+        assertThrows(ValidationException.class,()->FlightQuery.builder().withFlightNumber("").build());
         // fails on blank string
-        assertThrows(IllegalArgumentException.class,()->FlightQuery.builder().withFlightNumber("  ").build());
+        assertThrows(ValidationException.class,()->FlightQuery.builder().withFlightNumber("  ").build());
 
         // valid field
         FlightQuery flightQuery = FlightQuery.builder().withFlightNumber("TS123").build();
@@ -60,12 +61,10 @@ class FlightQueryTest {
         assertThrows(IllegalArgumentException.class,()->FlightQuery.builder().build());
         // fails on null field set
         assertThrows(NullPointerException.class,()->FlightQuery.builder().withRouteIdList(null).build());
-        // fails on empty list
-        assertThrows(IllegalArgumentException.class,()->FlightQuery.builder().withRouteIdList(List.of()).build());
         // fails on null element
         List<Integer> routeIdList = new ArrayList<>();
         routeIdList.add(null);
-        assertThrows(IllegalArgumentException.class,()->FlightQuery.builder().withRouteIdList(routeIdList).build());
+        assertThrows(ValidationException.class,()->FlightQuery.builder().withRouteIdList(routeIdList).build());
 
         // valid field
         routeIdList.remove(null);

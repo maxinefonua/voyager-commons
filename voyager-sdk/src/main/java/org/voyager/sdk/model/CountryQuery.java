@@ -1,19 +1,19 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.country.Continent;
-import org.voyager.commons.validate.annotations.NonNullElements;
-import org.voyager.sdk.utils.JakartaValidationUtil;
+import org.voyager.commons.validate.ValidationUtils;
 import java.util.List;
 import java.util.StringJoiner;
 
-@Getter
+@Getter @Setter
 public class CountryQuery {
-    @NonNullElements
-    private final List<Continent> continentList;
+    private List<@NotNull Continent> continentList;
 
     CountryQuery(@NonNull List<Continent> continentList) {
         this.continentList = continentList;
@@ -40,7 +40,7 @@ public class CountryQuery {
 
         public CountryQuery build() {
             CountryQuery countryQuery = new CountryQuery(this.continentList);
-            JakartaValidationUtil.validate(countryQuery);
+            ValidationUtils.validateAndThrow(countryQuery);
             return countryQuery;
         }
     }

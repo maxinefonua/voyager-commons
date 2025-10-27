@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.voyager.commons.validate.LongitudeValidator;
+import org.voyager.commons.validate.validators.LongitudeStringValidator;
 import org.voyager.commons.validate.annotations.ValidLongitude;
 
 import java.lang.annotation.Annotation;
@@ -16,51 +16,51 @@ import static org.junit.jupiter.api.Assertions.*;
 class LongitudeValidatorTest {
     @Mock
     private ConstraintValidatorContext context;
-    private LongitudeValidator longitudeValidator;
+    private LongitudeStringValidator longitudeStringValidator;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-        longitudeValidator = new LongitudeValidator();
+        longitudeStringValidator = new LongitudeStringValidator();
     }
 
     @Test
     void isValid() {
         String validLongitude = "180";
-        assertTrue(longitudeValidator.isValid(validLongitude,context));
+        assertTrue(longitudeStringValidator.isValid(validLongitude,context));
 
         validLongitude = "-180";
-        assertTrue(longitudeValidator.isValid(validLongitude,context));
+        assertTrue(longitudeStringValidator.isValid(validLongitude,context));
 
         validLongitude = "-10.30";
-        assertTrue(longitudeValidator.isValid(validLongitude,context));
+        assertTrue(longitudeStringValidator.isValid(validLongitude,context));
 
         validLongitude = "00.1009";
-        assertTrue(longitudeValidator.isValid(validLongitude,context));
+        assertTrue(longitudeStringValidator.isValid(validLongitude,context));
     }
 
     @Test
     void isInvalid() {
         String invalidLongitude = "0.10.";
-        assertFalse(longitudeValidator.isValid(invalidLongitude,context));
+        assertFalse(longitudeStringValidator.isValid(invalidLongitude,context));
 
         invalidLongitude = "";
-        assertFalse(longitudeValidator.isValid(invalidLongitude,context));
+        assertFalse(longitudeStringValidator.isValid(invalidLongitude,context));
 
         invalidLongitude = "190";
-        assertFalse(longitudeValidator.isValid(invalidLongitude,context));
+        assertFalse(longitudeStringValidator.isValid(invalidLongitude,context));
 
         invalidLongitude = "mas";
-        assertFalse(longitudeValidator.isValid(invalidLongitude,context));
+        assertFalse(longitudeStringValidator.isValid(invalidLongitude,context));
 
         invalidLongitude = "-200";
-        assertFalse(longitudeValidator.isValid(invalidLongitude,context));
+        assertFalse(longitudeStringValidator.isValid(invalidLongitude,context));
 
         invalidLongitude = ".10-";
-        assertFalse(longitudeValidator.isValid(invalidLongitude,context));
+        assertFalse(longitudeStringValidator.isValid(invalidLongitude,context));
 
         invalidLongitude = null;
-        assertFalse(longitudeValidator.isValid(invalidLongitude,context));
+        assertFalse(longitudeStringValidator.isValid(invalidLongitude,context));
     }
 
     @Test
@@ -91,7 +91,7 @@ class LongitudeValidatorTest {
                 return true;
             }
         };
-        longitudeValidator.initialize(validLongitude);
-        assertTrue(longitudeValidator.isValid(null,context));
+        longitudeStringValidator.initialize(validLongitude);
+        assertTrue(longitudeStringValidator.isValid(null,context));
     }
 }

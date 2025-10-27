@@ -26,9 +26,9 @@ public class GeoNamesConfig {
     public String getNearbyPlaceURL(GeoNearbyQuery geoNearbyQuery){
         String requestURL = String.format(nearbyPlacePathWithParams,geoUsername,
                 geoNearbyQuery.getLatitude(),geoNearbyQuery.getLongitude());
-        if (geoNearbyQuery.getRadius() != null) {
+        if (geoNearbyQuery.getRadiusKm() != null) {
             requestURL = requestURL.concat(String.format("&%s=%d",
-                    GeoNames.ParameterNames.RADIUS,geoNearbyQuery.getRadius()));
+                    GeoNames.ParameterNames.RADIUS,geoNearbyQuery.getRadiusKm()));
         }
         return requestURL;
     }
@@ -124,9 +124,11 @@ public class GeoNamesConfig {
             requestURL = requestURL.concat(String.format("&%s=%s",
                     GeoNames.ParameterNames.FEATURE_CLASS,geoSearchQuery.getFeatureClass().name()));
         }
-        if (geoSearchQuery.getFeatureCode() != null) {
-            requestURL = requestURL.concat(String.format("&%s=%s",
-                    GeoNames.ParameterNames.FEATURE_CODE,geoSearchQuery.getFeatureCode().name()));
+        if (geoSearchQuery.getFeatureCodeList() != null && !geoSearchQuery.getFeatureCodeList().isEmpty()) {
+            StringJoiner featureCodeJoiner = new StringJoiner("&");
+            geoSearchQuery.getFeatureCodeList().forEach(featureCode -> featureCodeJoiner.add(
+                    String.format("%s=%s",GeoNames.ParameterNames.FEATURE_CODE,featureCode.name())));
+            requestURL = requestURL.concat(String.format("&%s",featureCodeJoiner));
         }
         if (geoSearchQuery.getCities() != null) {
             requestURL = requestURL.concat(String.format("&%s=%s",

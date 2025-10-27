@@ -1,12 +1,11 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.country.Continent;
 import org.voyager.commons.model.location.Source;
 import org.voyager.commons.model.location.Status;
-import org.voyager.sdk.model.LocationQuery;
-
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,7 +29,7 @@ class LocationQueryTest {
         // set as null field
         assertThrows(NullPointerException.class,()-> LocationQuery.builder().withLimit(null).build());
         // set as less than minimum
-        assertThrows(IllegalArgumentException.class,()-> LocationQuery.builder().withLimit(0).build());
+        assertThrows(ValidationException.class,()-> LocationQuery.builder().withLimit(0).build());
 
         // valid value
         LocationQuery locationQuery = LocationQuery.builder().withLimit(20).build();
@@ -42,12 +41,10 @@ class LocationQueryTest {
     void builderStatusList() {
         // set as null field
         assertThrows(NullPointerException.class,()-> LocationQuery.builder().withStatusList(null).build());
-        // set as empty list
-        assertThrows(IllegalArgumentException.class,()-> LocationQuery.builder().withStatusList(List.of()).build());
         // set as list with null
         List<Status> statusList = new ArrayList<>();
         statusList.add(null);
-        assertThrows(IllegalArgumentException.class,()-> LocationQuery.builder().withStatusList(statusList).build());
+        assertThrows(ValidationException.class,()-> LocationQuery.builder().withStatusList(statusList).build());
 
         // valid value
         statusList.remove(null);
@@ -62,12 +59,10 @@ class LocationQueryTest {
     void builderContinentList() {
         // set as null field
         assertThrows(NullPointerException.class,()-> LocationQuery.builder().withContinentList(null).build());
-        // set as empty list
-        assertThrows(IllegalArgumentException.class,()-> LocationQuery.builder().withContinentList(List.of()).build());
         // set as list with null
         List<Continent> continentList = new ArrayList<>();
         continentList.add(null);
-        assertThrows(IllegalArgumentException.class,()-> LocationQuery.builder().withContinentList(continentList).build());
+        assertThrows(ValidationException.class,()-> LocationQuery.builder().withContinentList(continentList).build());
 
         // valid value
         continentList.remove(null);
@@ -82,26 +77,23 @@ class LocationQueryTest {
     void builderCountryCodeList() {
         // set as null field
         assertThrows(NullPointerException.class,()-> LocationQuery.builder().withCountryCodeList(null).build());
-        // set as empty list
-        assertThrows(IllegalArgumentException.class,()->
-                LocationQuery.builder().withCountryCodeList(List.of()).build());
 
         // set as list with null
         List<String> countryCodeList = new ArrayList<>();
         countryCodeList.add(null);
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(NullPointerException.class,()->
                 LocationQuery.builder().withCountryCodeList(countryCodeList).build());
 
         // set list with empty string
         countryCodeList.remove(null);
         countryCodeList.add("");
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 LocationQuery.builder().withCountryCodeList(countryCodeList).build());
 
         // set list with malformatted string
         countryCodeList.remove("");
         countryCodeList.add("United States");
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 LocationQuery.builder().withCountryCodeList(countryCodeList).build());
 
         // set list with valid strings

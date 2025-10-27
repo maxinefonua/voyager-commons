@@ -5,6 +5,7 @@ import jakarta.validation.Payload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.validate.annotations.ValidFlightNumber;
+import org.voyager.commons.validate.validators.FlightNumberValidator;
 
 import java.lang.annotation.Annotation;
 

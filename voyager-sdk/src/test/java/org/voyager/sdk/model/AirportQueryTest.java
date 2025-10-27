@@ -1,5 +1,6 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.AirportType;
@@ -49,9 +50,9 @@ class AirportQueryTest {
         // nonnull country code
         assertThrows(NullPointerException.class,()->AirportQuery.builder().withCountryCode(null).build());
         // invalid country code values
-        assertThrows(IllegalArgumentException.class,()->AirportQuery.builder().withCountryCode("").build());
-        assertThrows(IllegalArgumentException.class,()->AirportQuery.builder().withCountryCode("abs").build());
-        assertThrows(IllegalArgumentException.class,()->AirportQuery.builder().withCountryCode("34").build());
+        assertThrows(ValidationException.class,()->AirportQuery.builder().withCountryCode("").build());
+        assertThrows(ValidationException.class,()->AirportQuery.builder().withCountryCode("abs").build());
+        assertThrows(ValidationException.class,()->AirportQuery.builder().withCountryCode("34").build());
         // valid country code
         AirportQuery airportQuery = AirportQuery.builder().withCountryCode("to").build();
         assertEquals("TO",airportQuery.getCountryCode());
@@ -63,9 +64,8 @@ class AirportQueryTest {
         assertThrows(NullPointerException.class,()->AirportQuery.builder().withTypeList(null).build());
         // invalid type list values
         List<AirportType> airportTypeList = new ArrayList<>();
-        assertThrows(IllegalArgumentException.class,()->AirportQuery.builder().withTypeList(airportTypeList).build());
         airportTypeList.add(null);
-        assertThrows(IllegalArgumentException.class,()->AirportQuery.builder().withTypeList(airportTypeList).build());
+        assertThrows(ValidationException.class,()->AirportQuery.builder().withTypeList(airportTypeList).build());
         // valid type list
         airportTypeList.remove(null);
         airportTypeList.add(AirportType.UNVERIFIED);

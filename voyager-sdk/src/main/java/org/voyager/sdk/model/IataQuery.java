@@ -1,22 +1,20 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.AirportType;
-import org.voyager.commons.validate.annotations.NonNullElements;
 import java.util.List;
 import java.util.StringJoiner;
 
 @Getter
 public class IataQuery {
-    @NonNullElements(message = "must be a nonempty list of valid airlines") // allows null List
-    private final List<Airline> airlineList;
 
-    @NonNullElements(message = "must be a nonempty list of valid airport types") // allows null List
-    private final List<AirportType> airportTypeList;
+    private final List<@NotNull Airline> airlineList;
+    private final List<@NotNull AirportType> airportTypeList;
 
     IataQuery(List<Airline> airlineList, List<AirportType> airportTypeList) {
         this.airlineList = airlineList;

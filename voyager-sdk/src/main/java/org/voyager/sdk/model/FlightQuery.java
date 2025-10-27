@@ -1,21 +1,20 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NonNull;
 import org.junit.platform.commons.util.StringUtils;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.commons.validate.annotations.NonNullElements;
 import org.voyager.commons.validate.annotations.ValidFlightNumber;
-import org.voyager.sdk.utils.JakartaValidationUtil;
+import org.voyager.commons.validate.ValidationUtils;
 import java.util.List;
 import java.util.StringJoiner;
 
 @Getter
 public class FlightQuery {
-    @NonNullElements(message = "must be a nonempty list of valid route ids") // allows null list
-    private final List<Integer> routeIdList;
+    private final List<@NotNull Integer> routeIdList;
 
     @ValidFlightNumber(allowNull = true)
     private final String flightNumber;
@@ -84,7 +83,7 @@ public class FlightQuery {
 
         public FlightQuery build() {
             FlightQuery flightQuery = new FlightQuery(routeIdList,flightNumber,airline,isActive);
-            JakartaValidationUtil.validate(flightQuery);
+            ValidationUtils.validateAndThrow(flightQuery);
             return flightQuery;
         }
     }

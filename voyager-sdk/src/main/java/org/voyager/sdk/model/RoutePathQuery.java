@@ -1,46 +1,37 @@
 package org.voyager.sdk.model;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.constants.Regex;
-import org.voyager.commons.validate.annotations.NonNullElements;
-import org.voyager.commons.validate.annotations.ValidAirportCodeCollection;
-import org.voyager.commons.validate.annotations.ValidFlightNumberCollection;
-import org.voyager.sdk.utils.JakartaValidationUtil;
+import org.voyager.commons.validate.annotations.ValidAirportCode;
+import org.voyager.commons.validate.ValidationUtils;
+import org.voyager.commons.validate.annotations.ValidFlightNumber;
 import java.util.List;
 import java.util.StringJoiner;
 
 @Getter
 public class RoutePathQuery {
-    @ValidAirportCodeCollection(allowNullCollection = false,
-            allowEmptyCollection = false,
-            caseSensitive = false,
-            message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
-    private List<String> originIATAList;
-
-    @ValidAirportCodeCollection(allowNullCollection = false,
-            allowEmptyCollection = false,
-            caseSensitive = false,
-            message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
-    private List<String> destinationIATAList;
-
-    @ValidAirportCodeCollection(allowNullCollection = true,
-            allowEmptyCollection = false,
-            caseSensitive = false,
+    @NotEmpty
+    private List<@ValidAirportCode(caseSensitive = false,
             message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_CASE_INSENSITIVE)
-    private List<String> excludeIATAList;
+            String> originIATAList;
 
-    @NonNullElements(message = "must be a nonempty list of valid route ids to exclude")
-    private final List<Integer> excludeRouteIdList;
+    @NotEmpty
+    private List<@ValidAirportCode(caseSensitive = false,
+            message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_CASE_INSENSITIVE)
+            String> destinationIATAList;
 
-    @ValidFlightNumberCollection(allowNullCollection = true,
-            allowEmptyCollection = false,
-            message = Regex.ConstraintMessage.FLIGHT_NUMBER_ELEMENTS_NONEMPTY)
-    private List<String> excludeFlightNumberList;
+    private List<@ValidAirportCode(caseSensitive = false,
+            message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_CASE_INSENSITIVE)
+            String> excludeIATAList;
+
+    private final List<@NotNull Integer> excludeRouteIdList;
+
+    private List<@ValidFlightNumber(message = Regex.ConstraintMessage.FLIGHT_NUMBER_ELEMENTS)
+            String> excludeFlightNumberList;
 
     @Min(1) @Max(25)
     private final Integer limit;
@@ -134,7 +125,7 @@ public class RoutePathQuery {
         public RoutePathQuery build() {
             RoutePathQuery routePathQuery = new RoutePathQuery(originIATAList,destinationIATAList,excludeIATAList,
                     excludeRouteIdList, excludeFlightNumberList,limit);
-            JakartaValidationUtil.validate(routePathQuery);
+            ValidationUtils.validateAndThrow(routePathQuery);
             routePathQuery.originIATAList = originIATAList.stream().map(String::toUpperCase).toList();
             routePathQuery.destinationIATAList = destinationIATAList.stream().map(String::toUpperCase).toList();
             if (excludeIATAList != null) {

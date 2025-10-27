@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
-import org.voyager.sdk.utils.JakartaValidationUtil;
+import org.voyager.commons.validate.ValidationUtils;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
@@ -70,7 +70,7 @@ public class SearchQuery {
 
         public SearchQuery build() {
             SearchQuery searchQuery = new SearchQuery(query,skipRowCount,limit);
-            JakartaValidationUtil.validate(searchQuery);
+            ValidationUtils.validateAndThrow(searchQuery);
             return searchQuery;
         }
     }

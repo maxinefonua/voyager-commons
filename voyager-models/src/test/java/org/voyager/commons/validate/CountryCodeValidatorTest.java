@@ -5,6 +5,7 @@ import jakarta.validation.Payload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.validate.annotations.ValidCountryCode;
+import org.voyager.commons.validate.validators.CountryCodeValidator;
 
 import java.lang.annotation.Annotation;
 

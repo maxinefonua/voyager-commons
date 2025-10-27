@@ -1,7 +1,8 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
-import org.voyager.sdk.model.AirlineQuery;
+import org.voyager.commons.validate.ValidationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,18 +14,17 @@ class AirlineQueryTest {
 
     @Test
     void builder() {
-        assertThrows(NullPointerException.class,()-> AirlineQuery.builder().build());
+        assertThrows(ValidationException.class,()-> ValidationUtils.validateAndThrow(AirlineQuery.builder().build()));
     }
 
     @Test
     void builderIATAList() {
         assertThrows(NullPointerException.class,()->AirlineQuery.builder().withIATAList(null));
         List<String> iataList = new ArrayList<>();
-        assertThrows(IllegalArgumentException.class,()->AirlineQuery.builder().withIATAList(iataList).build());
         iataList.add(null);
-        assertThrows(IllegalArgumentException.class,()->AirlineQuery.builder().withIATAList(iataList).build());
-        assertThrows(IllegalArgumentException.class,()->AirlineQuery.builder().withIATAList(List.of("")).build());
-        assertThrows(IllegalArgumentException.class,()->AirlineQuery.builder().withIATAList(List.of("123")).build());
+        assertThrows(ValidationException.class,()->AirlineQuery.builder().withIATAList(iataList).build());
+        assertThrows(ValidationException.class,()->AirlineQuery.builder().withIATAList(List.of("")).build());
+        assertThrows(ValidationException.class,()->AirlineQuery.builder().withIATAList(List.of("123")).build());
         AirlineQuery airlineQuery = AirlineQuery.builder().withIATAList(List.of("abc")).build();
         assertEquals("ABC", airlineQuery.getIATAList().get(0));
     }

@@ -1,23 +1,24 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.constants.Regex;
-import org.voyager.commons.validate.annotations.ValidAirportCodeCollection;
-import org.voyager.sdk.utils.JakartaValidationUtil;
+import org.voyager.commons.validate.annotations.ValidAirportCode;
+import org.voyager.commons.validate.ValidationUtils;
 import java.util.List;
 import java.util.StringJoiner;
 
 @Getter
 public class AirlineQuery {
-    @ValidAirportCodeCollection(allowNullCollection = true,
-            allowEmptyCollection = false,caseSensitive = false,
-            message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
-    private List<String> IATAList;
+    @NotEmpty
+    private List<@ValidAirportCode(caseSensitive = false,
+            message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_CASE_INSENSITIVE)
+            String> IATAList;
 
-    private AirlineQuery(@NonNull List<String> IATAList) {
+    private AirlineQuery(List<String> IATAList) {
         this.IATAList = IATAList;
     }
 
@@ -35,7 +36,7 @@ public class AirlineQuery {
 
         public AirlineQuery build() {
             AirlineQuery query = new AirlineQuery(IATAList);
-            JakartaValidationUtil.validate(query);
+            ValidationUtils.validateAndThrow(query);
             query.IATAList = query.IATAList.stream().map(String::toUpperCase).toList();
             return query;
         }

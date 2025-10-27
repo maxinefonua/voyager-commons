@@ -1,18 +1,23 @@
 package org.voyager.commons.model.geoname.query;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Getter;
 import lombok.Setter;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import org.voyager.commons.validate.annotations.ValidLatitude;
+import org.voyager.commons.validate.annotations.ValidLongitude;
 
 @Builder @NoArgsConstructor
-@Getter @Setter @AllArgsConstructor
+@Setter @Getter
+@AllArgsConstructor
 public class GeoNearbyQuery {
-    @NotNull
+    @ValidLatitude
     Double latitude;
-    @NotNull
+    @ValidLongitude
     Double longitude;
-    Integer radius;
+    @Min(1) @Max(100)
+    Integer radiusKm;
 }

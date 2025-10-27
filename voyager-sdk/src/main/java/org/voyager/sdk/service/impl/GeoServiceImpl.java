@@ -11,6 +11,7 @@ import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.error.ServiceException;
+import org.voyager.commons.validate.ValidationUtils;
 import org.voyager.sdk.http.HttpMethod;
 import org.voyager.commons.model.geoname.GeoCountry;
 import org.voyager.commons.model.geoname.GeoFull;
@@ -22,10 +23,12 @@ import org.voyager.commons.model.geoname.query.GeoTimezoneQuery;
 import org.voyager.commons.model.geoname.response.GeoResponse;
 import org.voyager.commons.model.geoname.response.GeoStatus;
 import org.voyager.sdk.service.GeoService;
-import org.voyager.sdk.utils.JakartaValidationUtil;
 import org.voyager.sdk.utils.ServiceUtils;
 import org.voyager.sdk.utils.ServiceUtilsFactory;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class GeoServiceImpl implements GeoService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GeoServiceImpl.class);
@@ -42,17 +45,17 @@ public class GeoServiceImpl implements GeoService {
 
     @Override
     public Either<ServiceError, List<GeoPlace>> findNearbyPlaces(@NonNull GeoNearbyQuery geoNearbyQuery) {
-        JakartaValidationUtil.validate(geoNearbyQuery);
+        ValidationUtils.validateAndThrow(geoNearbyQuery);
         String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s",GeoNames.NEARBY_PLACES,
                 ParameterNames.LATITUDE_PARAM_NAME,geoNearbyQuery.getLatitude(),
                 ParameterNames.LONGITUDE_PARAM_NAME,geoNearbyQuery.getLongitude());
-        if (geoNearbyQuery.getRadius() != null) {
+        if (geoNearbyQuery.getRadiusKm() != null) {
             requestURL = requestURL.concat(String.format("&%s=%s",
-                    GeoNames.ParameterNames.RADIUS,geoNearbyQuery.getRadius()));
+                    GeoNames.ParameterNames.RADIUS,geoNearbyQuery.getRadiusKm()));
         }
         LOGGER.debug("attempting to GET {}", requestURL);
-        Either<ServiceError, GeoResponse<GeoPlace>> either = serviceUtils.fetch(requestURL, HttpMethod.GET, new TypeReference<>() {
-        });
+        Either<ServiceError, GeoResponse<GeoPlace>> either = serviceUtils.fetch(
+                requestURL, HttpMethod.GET, new TypeReference<>(){});
         if (either.isLeft()) return Either.left(either.getLeft());
         GeoResponse<GeoPlace> geoPlaceGeoResponse = either.get();
         if (geoPlaceGeoResponse.getGeoStatus() != null) {
@@ -66,7 +69,7 @@ public class GeoServiceImpl implements GeoService {
 
     @Override
     public Either<ServiceError, GeoTimezone> getTimezone(@NonNull GeoTimezoneQuery geoTimezoneQuery) {
-        JakartaValidationUtil.validate(geoTimezoneQuery);
+        ValidationUtils.validateAndThrow(geoTimezoneQuery);
         String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s",GeoNames.TIMEZONE,
                 ParameterNames.LATITUDE_PARAM_NAME,geoTimezoneQuery.getLatitude(),
                 ParameterNames.LONGITUDE_PARAM_NAME,geoTimezoneQuery.getLongitude());
@@ -88,11 +91,11 @@ public class GeoServiceImpl implements GeoService {
 
     @Override
     public Either<ServiceError, List<GeoPlace>> search(@NonNull GeoSearchQuery geoSearchQuery) {
-        JakartaValidationUtil.validate(geoSearchQuery);
+        ValidationUtils.validateAndThrow(geoSearchQuery);
         String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s" + "&%s=%s" + "%s=%s"
                         + "&%s=%s" + "&%s=%s" + "&%s=%s" + "&%s=%s",
                 GeoNames.SEARCH,
-                GeoNames.ParameterNames.QUERY,geoSearchQuery.getQuery(),
+                GeoNames.ParameterNames.QUERY, URLEncoder.encode(geoSearchQuery.getQuery(), StandardCharsets.UTF_8),
                 GeoNames.ParameterNames.MAX_ROWS,geoSearchQuery.getMaxRows(),
                 GeoNames.ParameterNames.START_ROW,geoSearchQuery.getStartRow(),
                 GeoNames.ParameterNames.LANGUAGE,geoSearchQuery.getLang(),
@@ -102,15 +105,15 @@ public class GeoServiceImpl implements GeoService {
                 GeoNames.ParameterNames.FUZZY,geoSearchQuery.getFuzzy());
         if (StringUtils.isNotBlank(geoSearchQuery.getName())) {
             requestURL = requestURL.concat(String.format("&%s=%s",GeoNames.ParameterNames.NAME,
-                    geoSearchQuery.getName()));
+                    URLEncoder.encode(geoSearchQuery.getName(),StandardCharsets.UTF_8)));
         }
         if (StringUtils.isNotBlank(geoSearchQuery.getNameEquals())) {
             requestURL = requestURL.concat(String.format("&%s=%s",GeoNames.ParameterNames.NAME_EQUALS,
-                    geoSearchQuery.getNameEquals()));
+                    URLEncoder.encode(geoSearchQuery.getNameEquals(),StandardCharsets.UTF_8)));
         }
         if (StringUtils.isNotBlank(geoSearchQuery.getNameStartsWith())) {
             requestURL = requestURL.concat(String.format("&%s=%s",GeoNames.ParameterNames.NAME_STARTS_WITH,
-                    geoSearchQuery.getNameStartsWith()));
+                    URLEncoder.encode(geoSearchQuery.getNameStartsWith(),StandardCharsets.UTF_8)));
         }
         if (geoSearchQuery.getCountryList() != null) {
             for (String country : geoSearchQuery.getCountryList()) {
@@ -150,9 +153,11 @@ public class GeoServiceImpl implements GeoService {
             requestURL = requestURL.concat(String.format("&%s=%s",GeoNames.ParameterNames.FEATURE_CLASS,
                     geoSearchQuery.getFeatureClass().name()));
         }
-        if (geoSearchQuery.getFeatureCode() != null) {
-            requestURL = requestURL.concat(String.format("&%s=%s",GeoNames.ParameterNames.FEATURE_CODE,
-                    geoSearchQuery.getFeatureCode().name()));
+        if (geoSearchQuery.getFeatureCodeList() != null && !geoSearchQuery.getFeatureCodeList().isEmpty()) {
+            StringJoiner featureJoiner = new StringJoiner("&");
+            geoSearchQuery.getFeatureCodeList().forEach(featureCode -> featureJoiner.add(
+                    String.format("%s=%s",GeoNames.ParameterNames.FEATURE_CODE,featureCode.name())));
+            requestURL = requestURL.concat(String.format("&%s",featureJoiner));
         }
         if (geoSearchQuery.getCities() != null) {
             requestURL = requestURL.concat(String.format("&%s=%s",GeoNames.ParameterNames.CITIES,

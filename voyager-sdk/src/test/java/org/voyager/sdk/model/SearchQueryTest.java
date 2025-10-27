@@ -1,5 +1,6 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.constants.Path;
 import org.voyager.sdk.model.SearchQuery;
@@ -12,8 +13,8 @@ class SearchQueryTest {
     @Test
     void builderQuery() {
         assertThrows(NullPointerException.class,()-> SearchQuery.builder().withQuery(null).build());
-        assertThrows(IllegalArgumentException.class,()->SearchQuery.builder().withQuery("").build());
-        assertThrows(IllegalArgumentException.class,()->SearchQuery.builder().withQuery("  ").build());
+        assertThrows(ValidationException.class,()->SearchQuery.builder().withQuery("").build());
+        assertThrows(ValidationException.class,()->SearchQuery.builder().withQuery("  ").build());
 
         SearchQuery searchQuery = SearchQuery.builder().withQuery("test query").build();
         assertEquals("test query",searchQuery.getQuery());
@@ -32,7 +33,7 @@ class SearchQueryTest {
     @Test
     void builderSkipRowCount() {
         assertThrows(NullPointerException.class,()->SearchQuery.builder().withSkipRowCount(null).build());
-        assertThrows(IllegalArgumentException.class,()->SearchQuery.builder().withQuery("test query")
+        assertThrows(ValidationException.class,()->SearchQuery.builder().withQuery("test query")
                 .withSkipRowCount(0).build());
 
         SearchQuery searchQuery = SearchQuery.builder().withQuery("test query").withSkipRowCount(10).build();
@@ -43,7 +44,7 @@ class SearchQueryTest {
     @Test
     void getLimit() {
         assertThrows(NullPointerException.class,()->SearchQuery.builder().withLimit(null).build());
-        assertThrows(IllegalArgumentException.class,()->SearchQuery.builder().withQuery("test query")
+        assertThrows(ValidationException.class,()->SearchQuery.builder().withQuery("test query")
                 .withLimit(0).build());
 
         SearchQuery searchQuery = SearchQuery.builder().withQuery("test query").withLimit(10).build();

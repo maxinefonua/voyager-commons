@@ -1,5 +1,6 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.sdk.model.AirlinePathQuery;
@@ -38,48 +39,48 @@ class PathAirlineQueryTest {
                 AirlinePathQuery.builder().withDestinationIATAList(List.of()).build());
 
         // set empty list
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of())
                         .withDestinationIATAList(List.of("sjc")).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of()).build());
 
         // set to list with invalid element
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("to"))
                         .withDestinationIATAList(List.of("sjc")).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("ton"))
                         .withDestinationIATAList(List.of("sj")).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("143"))
                         .withDestinationIATAList(List.of("sjc")).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("ton"))
                         .withDestinationIATAList(List.of("987")).build());
 
         // set to list with empty element
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of(""))
                         .withDestinationIATAList(List.of("sjc")).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("ton"))
                         .withDestinationIATAList(List.of("")).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("   "))
                         .withDestinationIATAList(List.of("sjc")).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("ton"))
                         .withDestinationIATAList(List.of("   ")).build());
 
         // set to list with null element
         List<String> listWithNullElement = new ArrayList<>();
         listWithNullElement.add(null);
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("ton"))
                         .withDestinationIATAList(listWithNullElement).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(listWithNullElement)
                         .withDestinationIATAList(List.of("abc")).build());
 
@@ -113,29 +114,24 @@ class PathAirlineQueryTest {
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc")).withExcludeIATAList(null).build());
 
-        // set empty list
-        assertThrows(IllegalArgumentException.class,()->
-                AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
-                        .withDestinationIATAList(List.of("sjc")).withExcludeIATAList(List.of()).build());
-
         // set to list with empty string
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeIATAList(List.of("abc","dog","")).build());
 
         // set to list with blank string
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeIATAList(List.of("abc","dog","   ")).build());
 
         // set to list with invalid string
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeIATAList(List.of("abc","dog","123")).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeIATAList(List.of("abc","dog","yo")).build());
@@ -143,7 +139,7 @@ class PathAirlineQueryTest {
         // set to list with null element
         List<String> listWithNullElement = new ArrayList<>();
         listWithNullElement.add(null);
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeIATAList(listWithNullElement).build());
@@ -164,15 +160,10 @@ class PathAirlineQueryTest {
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc")).withExcludeRouteIdList(null).build());
 
-        // set empty list
-        assertThrows(IllegalArgumentException.class,()->
-                AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
-                        .withDestinationIATAList(List.of("sjc")).withExcludeRouteIdList(List.of()).build());
-
         // set to list with null element
         List<Integer> listWithNullElement = new ArrayList<>();
         listWithNullElement.add(null);
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeRouteIdList(listWithNullElement).build());
@@ -193,25 +184,20 @@ class PathAirlineQueryTest {
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc")).withExcludeFlightNumberList(null).build());
 
-        // set empty list
-        assertThrows(IllegalArgumentException.class,()->
-                AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
-                        .withDestinationIATAList(List.of("sjc")).withExcludeFlightNumberList(List.of()).build());
-
         // set to list with empty string
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeFlightNumberList(List.of("mn12","i2h3","")).build());
 
         // set to list with blank string
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeFlightNumberList(List.of("cd234","cd244","   ")).build());
 
         // set to list with invalid string
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeFlightNumberList(List.of("cd234","cd244","12  wq ")).build());
@@ -219,7 +205,7 @@ class PathAirlineQueryTest {
         // set to list with null element
         List<String> listWithNullElement = new ArrayList<>();
         listWithNullElement.add(null);
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc"))
                         .withExcludeFlightNumberList(listWithNullElement).build());
@@ -241,10 +227,10 @@ class PathAirlineQueryTest {
                         .withDestinationIATAList(List.of("sjc")).withLimit(null).build());
 
         // set to invalid values
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc")).withLimit(0).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 AirlinePathQuery.builder().withOriginIATAList(List.of("akl"))
                         .withDestinationIATAList(List.of("sjc")).withLimit(20).build());
 

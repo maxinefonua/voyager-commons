@@ -2,6 +2,7 @@ package org.voyager.sdk.model;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NonNull;
 import org.voyager.commons.constants.ParameterNames;
@@ -10,9 +11,8 @@ import org.voyager.commons.constants.Regex;
 import org.voyager.commons.model.country.Continent;
 import org.voyager.commons.model.location.Source;
 import org.voyager.commons.model.location.Status;
-import org.voyager.commons.validate.annotations.NonNullElements;
-import org.voyager.commons.validate.annotations.ValidCountryCodeCollection;
-import org.voyager.sdk.utils.JakartaValidationUtil;
+import org.voyager.commons.validate.annotations.ValidCountryCode;
+import org.voyager.commons.validate.ValidationUtils;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -24,17 +24,11 @@ public class LocationQuery {
     @Max(100)
     private final Integer limit;
 
-    @ValidCountryCodeCollection(allowNullCollection = true,
-            allowEmptyCollection = false,
-            caseSensitive = false,
-            message = Regex.ConstraintMessage.COUNTRY_CODE_ELEMENTS_NONEMPTY_CASE_INSENSITIVE)
-    private List<String> countryCodeList;
+    private List<@ValidCountryCode(message = Regex.ConstraintMessage.COUNTRY_CODE_ELEMENTS) String> countryCodeList;
 
-    @NonNullElements(message = "must be a nonempty list of valid status values") // allows null List
-    private final List<Status> statusList;
+    private final List<@NotNull Status> statusList;
 
-    @NonNullElements(message = "must be a nonempty list of valid continents")  // allows null List
-    private final List<Continent> continentList;
+    private final List<@NotNull Continent> continentList;
 
     LocationQuery(Source source, Integer limit, List<String> countryCodeList,
                   List<Status> statusList, List<Continent> continentList) {
@@ -97,8 +91,8 @@ public class LocationQuery {
             return this;
         }
 
-        public LocationQueryBuilder withCountryCodeList(@NonNull List<String> countryCodeList) {
-            this.countryCodeList = countryCodeList;
+        public LocationQueryBuilder withCountryCodeList(@NonNull List<@NonNull String> countryCodeList) {
+            this.countryCodeList = countryCodeList.stream().map(String::toUpperCase).toList();
             return this;
         }
 
@@ -114,7 +108,7 @@ public class LocationQuery {
 
         public LocationQuery build() {
             LocationQuery locationQuery = new LocationQuery(source,limit,countryCodeList,statusList,continentList);
-            JakartaValidationUtil.validate(locationQuery);
+            ValidationUtils.validateAndThrow(locationQuery);
             if (countryCodeList != null) {
                 locationQuery.countryCodeList = countryCodeList.stream().map(String::toUpperCase).toList();
             }

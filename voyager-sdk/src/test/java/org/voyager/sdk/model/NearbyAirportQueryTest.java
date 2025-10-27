@@ -1,5 +1,6 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.AirportType;
@@ -31,15 +32,15 @@ class NearbyAirportQueryTest {
         assertThrows(NullPointerException.class,()->NearbyAirportQuery.builder().withLongitude(10.0).build());
 
         // set over maximum
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 NearbyAirportQuery.builder().withLatitude(900.0).withLongitude(10.0).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 NearbyAirportQuery.builder().withLatitude(10.0).withLongitude(800.0).build());
 
         // set under minimum
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 NearbyAirportQuery.builder().withLatitude(-300.0).withLongitude(-10.0).build());
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(ValidationException.class,()->
                 NearbyAirportQuery.builder().withLatitude(-10.0).withLongitude(-400.0).build());
 
         // valid
@@ -57,7 +58,7 @@ class NearbyAirportQueryTest {
         assertThrows(NullPointerException.class,()->NearbyAirportQuery.builder()
                 .withLatitude(10.0).withLongitude(-10.0).withLimit(null).build());
         // set less than min
-        assertThrows(IllegalArgumentException.class,()-> NearbyAirportQuery.builder()
+        assertThrows(ValidationException.class,()-> NearbyAirportQuery.builder()
                 .withLatitude(10.0).withLongitude(-10.0).withLimit(0).build());
 
         // valid value
@@ -73,14 +74,10 @@ class NearbyAirportQueryTest {
         // set as null
         assertThrows(NullPointerException.class,()->NearbyAirportQuery.builder()
                 .withLatitude(10.0).withLongitude(-10.0).withAirlineList(null).build());
-        // set as empty list
-        assertThrows(IllegalArgumentException.class,()-> NearbyAirportQuery.builder()
-                .withLatitude(10.0).withLongitude(-10.0).withAirlineList(List.of()).build());
-
         // set as list with null
         List<Airline> airlineList = new ArrayList<>();
         airlineList.add(null);
-        assertThrows(IllegalArgumentException.class,()-> NearbyAirportQuery.builder()
+        assertThrows(ValidationException.class,()-> NearbyAirportQuery.builder()
                 .withLatitude(10.0).withLongitude(-10.0).withAirlineList(airlineList).build());
 
         // valid value
@@ -99,14 +96,10 @@ class NearbyAirportQueryTest {
         // set as null
         assertThrows(NullPointerException.class,()->NearbyAirportQuery.builder()
                 .withLatitude(10.0).withLongitude(-10.0).withAirportTypeList(null).build());
-        // set as empty list
-        assertThrows(IllegalArgumentException.class,()-> NearbyAirportQuery.builder()
-                .withLatitude(10.0).withLongitude(-10.0).withAirportTypeList(List.of()).build());
-
         // set as list with null
         List<AirportType> typeList = new ArrayList<>();
         typeList.add(null);
-        assertThrows(IllegalArgumentException.class,()-> NearbyAirportQuery.builder()
+        assertThrows(ValidationException.class,()-> NearbyAirportQuery.builder()
                 .withLatitude(10.0).withLongitude(-10.0).withAirportTypeList(typeList).build());
 
         // valid value

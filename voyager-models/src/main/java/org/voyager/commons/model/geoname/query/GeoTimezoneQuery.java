@@ -1,11 +1,13 @@
 package org.voyager.commons.model.geoname.query;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
+import org.voyager.commons.constants.Regex;
 
 @Builder
 @NoArgsConstructor
@@ -20,6 +22,7 @@ public class GeoTimezoneQuery {
     private Double longitude;
 
     // TODO: update to language datatype
+    @Pattern(regexp = Regex.NONEMPTY_TRIMMED)
     private String language; // for country name
     private Integer radius; // radius (buffer in km for closest timezone in coastal areas)
 

@@ -1,5 +1,6 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
@@ -7,9 +8,8 @@ import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.AirportType;
-import org.voyager.commons.validate.annotations.NonNullElements;
 import org.voyager.commons.validate.annotations.ValidCountryCode;
-import org.voyager.sdk.utils.JakartaValidationUtil;
+import org.voyager.commons.validate.ValidationUtils;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -20,8 +20,7 @@ public class AirportQuery {
 
     private final Airline airline;
 
-    @NonNullElements(message = "must be a nonempty list of valid airport types") // allows null List
-    private final List<AirportType> airportTypeList;
+    private final List<@NotNull AirportType> airportTypeList;
 
     private AirportQuery(String countryCode,Airline airline, List<AirportType> airportTypeList) {
         this.countryCode = countryCode;
@@ -80,7 +79,7 @@ public class AirportQuery {
 
         public AirportQuery build() {
             AirportQuery airportQuery = new AirportQuery(countryCode, airline, airportTypeList);
-            JakartaValidationUtil.validate(airportQuery);
+            ValidationUtils.validateAndThrow(airportQuery);
             if (airportQuery.countryCode != null)
                 airportQuery.countryCode = airportQuery.countryCode.toUpperCase();
             return airportQuery;

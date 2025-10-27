@@ -1,5 +1,6 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.sdk.model.RouteQuery;
@@ -12,10 +13,10 @@ class RouteQueryTest {
     @Test
     void builderOrigin() {
         assertThrows(NullPointerException.class,()-> RouteQuery.builder().withOrigin(null).build());
-        assertThrows(IllegalArgumentException.class,()->RouteQuery.builder().withOrigin("").build());
-        assertThrows(IllegalArgumentException.class,()->RouteQuery.builder().withOrigin("  ").build());
-        assertThrows(IllegalArgumentException.class,()->RouteQuery.builder().withOrigin("as2").build());
-        assertThrows(IllegalArgumentException.class,()->RouteQuery.builder().withOrigin("as").build());
+        assertThrows(ValidationException.class,()->RouteQuery.builder().withOrigin("").build());
+        assertThrows(ValidationException.class,()->RouteQuery.builder().withOrigin("  ").build());
+        assertThrows(ValidationException.class,()->RouteQuery.builder().withOrigin("as2").build());
+        assertThrows(ValidationException.class,()->RouteQuery.builder().withOrigin("as").build());
 
         RouteQuery routeQuery = RouteQuery.builder().withOrigin("sjc").build();
         assertEquals("SJC",routeQuery.getOrigin());
@@ -25,10 +26,10 @@ class RouteQueryTest {
     @Test
     void builderDestination() {
         assertThrows(NullPointerException.class,()->RouteQuery.builder().withDestination(null).build());
-        assertThrows(IllegalArgumentException.class,()->RouteQuery.builder().withDestination("").build());
-        assertThrows(IllegalArgumentException.class,()->RouteQuery.builder().withDestination("  ").build());
-        assertThrows(IllegalArgumentException.class,()->RouteQuery.builder().withDestination("as2").build());
-        assertThrows(IllegalArgumentException.class,()->RouteQuery.builder().withDestination("as").build());
+        assertThrows(ValidationException.class,()->RouteQuery.builder().withDestination("").build());
+        assertThrows(ValidationException.class,()->RouteQuery.builder().withDestination("  ").build());
+        assertThrows(ValidationException.class,()->RouteQuery.builder().withDestination("as2").build());
+        assertThrows(ValidationException.class,()->RouteQuery.builder().withDestination("as").build());
 
         RouteQuery routeQuery = RouteQuery.builder().withDestination("sjc").build();
         assertEquals("SJC",routeQuery.getDestination());

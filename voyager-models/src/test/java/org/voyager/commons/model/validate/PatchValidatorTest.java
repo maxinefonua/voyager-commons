@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.voyager.commons.validate.PatchValidator;
+import org.voyager.commons.validate.validators.PatchValidator;
 
 import java.lang.reflect.Field;
 
