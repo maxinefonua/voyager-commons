@@ -1,0 +1,140 @@
+package org.voyager.sdk.model;
+
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.NonNull;
+import org.voyager.commons.constants.ParameterNames;
+import org.voyager.commons.constants.Path;
+import org.voyager.commons.constants.Regex;
+import org.voyager.commons.validate.annotations.ValidAirportCode;
+import org.voyager.commons.validate.ValidationUtils;
+import org.voyager.commons.validate.annotations.ValidFlightNumber;
+import java.util.List;
+import java.util.StringJoiner;
+
+@Getter
+public class RoutePathQuery {
+    @NotEmpty
+    private List<@ValidAirportCode(caseSensitive = false,
+            message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_CASE_INSENSITIVE)
+            String> originIATAList;
+
+    @NotEmpty
+    private List<@ValidAirportCode(caseSensitive = false,
+            message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_CASE_INSENSITIVE)
+            String> destinationIATAList;
+
+    private List<@ValidAirportCode(caseSensitive = false,
+            message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS_CASE_INSENSITIVE)
+            String> excludeIATAList;
+
+    private final List<@NotNull Integer> excludeRouteIdList;
+
+    private List<@ValidFlightNumber(message = Regex.ConstraintMessage.FLIGHT_NUMBER_ELEMENTS)
+            String> excludeFlightNumberList;
+
+    @Min(1) @Max(25)
+    private final Integer limit;
+
+    RoutePathQuery(@NonNull List<String> originIATAList, @NonNull List<String> destinationIATAList,
+                   List<String> excludeIATAList, List<Integer> excludeRouteIdList, List<String> excludeFlightNumberList,
+                   Integer limit) {
+        this.originIATAList = originIATAList;
+        this.destinationIATAList = destinationIATAList;
+        this.excludeIATAList = excludeIATAList;
+        this.excludeRouteIdList = excludeRouteIdList;
+        this.excludeFlightNumberList = excludeFlightNumberList;
+        this.limit = limit;
+    }
+
+    public static PathQueryBuilder builder() {
+        return new PathQueryBuilder();
+    }
+
+    public String getRequestURL() {
+        StringJoiner originJoiner = new StringJoiner(",");
+        originIATAList.forEach(originJoiner::add);
+        StringJoiner destinationJoiner = new StringJoiner(",");
+        destinationIATAList.forEach(destinationJoiner::add);
+
+        StringJoiner paramsJoiner = new StringJoiner("&");
+        paramsJoiner.add(String.format("%s=%s", ParameterNames.ORIGIN_PARAM_NAME,originJoiner));
+        paramsJoiner.add(String.format("%s=%s", ParameterNames.DESTINATION_PARAM_NAME,destinationJoiner));
+
+        if (excludeIATAList != null) {
+            StringJoiner iataJoiner = new StringJoiner(",");
+            excludeIATAList.forEach(iataJoiner::add);
+            paramsJoiner.add(String.format("%s=%s",ParameterNames.EXCLUDE_PARAM_NAME,iataJoiner));
+        }
+
+        if (excludeRouteIdList != null) {
+            StringJoiner routeIdJoiner = new StringJoiner(",");
+            excludeRouteIdList.forEach(routeId -> routeIdJoiner.add(String.valueOf(routeId)));
+            paramsJoiner.add(String.format("%s=%s",ParameterNames.EXCLUDE_ROUTE_PARAM_NAME,routeIdJoiner));
+        }
+
+        if (excludeFlightNumberList != null) {
+            StringJoiner flightJoiner = new StringJoiner(",");
+            excludeFlightNumberList.forEach(flightJoiner::add);
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.EXCLUDE_FLIGHT_PARAM_NAME,flightJoiner));
+        }
+
+        if (limit != null) paramsJoiner.add(String.format("%s=%s", ParameterNames.LIMIT_PARAM_NAME,limit));
+
+        return String.format("%s?%s",Path.ROUTE_PATH,paramsJoiner);
+    }
+
+    public static class PathQueryBuilder {
+        private List<String> originIATAList;
+        private List<String> destinationIATAList;
+        private List<String> excludeIATAList;
+        private List<Integer> excludeRouteIdList;
+        private List<String> excludeFlightNumberList;
+        private Integer limit;
+
+        public PathQueryBuilder withOriginIATAList(@NonNull List<String> originIATAList) {
+            this.originIATAList = originIATAList;
+            return this;
+        }
+
+        public PathQueryBuilder withDestinationIATAList(@NonNull List<String> destinationIATAList) {
+            this.destinationIATAList = destinationIATAList;
+            return this;
+        }
+
+        public PathQueryBuilder withExcludeIATAList(@NonNull List<String> excludeIATAList) {
+            this.excludeIATAList = excludeIATAList;
+            return this;
+        }
+
+        public PathQueryBuilder withExcludeRouteIdList(@NonNull List<Integer> excludeRouteIdList) {
+            this.excludeRouteIdList = excludeRouteIdList;
+            return this;
+        }
+
+        public PathQueryBuilder withExcludeFlightNumberList(@NonNull List<String> excludeFlightNumberList) {
+            this.excludeFlightNumberList = excludeFlightNumberList;
+            return this;
+        }
+
+        public PathQueryBuilder withLimit(@NonNull Integer limit) {
+            this.limit = limit;
+            return this;
+        }
+
+        public RoutePathQuery build() {
+            RoutePathQuery routePathQuery = new RoutePathQuery(originIATAList,destinationIATAList,excludeIATAList,
+                    excludeRouteIdList, excludeFlightNumberList,limit);
+            ValidationUtils.validateAndThrow(routePathQuery);
+            routePathQuery.originIATAList = originIATAList.stream().map(String::toUpperCase).toList();
+            routePathQuery.destinationIATAList = destinationIATAList.stream().map(String::toUpperCase).toList();
+            if (excludeIATAList != null) {
+                routePathQuery.excludeIATAList = excludeIATAList.stream().map(String::toUpperCase).toList();
+            }
+            if (excludeFlightNumberList != null) {
+                routePathQuery.excludeFlightNumberList = excludeFlightNumberList.stream().map(String::toUpperCase).toList();
+            }
+            return routePathQuery;
+        }
+    }
+}

@@ -6,7 +6,7 @@
 
     <groupId>org.voyager</groupId>
     <artifactId>voyager-commons</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>voyager-models</module>
@@ -19,10 +19,10 @@
         <java.version>17</java.version>
         <jackson.version>2.18.1</jackson.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-        <maven.compiler.source>19</maven.compiler.source>
-        <maven.compiler.target>19</maven.compiler.target>
-        <spring-data-commons.version>3.4.0</spring-data-commons.version>
+        <maven.compiler.source>17</maven.compiler.source>
         <lombok.version>1.18.36</lombok.version>
+        <maven.compiler.target>17</maven.compiler.target>
+        <spring-data-commons.version>3.4.0</spring-data-commons.version>
     </properties>
 
     <dependencies>

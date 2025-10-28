@@ -4,10 +4,7 @@ target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+.idea/*
 *.iws
 *.iml
 *.ipr
@@ -19,5 +16,7 @@ target/
 *.env
 *.env_local
 *.env_dev
+*.log
 voyager-datasync/scripts/data/*
 voyager-datasync/scripts/postgres/logs/*
+*dependency-reduced-pom.xml
