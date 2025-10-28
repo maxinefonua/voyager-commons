@@ -18,7 +18,7 @@ public class LocationPatch {
     List<@ValidAirportCode(message = Regex.ConstraintMessage.AIRPORT_CODE_ELEMENTS)
             String> airports;
 
-    @ValidEnum(enumClass = Status.class,
+    @ValidEnum(enumClass = Status.class, allowNull = true,
     message = "must be an accepted Status value")
     String status;
 }
