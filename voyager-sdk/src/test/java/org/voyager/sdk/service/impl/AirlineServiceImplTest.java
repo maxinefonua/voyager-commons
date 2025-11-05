@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.sdk.model.AirlineQuery;
+import org.voyager.commons.model.airline.AirlineQuery;
 import org.voyager.commons.model.airline.AirlineAirport;
 import org.voyager.commons.model.airline.AirlineBatchUpsert;
 import org.voyager.sdk.service.AirlineService;

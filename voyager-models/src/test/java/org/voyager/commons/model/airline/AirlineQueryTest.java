@@ -1,7 +1,8 @@
-package org.voyager.sdk.model;
+package org.voyager.commons.model.airline;
 
 import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
+import org.voyager.commons.model.geoname.fields.SearchOperator;
 import org.voyager.commons.validate.ValidationUtils;
 
 import java.util.ArrayList;
@@ -34,6 +35,15 @@ class AirlineQueryTest {
         AirlineQuery airlineQuery = AirlineQuery.builder().withIATAList(List.of("abc","def")).build();
         String requestURL = airlineQuery.getRequestURL();
         assertNotNull(requestURL);
-        assertEquals("/airlines?iata=ABC,DEF", requestURL);
+        assertEquals("/airlines?iata=ABC,DEF&operator=OR", requestURL);
+    }
+
+    @Test
+    void resolveRequestURLWithAND() {
+        AirlineQuery airlineQuery = AirlineQuery.builder().withIATAList(List.of("abc","def"))
+                .withOperator(SearchOperator.AND).build();
+        String requestURL = airlineQuery.getRequestURL();
+        assertNotNull(requestURL);
+        assertEquals("/airlines?iata=ABC,DEF&operator=AND", requestURL);
     }
 }

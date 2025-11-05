@@ -139,7 +139,7 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 Airport nearby = AIRPORT.toBuilder().type(AirportType.UNVERIFIED).build();
                 return Either.right((T) List.of(nearby));
             case "/airlines":
-            case "/airlines?iata=HEL":
+            case "/airlines?iata=HEL&operator=OR":
                 return Either.right((T)List.of(Airline.DELTA,Airline.JAPAN));
             case "/countries":
                 return Either.right((T)List.of(COUNTRY));
@@ -207,6 +207,8 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/routes":
             case "/routes/555":
                 return Either.right((T) ROUTE);
+            case "/admin/airports":
+                return Either.right((T)AIRPORT);
             default:
                 throw new RuntimeException(String.format(
                     "ServiceUtilsTest fetchWithRequestBody: '%s' not yet implemented for requestURL: %s",

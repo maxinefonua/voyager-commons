@@ -4,7 +4,7 @@ import io.vavr.control.Either;
 import lombok.NonNull;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.sdk.model.AirlineQuery;
+import org.voyager.commons.model.airline.AirlineQuery;
 import org.voyager.commons.model.airline.AirlineAirport;
 import org.voyager.commons.model.airline.AirlineBatchUpsert;
 

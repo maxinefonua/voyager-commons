@@ -10,7 +10,7 @@ import org.voyager.commons.constants.Path;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.sdk.http.HttpMethod;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.sdk.model.AirlineQuery;
+import org.voyager.commons.model.airline.AirlineQuery;
 import org.voyager.commons.model.airline.AirlineAirport;
 import org.voyager.commons.model.airline.AirlineBatchUpsert;
 import org.voyager.sdk.service.AirlineService;

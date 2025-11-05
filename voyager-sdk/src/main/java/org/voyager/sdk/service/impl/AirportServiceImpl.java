@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.error.ServiceError;
+import org.voyager.commons.validate.ValidationUtils;
 import org.voyager.sdk.http.HttpMethod;
 import org.voyager.sdk.model.AirportQuery;
 import org.voyager.sdk.model.IataQuery;
@@ -56,6 +57,7 @@ public class AirportServiceImpl implements AirportService {
 
     @Override
     public Either<ServiceError,Airport> patchAirport(@NonNull String iata, @NonNull AirportPatch airportPatch) {
+        ValidationUtils.validateAndThrow(airportPatch);
         String requestURL = String.format("%s/%s",Path.Admin.AIRPORTS,iata);
         LOGGER.debug("attempting to PATCH airport at: {}, with: '{}'", requestURL, airportPatch);
         return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.PATCH,Airport.class,airportPatch);
@@ -63,6 +65,7 @@ public class AirportServiceImpl implements AirportService {
 
     @Override
     public Either<ServiceError, Airport> createAirport(@NonNull AirportForm airportForm) {
+        ValidationUtils.validateAndThrow(airportForm);
         String requestURL = Path.Admin.AIRPORTS;
         LOGGER.debug("attempting to POST at {} with airportForm {}",requestURL,airportForm);
         return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.POST,Airport.class,airportForm);

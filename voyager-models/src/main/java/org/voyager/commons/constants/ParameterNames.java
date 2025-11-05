@@ -26,4 +26,5 @@ public class ParameterNames {
     public static final String SOURCE_ID_PARAM_NAME = "sourceId";
     @SuppressWarnings("unused")
     public static final String AIRPORTS_PROPERTY_NAME = "airports";
+    public static final String OPERATOR = "operator";
 }
