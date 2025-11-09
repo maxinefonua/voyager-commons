@@ -28,10 +28,10 @@ import org.voyager.commons.model.result.LookupAttribution;
 import org.voyager.commons.model.result.ResultSearch;
 import org.voyager.commons.model.result.ResultSearchFull;
 import org.voyager.commons.model.route.Route;
-import org.voyager.commons.model.route.PathResponse;
-import org.voyager.commons.model.route.RouteAirline;
-import org.voyager.commons.model.route.AirlinePath;
-import org.voyager.commons.model.route.RoutePath;
+import org.voyager.commons.model.path.PathResponse;
+import org.voyager.commons.model.path.route.RouteAirline;
+import org.voyager.commons.model.path.airline.AirlinePath;
+import org.voyager.commons.model.path.route.RoutePath;
 import org.voyager.sdk.utils.ServiceUtilsDefault;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -144,12 +144,12 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/countries":
                 return Either.right((T)List.of(COUNTRY));
             case "/flights":
-            case "/flights?flightNumber=DL100":
+            case "/flights?page=0&size=20&flightNumber=DL100":
                 return Either.right((T)List.of(FLIGHT));
             case "/admin/locations?limit=20":
             case "/admin/locations":
                 return Either.right((T)List.of(LOCATION));
-            case "/airline-path?origin=SJC&destination=SLC":
+            case "/airline-path?origin=SJC&destination=SLC&page=0&size=5":
                 return Either.right((T)PATH_RESPONSE);
             case "/route-path?origin=SJC&destination=SLC":
                 return Either.right((T)List.of(RoutePath.builder().routeAirlineList(List.of(

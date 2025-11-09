@@ -4,7 +4,7 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.error.ServiceError;
-import org.voyager.sdk.model.RouteQuery;
+import org.voyager.commons.model.route.RouteQuery;
 import org.voyager.commons.model.route.Route;
 import org.voyager.commons.model.route.RouteForm;
 import org.voyager.commons.model.route.RoutePatch;
@@ -34,7 +34,7 @@ class RouteServiceImplTest {
 
     @Test
     void getRoutes() {
-        Either<ServiceError, List<Route>> either = routeService.getRoutes(RouteQuery.builder().withOrigin("sjc").build());
+        Either<ServiceError, List<Route>> either = routeService.getRoutes(RouteQuery.builder().origin("SJC").build());
         assertNotNull(either);
         assertTrue(either.isRight());
         assertNotNull(either.get());

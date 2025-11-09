@@ -1,10 +1,12 @@
-package org.voyager.commons.model.route;
+package org.voyager.commons.model.path.airline;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.voyager.commons.model.airline.Airline;
+import org.voyager.commons.model.route.Route;
+
 import java.util.ArrayList;
 import java.util.List;
 

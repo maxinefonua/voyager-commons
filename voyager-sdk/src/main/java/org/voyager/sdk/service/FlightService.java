@@ -5,7 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 import org.voyager.commons.error.ServiceError;
-import org.voyager.sdk.model.FlightQuery;
+import org.voyager.commons.model.flight.FlightQuery;
 import org.voyager.commons.model.flight.Flight;
 import org.voyager.commons.model.flight.FlightBatchDelete;
 import org.voyager.commons.model.flight.FlightForm;

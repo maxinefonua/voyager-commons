@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.validate.annotations.ValidEnum;
-import org.voyager.commons.validate.annotations.ValidPatch;
+import org.voyager.commons.validate.annotations.ValidNonNullField;
 
 @Builder @Data
 @AllArgsConstructor
-@NoArgsConstructor @ValidPatch
+@NoArgsConstructor @ValidNonNullField
 @ToString(includeFieldNames = false)
 public class AirportPatch {
     @Pattern(regexp = Regex.NONEMPTY_TRIMMED,

@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = PatchValidator.class)
-public @interface ValidPatch {
+public @interface ValidNonNullField {
     String message() default "must have at least one nonnull field";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

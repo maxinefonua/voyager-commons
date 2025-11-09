@@ -8,8 +8,9 @@ import lombok.NonNull;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.error.ServiceError;
+import org.voyager.commons.validate.ValidationUtils;
 import org.voyager.sdk.http.HttpMethod;
-import org.voyager.sdk.model.FlightQuery;
+import org.voyager.commons.model.flight.FlightQuery;
 import org.voyager.commons.model.flight.Flight;
 import org.voyager.commons.model.flight.FlightBatchDelete;
 import org.voyager.commons.model.flight.FlightForm;
@@ -41,6 +42,7 @@ public class FlightServiceImpl implements FlightService {
 
     @Override
     public Either<ServiceError, List<Flight>> getFlights(FlightQuery flightQuery) {
+        ValidationUtils.validateAndThrow(flightQuery);
         return serviceUtils.fetch(flightQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
         });
     }

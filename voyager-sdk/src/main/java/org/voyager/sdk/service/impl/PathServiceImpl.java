@@ -3,12 +3,13 @@ package org.voyager.sdk.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.vavr.control.Either;
 import org.voyager.commons.error.ServiceError;
+import org.voyager.commons.validate.ValidationUtils;
 import org.voyager.sdk.http.HttpMethod;
-import org.voyager.sdk.model.AirlinePathQuery;
+import org.voyager.commons.model.path.airline.PathAirlineQuery;
 import org.voyager.sdk.model.RoutePathQuery;
-import org.voyager.commons.model.route.RoutePath;
-import org.voyager.commons.model.route.AirlinePath;
-import org.voyager.commons.model.route.PathResponse;
+import org.voyager.commons.model.path.route.RoutePath;
+import org.voyager.commons.model.path.airline.AirlinePath;
+import org.voyager.commons.model.path.PathResponse;
 import org.voyager.sdk.service.PathService;
 import org.voyager.sdk.utils.ServiceUtils;
 import org.voyager.sdk.utils.ServiceUtilsFactory;
@@ -28,8 +29,9 @@ public class PathServiceImpl implements PathService {
 
 
     @Override
-    public Either<ServiceError, PathResponse<AirlinePath>> getAirlinePathResponse(AirlinePathQuery airlinePathQuery) {
-        return serviceUtils.fetch(airlinePathQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>(){});
+    public Either<ServiceError, PathResponse<AirlinePath>> getAirlinePathResponse(PathAirlineQuery pathAirlineQuery) {
+        ValidationUtils.validateAndThrow(pathAirlineQuery);
+        return serviceUtils.fetch(pathAirlineQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>(){});
     }
 
     @Override

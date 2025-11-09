@@ -1,5 +1,6 @@
 package org.voyager.sdk.http;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.sdk.http.HttpMethod;
 import org.voyager.sdk.http.VoyagerHttpFactory;
@@ -11,6 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class VoyagerHttpFactoryTest {
+    @BeforeAll
+    static void setup() {
+        VoyagerHttpFactory.reset();
+    }
 
     @Test
     void testAllMethods() throws URISyntaxException {

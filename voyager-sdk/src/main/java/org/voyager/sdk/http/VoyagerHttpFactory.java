@@ -10,7 +10,6 @@ public class VoyagerHttpFactory {
     private static boolean initialized = false;
     private static String authorizationToken;
 
-    VoyagerHttpFactory(){}
     /**
      * Initialize the factory with required authorization token
      * Must be called before using any other methods

@@ -4,10 +4,7 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.error.ServiceError;
-import org.voyager.sdk.model.FlightQuery;
-import org.voyager.commons.model.flight.Flight;
-import org.voyager.commons.model.flight.FlightForm;
-import org.voyager.commons.model.flight.FlightPatch;
+import org.voyager.commons.model.flight.*;
 import org.voyager.sdk.service.FlightService;
 import org.voyager.sdk.service.TestServiceRegistry;
 import org.voyager.sdk.service.utils.ServiceUtilsTestFactory;
@@ -46,7 +43,7 @@ class FlightServiceImplTest {
         assertNotNull(either.get());
         assertFalse(either.get().isEmpty());
 
-        either = flightService.getFlights(FlightQuery.builder().withFlightNumber("DL100").build());
+        either = flightService.getFlights(FlightNumberQuery.builder().flightNumber("DL100").build());
         assertNotNull(either);
         assertTrue(either.isRight());
         assertNotNull(either.get());

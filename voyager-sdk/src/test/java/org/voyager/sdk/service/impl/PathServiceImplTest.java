@@ -5,15 +5,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.sdk.model.AirlinePathQuery;
+import org.voyager.commons.model.path.airline.PathAirlineQuery;
 import org.voyager.sdk.model.RoutePathQuery;
-import org.voyager.commons.model.route.AirlinePath;
-import org.voyager.commons.model.route.PathResponse;
-import org.voyager.commons.model.route.RoutePath;
+import org.voyager.commons.model.path.airline.AirlinePath;
+import org.voyager.commons.model.path.PathResponse;
+import org.voyager.commons.model.path.route.RoutePath;
 import org.voyager.sdk.service.PathService;
 import org.voyager.sdk.service.TestServiceRegistry;
 import org.voyager.sdk.service.utils.ServiceUtilsTestFactory;
 import java.util.List;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,10 +38,10 @@ class PathServiceImplTest {
 
     @Test
     void getAirlinePathResponse() {
-        assertThrows(NullPointerException.class, ()->pathService.getAirlinePathResponse(null));
+        assertThrows(IllegalArgumentException.class, ()->pathService.getAirlinePathResponse(null));
         Either<ServiceError, PathResponse<AirlinePath>> either = pathService.getAirlinePathResponse(
-                AirlinePathQuery.builder().withOriginIATAList(List.of("SJC"))
-                        .withDestinationIATAList(List.of("SLC")).build());
+                PathAirlineQuery.builder().originSet(Set.of("SJC"))
+                        .destinationSet(Set.of("SLC")).build());
         assertNotNull(either);
         assertTrue(either.isRight());
         assertNotNull(either.get());

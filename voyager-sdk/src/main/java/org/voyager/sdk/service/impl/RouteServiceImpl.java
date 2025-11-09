@@ -7,8 +7,9 @@ import lombok.NonNull;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.error.ServiceError;
+import org.voyager.commons.validate.ValidationUtils;
 import org.voyager.sdk.http.HttpMethod;
-import org.voyager.sdk.model.RouteQuery;
+import org.voyager.commons.model.route.RouteQuery;
 import org.voyager.commons.model.route.Route;
 import org.voyager.commons.model.route.RouteForm;
 import org.voyager.commons.model.route.RoutePatch;
@@ -38,6 +39,7 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public Either<ServiceError, List<Route>> getRoutes(RouteQuery routeQuery) {
+        ValidationUtils.validateAndThrow(routeQuery);
         return serviceUtils.fetch(routeQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
         });
     }

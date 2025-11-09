@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.commons.model.airline.AirlineQuery;
+import org.voyager.commons.model.airline.AirlineAirportQuery;
 import org.voyager.commons.model.airline.AirlineAirport;
 import org.voyager.commons.model.airline.AirlineBatchUpsert;
 import org.voyager.sdk.service.AirlineService;
@@ -32,8 +32,8 @@ class AirlineServiceImplTest {
     @Test
     void getAirlines() {
         assertThrows(NullPointerException.class,() -> airlineService.getAirlines(null));
-        AirlineQuery airlineQuery = AirlineQuery.builder().withIATAList(List.of("HEL")).build();
-        Either<ServiceError, List<Airline>> either = airlineService.getAirlines(airlineQuery);
+        AirlineAirportQuery airlineAirportQuery = AirlineAirportQuery.builder().iatalist(List.of("HEL")).build();
+        Either<ServiceError, List<Airline>> either = airlineService.getAirlines(airlineAirportQuery);
         assertNotNull(either);
         assertTrue(either.isRight());
         assertEquals(Airline.DELTA,either.get().get(0));
