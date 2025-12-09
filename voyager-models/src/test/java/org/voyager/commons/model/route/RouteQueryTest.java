@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.validate.ValidationUtils;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -15,32 +17,32 @@ class RouteQueryTest {
         assertThrows(ValidationException.class,()-> ValidationUtils.validateAndThrow(
                 RouteQuery.builder().build()));
         assertThrows(ValidationException.class,()->ValidationUtils.validateAndThrow(
-                RouteQuery.builder().origin("").build()));
+                RouteQuery.builder().originList(List.of("")).build()));
         assertThrows(ValidationException.class,()->ValidationUtils.validateAndThrow(
-                RouteQuery.builder().origin("  ").build()));
+                RouteQuery.builder().originList(List.of("  ")).build()));
         assertThrows(ValidationException.class,()->ValidationUtils.validateAndThrow(
-                RouteQuery.builder().origin("as2").build()));
+                RouteQuery.builder().originList(List.of("as2")).build()));
         assertThrows(ValidationException.class,()->ValidationUtils.validateAndThrow(
-                RouteQuery.builder().origin("as").build()));
+                RouteQuery.builder().originList(List.of("as")).build()));
 
-        RouteQuery routeQuery = RouteQuery.builder().origin("SJC").build();
-        assertEquals("SJC",routeQuery.getOrigin());
+        RouteQuery routeQuery = RouteQuery.builder().originList(List.of("SJC")).build();
+        assertEquals("SJC",routeQuery.getOriginList().get(0));
         assertEquals("/routes?origin=SJC",routeQuery.getRequestURL());
     }
 
     @Test
     void builderDestination() {
         assertThrows(ValidationException.class,()->ValidationUtils.validateAndThrow(
-                RouteQuery.builder().destination("").build()));
+                RouteQuery.builder().destinationList(List.of("")).build()));
         assertThrows(ValidationException.class,()->ValidationUtils.validateAndThrow(
-                RouteQuery.builder().destination("  ").build()));
+                RouteQuery.builder().destinationList(List.of("  ")).build()));
         assertThrows(ValidationException.class,()->ValidationUtils.validateAndThrow(
-                RouteQuery.builder().destination("as2").build()));
+                RouteQuery.builder().destinationList(List.of("as2")).build()));
         assertThrows(ValidationException.class,()->ValidationUtils.validateAndThrow(
-                RouteQuery.builder().destination("as").build()));
+                RouteQuery.builder().destinationList(List.of("as")).build()));
 
-        RouteQuery routeQuery = RouteQuery.builder().destination("SJC").build();
-        assertEquals("SJC",routeQuery.getDestination());
+        RouteQuery routeQuery = RouteQuery.builder().destinationList(List.of("SJC")).build();
+        assertEquals("SJC",routeQuery.getDestinationList().get(0));
         assertEquals("/routes?destination=SJC",routeQuery.getRequestURL());
     }
 
@@ -49,15 +51,8 @@ class RouteQueryTest {
         assertThrows(ValidationException.class,()->ValidationUtils.validateAndThrow(
                 RouteQuery.builder().build()));
 
-        RouteQuery routeQuery = RouteQuery.builder().origin("SLC").destination("HEL")
-                .airline(Airline.JAPAN).build();
-        assertEquals("/routes?origin=SLC&destination=HEL&airline=JAPAN",routeQuery.getRequestURL());
-    }
-
-    @Test
-    void builderAirline() {
-        RouteQuery routeQuery = RouteQuery.builder().airline(Airline.JAPAN).build();
-        assertEquals(Airline.JAPAN,routeQuery.getAirline());
-        assertEquals("/routes?airline=JAPAN",routeQuery.getRequestURL());
+        RouteQuery routeQuery = RouteQuery.builder().originList(List.of("SLC"))
+                .destinationList(List.of("HEL")).build();
+        assertEquals("/routes?origin=SLC&destination=HEL",routeQuery.getRequestURL());
     }
 }

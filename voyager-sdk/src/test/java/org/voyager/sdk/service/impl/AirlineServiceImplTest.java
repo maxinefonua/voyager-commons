@@ -1,6 +1,7 @@
 package org.voyager.sdk.service.impl;
 
 import io.vavr.control.Either;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.error.ServiceError;
@@ -19,14 +20,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AirlineServiceImplTest {
     private static AirlineService airlineService;
-
     @BeforeEach
-    void init() {
-        TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
-        testServiceRegistry.registerTestImplementation(
-                AirlineService.class, AirlineServiceImpl.class,ServiceUtilsTestFactory.getInstance());
-        airlineService = testServiceRegistry.get(AirlineService.class);
-        assertNotNull(airlineService);
+    void setup() {
+        TestServiceRegistry.getInstance().registerTestImplementation(AirlineService.class,
+                AirlineServiceImpl.class, ServiceUtilsTestFactory.getInstance());
+        airlineService = VoyagerServiceRegistry.getInstance().get(AirlineService.class);
+    }
+
+    @AfterAll
+    static void cleanup() {
+        TestServiceRegistry.getInstance().reset();
     }
 
     @Test

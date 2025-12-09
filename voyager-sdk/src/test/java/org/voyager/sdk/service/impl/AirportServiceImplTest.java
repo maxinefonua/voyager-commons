@@ -74,9 +74,13 @@ class AirportServiceImplTest {
 
     @Test
     void getIATACodes() {
+        Either<ServiceError,List<String>> either = airportService.getIATACodes();
+        assertNotNull(either);
+        assertTrue(either.isRight());
+
         assertThrows(NullPointerException.class,()->airportService.getIATACodes(null));
-        IataQuery iataQuery = IataQuery.builder().withAirportTypeList(List.of(AirportType.HISTORICAL)).build();
-        Either<ServiceError,List<String>> either = airportService.getIATACodes(iataQuery);
+        IataQuery iataQuery = IataQuery.builder().airportTypeList(List.of(AirportType.HISTORICAL)).build();
+        either = airportService.getIATACodes(iataQuery);
         assertNotNull(either);
         assertTrue(either.isRight());
         assertFalse(either.get().isEmpty());
@@ -86,7 +90,7 @@ class AirportServiceImplTest {
 
     @Test
     void getAirlineIATACodes() {
-        IataQuery iataQuery = IataQuery.builder().withAirlineList(List.of(Airline.JAPAN)).build();
+        IataQuery iataQuery = IataQuery.builder().airlineList(List.of(Airline.JAPAN)).build();
         Either<ServiceError,List<String>> either = airportService.getIATACodes(iataQuery);
         assertNotNull(either);
         assertTrue(either.isRight());

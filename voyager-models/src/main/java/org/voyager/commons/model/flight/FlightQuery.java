@@ -7,13 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.junit.platform.commons.util.StringUtils;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
-import org.voyager.commons.model.airline.Airline;
-import org.voyager.commons.validate.annotations.ValidFlightNumber;
-import org.voyager.commons.validate.annotations.ValidNonNullField;
-
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -30,6 +26,11 @@ public class FlightQuery {
 
     private List<@NotNull Integer> routeIdList;
 
+    @NotNull
+    private ZonedDateTime startTime;
+    @NotNull
+    private ZonedDateTime endTime;
+
     private Boolean isActive;
 
     public String getRequestURL() {
@@ -43,7 +44,9 @@ public class FlightQuery {
             paramJoiner.add(String.format("%s=%s", ParameterNames.IS_ACTIVE_PARAM_NAME,isActive));
         }
         paramJoiner.add(String.format("%s=%s",ParameterNames.PAGE,page));
-        paramJoiner.add(String.format("%s=%s",ParameterNames.PAGE_SIZE,pageSize));
+        paramJoiner.add(String.format("%s=%s",ParameterNames.SIZE,pageSize));
+        paramJoiner.add(String.format("%s=%s",ParameterNames.START,startTime));
+        paramJoiner.add(String.format("%s=%s",ParameterNames.END,endTime));
         return String.format("%s?%s", Path.FLIGHTS,paramJoiner);
     }
 }

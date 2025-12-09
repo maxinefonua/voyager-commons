@@ -1,5 +1,7 @@
 package org.voyager.commons.model.flight;
 
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +22,7 @@ public class FlightBatchDelete {
     @ValidBoolean(caseSensitive = false,
             allowNull = true)
     String isActive;
+
+    @Min(value = 3, message = "must be a valid integer with a minimum value of 3")
+    String daysPast;
 }

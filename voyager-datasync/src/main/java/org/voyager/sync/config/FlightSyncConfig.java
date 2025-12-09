@@ -17,12 +17,15 @@ public class FlightSyncConfig extends DatasyncConfig {
     public static class Flag extends DatasyncConfig.Flag {
         public static String AIRLINE_LIST = "-al";
         public static String RETRY_FILE = "-rf";
+        public static String RETENTION_DAYS = "-rd";
     }
 
     public static class Defaults {
         public static int THREAD_COUNT = 3;
         public static int THREAD_COUNT_MAX = 5;
         public static SyncMode SYNC_MODE = SyncMode.FULL_SYNC;
+        public static int RETENTION_DAYS = 3;
+        public static int RETENTION_DAYS_MIN = 3;
     }
 
     public enum SyncMode {
@@ -36,11 +39,29 @@ public class FlightSyncConfig extends DatasyncConfig {
         validateGeoNamesUser();
         processThreadCount();
         processSyncMode();
+        processRetryFile();
+        processRetentionDays();
         if (this.additionalOptions.get(Flag.SYNC_MODE).equals(SyncMode.AIRLINE_SYNC)) {
             processAirlineList();
         }
-        if (this.additionalOptions.get(Flag.SYNC_MODE).equals(SyncMode.RETRY_SYNC)) {
-            processRetryFile();
+    }
+
+    private void processRetentionDays() {
+        if (!this.additionalOptions.containsKey(Flag.RETENTION_DAYS)) {
+            this.additionalOptions.put(Flag.RETENTION_DAYS,Defaults.RETENTION_DAYS);
+        } else {
+            String retentionString = (String) this.additionalOptions.get(Flag.RETENTION_DAYS);
+            try {
+                int retentionDays = Integer.parseInt(retentionString);
+                if (retentionDays < Defaults.RETENTION_DAYS_MIN) {
+                    throw new RuntimeException(DatasyncConfig.Messages.getInvalidValueMessage("retention days",
+                            Flag.RETENTION_DAYS, "integer at minimum value of 3", retentionString));
+                }
+                this.additionalOptions.put(Flag.RETENTION_DAYS, retentionDays);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException(DatasyncConfig.Messages.getInvalidValueMessage("retention days",
+                        Flag.RETENTION_DAYS, "integer", retentionString));
+            }
         }
     }
 
@@ -121,5 +142,9 @@ public class FlightSyncConfig extends DatasyncConfig {
 
     public SyncMode getSyncMode() {
         return (SyncMode) this.additionalOptions.get(DatasyncConfig.Flag.SYNC_MODE);
+    }
+
+    public int getRetentionDays() {
+        return (int) this.additionalOptions.get(Flag.RETENTION_DAYS);
     }
 }

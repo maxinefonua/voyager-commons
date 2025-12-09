@@ -2,12 +2,13 @@ package org.voyager.commons.constants;
 
 @SuppressWarnings("unused")
 public final class GeoNames {
-    public static final String NEARBY_PLACES = "/admin/geonames/nearby";
-    public static final String TIMEZONE = "/admin/geonames/timezone";
-    public static final String SEARCH = "/admin/geonames/search";
-    public static final String FETCH = "/admin/geonames/fetch";
-    public static final String FETCH_BY_ID = "/admin/geonames/fetch/{id}";
-    public static final String COUNTRIES = "/admin/geonames/countries";
+    public static final String GEONAMES = "/admin/geonames";
+    public static final String NEARBY_PLACES = "/nearby";
+    public static final String TIMEZONE = "/timezone";
+    public static final String SEARCH = "/search";
+    public static final String FETCH = "/fetch";
+    public static final String FETCH_BY_ID = "/fetch/{id}";
+    public static final String COUNTRIES = "/countries";
 
     public static final class ParameterNames {
         public static final String QUERY = "q";
@@ -41,11 +42,8 @@ public final class GeoNames {
         public static final String WEST = "west";
         public static final String NORTH = "north";
         public static final String SOUTH = "south";
-        @SuppressWarnings("SpellCheckingInspection")
         public static final String SEARCH_LANG = "searchlang";
-        @SuppressWarnings("SpellCheckingInspection")
         public static final String ORDER_BY = "orderby";
-        @SuppressWarnings("SpellCheckingInspection")
         public static final String INCL_BBOX = "inclBbox";
     }
 }

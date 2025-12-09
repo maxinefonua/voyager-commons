@@ -34,7 +34,7 @@ class RouteServiceImplTest {
 
     @Test
     void getRoutes() {
-        Either<ServiceError, List<Route>> either = routeService.getRoutes(RouteQuery.builder().origin("SJC").build());
+        Either<ServiceError, List<Route>> either = routeService.getRoutes(RouteQuery.builder().originList(List.of("SJC")).build());
         assertNotNull(either);
         assertTrue(either.isRight());
         assertNotNull(either.get());

@@ -1,5 +1,6 @@
 package org.voyager.commons.model.route;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Data;
 import org.voyager.commons.constants.ParameterNames;
@@ -15,33 +16,28 @@ import java.util.StringJoiner;
 
 @Builder @Data @ValidNonNullField
 public class RouteQuery {
-    @ValidAirportCode(allowNull = true,
-            message = Regex.AIRPORT_CODE)
-    private String origin;
+    private List<@ValidAirportCode(allowNull = true,
+            message = Regex.AIRPORT_CODE) String> originList;
 
-    @ValidAirportCode(allowNull = true,
-            message = Regex.AIRPORT_CODE)
-    private String destination;
+    private List<@ValidAirportCode(allowNull = true,
+            message = Regex.AIRPORT_CODE) String> destinationList;
 
     // TODO: add verification for origin only allows excludeDestination etc
     private Set<@ValidAirportCode String> excludeDestinationSet;
     private Set<Integer> excludeRouteIdSet;
 
-    private Airline airline;
-
     public String getRequestURL() {
         StringJoiner paramsJoiner = new StringJoiner("&");
-        if (origin != null) {
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.ORIGIN_PARAM_NAME,origin));
+        if (originList != null && !originList.isEmpty()) {
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.ORIGIN_PARAM_NAME,
+                    String.join(",",originList)));
         }
 
-        if (destination != null) {
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.DESTINATION_PARAM_NAME,destination));
+        if (destinationList != null) {
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.DESTINATION_PARAM_NAME,
+                    String.join(",",destinationList)));
         }
 
-        if (airline != null) {
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.AIRLINE_PARAM_NAME,airline.name()));
-        }
         return String.format("%s?%s",Path.ROUTES,paramsJoiner);
     }
 }

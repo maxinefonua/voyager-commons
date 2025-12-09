@@ -30,11 +30,11 @@ class GeoNamesConfigTest {
         GeoTimezoneQuery geoTimezoneQuery = GeoTimezoneQuery.builder().longitude(10.0).latitude(9.0).radius(10)
                 .language("en").date("date").build();
         String url = geoNamesConfig.getTimezoneURL(geoTimezoneQuery);
-        assertEquals("https://secure.geonames.org/timezoneJSON?username=geoUsername&lat=9.000000&lng=9.000000&lang=en&date=date&radius=10",url);
+        assertEquals("https://secure.geonames.org/timezoneJSON?username=geoUsername&lat=9.000000&lng=10.000000&lang=en&date=date&radius=10",url);
 
         geoTimezoneQuery = GeoTimezoneQuery.builder().longitude(10.0).latitude(9.0).build();
         url = geoNamesConfig.getTimezoneURL(geoTimezoneQuery);
-        assertEquals("https://secure.geonames.org/timezoneJSON?username=geoUsername&lat=9.000000&lng=9.000000",url);
+        assertEquals("https://secure.geonames.org/timezoneJSON?username=geoUsername&lat=9.000000&lng=10.000000",url);
     }
 
     @Test

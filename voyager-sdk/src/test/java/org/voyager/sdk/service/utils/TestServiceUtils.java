@@ -28,10 +28,6 @@ import org.voyager.commons.model.result.LookupAttribution;
 import org.voyager.commons.model.result.ResultSearch;
 import org.voyager.commons.model.result.ResultSearchFull;
 import org.voyager.commons.model.route.Route;
-import org.voyager.commons.model.path.PathResponse;
-import org.voyager.commons.model.path.route.RouteAirline;
-import org.voyager.commons.model.path.airline.AirlinePath;
-import org.voyager.commons.model.path.route.RoutePath;
 import org.voyager.sdk.utils.ServiceUtilsDefault;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -47,8 +43,6 @@ public class TestServiceUtils extends ServiceUtilsDefault {
     private static final Country COUNTRY =  Country.builder().code("TS").name("NAME").capitalCity("CITY").build();
     private static final Flight FLIGHT = Flight.builder().flightNumber("DL988").build();
     private static final Location LOCATION = Location.builder().name("test location").build();
-    private static final PathResponse<AirlinePath> PATH_RESPONSE = PathResponse.<AirlinePath>builder()
-            .responseList(List.of(AirlinePath.builder().airline(Airline.DELTA).build())).build();
     private static final Route ROUTE = Route.builder().id(555).build();
 
     private final VoyagerConfig voyagerConfig;
@@ -68,9 +62,10 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/countries/TS":
                 return Either.right((T)COUNTRY);
             case "/flights/125":
+            case "/flight?routeId=101&flightNumber=DL988&onDay=2025-11-13&zoneId=America/Los_Angeles":
                 FLIGHT.setId(125);
                 return Either.right((T)FLIGHT);
-            case "/flight?routeId=101&flightNumber=DL988":
+            case "/flight?routeId=101&flightNumber=DL988&departureZDT=2025-11-13T04:11:00.476797Z":
                 FLIGHT.setFlightNumber("DL988");
                 FLIGHT.setRouteId(101);
                 return Either.right((T)FLIGHT);
@@ -132,6 +127,7 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/airports":
             case "/airports?countryCode=TO&airline=DELTA&type=CIVIL":
                 return Either.right((T) List.of(AIRPORT));
+            case "/iata":
             case "/iata?airline=JAPAN":
             case "/iata?type=HISTORICAL":
                 return Either.right((T) List.of("IATA"));
@@ -144,16 +140,11 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/countries":
                 return Either.right((T)List.of(COUNTRY));
             case "/flights":
-            case "/flights?page=0&size=20&flightNumber=DL100":
+            case "/flights?page=0&size=20&start=2025-11-14T16:17:34.035784-08:00[America/Los_Angeles]&end=2025-11-15T16:17:34.036843-08:00[America/Los_Angeles]&flightNumber=DL100":
                 return Either.right((T)List.of(FLIGHT));
             case "/admin/locations?limit=20":
             case "/admin/locations":
                 return Either.right((T)List.of(LOCATION));
-            case "/airline-path?origin=SJC&destination=SLC&page=0&size=5":
-                return Either.right((T)PATH_RESPONSE);
-            case "/route-path?origin=SJC&destination=SLC":
-                return Either.right((T)List.of(RoutePath.builder().routeAirlineList(List.of(
-                        RouteAirline.builder().airlines(List.of(Airline.DELTA,Airline.UNITED)).build())).build()));
             case "/routes?origin=SJC":
             case "/routes":
                 return Either.right((T)List.of(Route.builder().build()));
@@ -204,8 +195,8 @@ public class TestServiceUtils extends ServiceUtilsDefault {
             case "/admin/locations/2":
                 LOCATION.setId(2);
                 return Either.right((T) LOCATION);
-            case "/routes":
-            case "/routes/555":
+            case "/admin/routes":
+            case "/admin/routes/555":
                 return Either.right((T) ROUTE);
             case "/admin/airports":
                 return Either.right((T)AIRPORT);
