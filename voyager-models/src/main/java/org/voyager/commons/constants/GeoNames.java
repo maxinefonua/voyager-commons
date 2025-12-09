@@ -10,6 +10,26 @@ public final class GeoNames {
     public static final String FETCH_BY_ID = "/fetch/{id}";
     public static final String COUNTRIES = "/countries";
 
+    public static String getSearchPath() {
+        return GEONAMES.concat(SEARCH);
+    }
+
+    public static String getNearbyPath() {
+        return GEONAMES.concat(NEARBY_PLACES);
+    }
+
+    public static String getTimezonePath() {
+        return GEONAMES.concat(TIMEZONE);
+    }
+
+    public static String getFetchPath() {
+        return GEONAMES.concat(FETCH);
+    }
+
+    public static String getCountriesPath() {
+        return GEONAMES.concat(COUNTRIES);
+    }
+
     public static final class ParameterNames {
         public static final String QUERY = "q";
         public static final String RADIUS = "radius";

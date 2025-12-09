@@ -46,7 +46,7 @@ public class GeoServiceImpl implements GeoService {
     @Override
     public Either<ServiceError, List<GeoPlace>> findNearbyPlaces(@NonNull GeoNearbyQuery geoNearbyQuery) {
         ValidationUtils.validateAndThrow(geoNearbyQuery);
-        String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s",GeoNames.NEARBY_PLACES,
+        String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s",GeoNames.getNearbyPath(),
                 ParameterNames.LATITUDE_PARAM_NAME,geoNearbyQuery.getLatitude(),
                 ParameterNames.LONGITUDE_PARAM_NAME,geoNearbyQuery.getLongitude());
         if (geoNearbyQuery.getRadiusKm() != null) {
@@ -70,7 +70,7 @@ public class GeoServiceImpl implements GeoService {
     @Override
     public Either<ServiceError, GeoTimezone> getTimezone(@NonNull GeoTimezoneQuery geoTimezoneQuery) {
         ValidationUtils.validateAndThrow(geoTimezoneQuery);
-        String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s",GeoNames.TIMEZONE,
+        String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s",GeoNames.getTimezonePath(),
                 ParameterNames.LATITUDE_PARAM_NAME,geoTimezoneQuery.getLatitude(),
                 ParameterNames.LONGITUDE_PARAM_NAME,geoTimezoneQuery.getLongitude());
         if (geoTimezoneQuery.getRadius() != null) {
@@ -94,7 +94,7 @@ public class GeoServiceImpl implements GeoService {
         ValidationUtils.validateAndThrow(geoSearchQuery);
         String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s" + "&%s=%s" + "%s=%s"
                         + "&%s=%s" + "&%s=%s" + "&%s=%s" + "&%s=%s",
-                GeoNames.SEARCH,
+                GeoNames.getSearchPath(),
                 GeoNames.ParameterNames.QUERY, URLEncoder.encode(geoSearchQuery.getQuery(), StandardCharsets.UTF_8),
                 GeoNames.ParameterNames.MAX_ROWS,geoSearchQuery.getMaxRows(),
                 GeoNames.ParameterNames.START_ROW,geoSearchQuery.getStartRow(),
@@ -210,14 +210,14 @@ public class GeoServiceImpl implements GeoService {
 
     @Override
     public Either<ServiceError, GeoFull> getFull(@NonNull Long geoNameId) {
-        String requestURL = String.format("%s/%d",GeoNames.FETCH,geoNameId);
+        String requestURL = String.format("%s/%d",GeoNames.getFetchPath(),geoNameId);
         LOGGER.debug("attempting to GET {}", requestURL);
         return serviceUtils.fetch(requestURL, HttpMethod.GET,GeoFull.class);
     }
 
     @Override
     public Either<ServiceError, List<GeoCountry>> getCountries() {
-        String requestURL = GeoNames.COUNTRIES;
+        String requestURL = GeoNames.getCountriesPath();
         LOGGER.debug("attempting to GET {}",requestURL);
         Either<ServiceError,GeoResponse<GeoCountry>> either = serviceUtils.fetch(requestURL,HttpMethod.GET, new TypeReference<>() {
         });
