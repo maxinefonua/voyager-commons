@@ -3,9 +3,9 @@
 A personal project I took on to relearn full-cycle development, and to better utilize my airline employee flight benefits. Modules created to decouple dependencies and enable continuous integration and development.
 
 ### Project Repos:
-- Voyager UI: https://github.com/maxinefonua/voyager-ui
-  - mapped requests and web feature functions
-  - dynamic page injection and  targeted fragment reloads
+- Voyager App: https://github.com/maxinefonua/voyager-app
+  - Flutter project for cross-platform apps
+  - custom responsive widgets and animation
 - Voyager API: https://github.com/maxinefonua/voyager-api
   - standalone backend services
   - caching, request limits, auth tokens
