@@ -21,10 +21,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
-    - name: Configure Maven Settings with Token
+    - name: Create Maven settings with GitHub Token
       run: |
-        # Create a proper settings.xml with the GitHub token
-        cat > ~/.m2/settings.xml << EOF
+        # Create settings.xml in the workspace
+        cat > settings.xml << 'EOF'
         <?xml version="1.0" encoding="UTF-8"?>
         <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -34,30 +34,27 @@ jobs:
             <server>
               <id>github</id>
               <username>maxinefonua</username>
-              <!-- Use the GitHub Actions token directly -->
-              <password>\${{ secrets.GITHUB_TOKEN }}</password>
+              <password>${{ secrets.GITHUB_TOKEN }}</password>
             </server>
           </servers>
         </settings>
         EOF
-        
-        # Also set as environment variable for Maven
-        echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
-    
-    - name: Verify Authentication
-      run: |
-        echo "Testing GitHub Packages access..."
-        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          https://maven.pkg.github.com/maxinefonua -I
+        # Copy to Maven directory
+        mkdir -p ~/.m2
+        cp settings.xml ~/.m2/settings.xml
     
     - name: Build all modules locally
       run: mvn clean install -DskipTests
     
-    - name: Deploy All Modules
+    - name: Deploy modules with explicit credentials
       env:
-        # Pass token as environment variable too
+        GITHUB_USER: maxinefonua
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Deploy from root - this should deploy everything
-        mvn deploy -DskipTests \
-          --settings ~/.m2/settings.xml
+        for module in voyager-models voyager-sdk voyager-datasync; do
+            echo "📦 Deploying $module..."
+            cd $module
+            mvn deploy -DskipTests \
+              -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/maxinefonua/voyager-commons
+            cd ..
+        done
