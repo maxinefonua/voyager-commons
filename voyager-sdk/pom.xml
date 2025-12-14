@@ -12,14 +12,6 @@
     <artifactId>voyager-sdk</artifactId>
     <packaging>jar</packaging>
 
-    <!-- ADD THIS SECTION -->
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/maxinefonua/voyager-commons</url>
-        </repository>
-    </distributionManagement>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
