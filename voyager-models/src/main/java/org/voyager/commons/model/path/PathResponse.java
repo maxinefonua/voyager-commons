@@ -1,4 +1,4 @@
-package org.voyager.commons.model.route;
+package org.voyager.commons.model.path;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,9 +1,11 @@
 package org.voyager.sdk.service.impl;
 
 import io.vavr.control.Either;
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.error.ServiceError;
+import org.voyager.commons.model.airport.AirportForm;
 import org.voyager.sdk.model.IataQuery;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.Airport;
@@ -14,6 +16,8 @@ import org.voyager.sdk.model.NearbyAirportQuery;
 import org.voyager.sdk.service.AirportService;
 import org.voyager.sdk.service.TestServiceRegistry;
 import org.voyager.sdk.service.utils.ServiceUtilsTestFactory;
+
+import java.time.ZoneId;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -70,9 +74,13 @@ class AirportServiceImplTest {
 
     @Test
     void getIATACodes() {
+        Either<ServiceError,List<String>> either = airportService.getIATACodes();
+        assertNotNull(either);
+        assertTrue(either.isRight());
+
         assertThrows(NullPointerException.class,()->airportService.getIATACodes(null));
-        IataQuery iataQuery = IataQuery.builder().withAirportTypeList(List.of(AirportType.HISTORICAL)).build();
-        Either<ServiceError,List<String>> either = airportService.getIATACodes(iataQuery);
+        IataQuery iataQuery = IataQuery.builder().airportTypeList(List.of(AirportType.HISTORICAL)).build();
+        either = airportService.getIATACodes(iataQuery);
         assertNotNull(either);
         assertTrue(either.isRight());
         assertFalse(either.get().isEmpty());
@@ -82,7 +90,7 @@ class AirportServiceImplTest {
 
     @Test
     void getAirlineIATACodes() {
-        IataQuery iataQuery = IataQuery.builder().withAirlineList(List.of(Airline.JAPAN)).build();
+        IataQuery iataQuery = IataQuery.builder().airlineList(List.of(Airline.JAPAN)).build();
         Either<ServiceError,List<String>> either = airportService.getIATACodes(iataQuery);
         assertNotNull(either);
         assertTrue(either.isRight());
@@ -101,5 +109,20 @@ class AirportServiceImplTest {
         assertTrue(either.isRight());
         assertFalse(either.get().isEmpty());
         assertEquals(AirportType.UNVERIFIED,either.get().get(0).getType());
+    }
+
+
+
+    @Test
+    void createAirport() {
+        assertThrows(NullPointerException.class,()->airportService.createAirport(null));
+        AirportForm invalidForm = AirportForm.builder().build();
+        assertThrows(ValidationException.class,()->airportService.createAirport(invalidForm));
+        AirportForm airportForm = AirportForm.builder().iata("TES").longitude("1.0").latitude("1.0")
+                .zoneId("Pacific/Honolulu").countryCode("TS")
+                .airportType(AirportType.UNVERIFIED.name()).build();
+        Either<ServiceError, Airport> either = airportService.createAirport(airportForm);
+        assertNotNull(either);
+        assertTrue(either.isRight());
     }
 }

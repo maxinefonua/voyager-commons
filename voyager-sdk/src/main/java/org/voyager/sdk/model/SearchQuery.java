@@ -1,5 +1,6 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -16,11 +17,10 @@ public class SearchQuery {
     @NotBlank
     private final String query;
 
-    @Min(1)
+    @Min(1) @Max(5000) // 5000+ requires paid premium services
     private final Integer skipRowCount;
 
-    @Min(1)
-    // TODO: find out max for geonames
+    @Min(1) @Max(100)
     private final Integer limit;
 
     SearchQuery(@NonNull String query, Integer skipRowCount, Integer limit) {

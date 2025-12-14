@@ -91,7 +91,7 @@ public class AirportSync {
 
     private static List<String> fullSyncList() {
         List<AirportType> processTypeList = airportSyncConfig.getAirportTypeList();
-        IataQuery iataQuery = IataQuery.builder().withAirportTypeList(processTypeList).build();
+        IataQuery iataQuery = IataQuery.builder().airportTypeList(processTypeList).build();
         long start = System.currentTimeMillis();
         Either<ServiceError,List<String>> either = airportService.getIATACodes(iataQuery);
         if (either.isLeft()) {

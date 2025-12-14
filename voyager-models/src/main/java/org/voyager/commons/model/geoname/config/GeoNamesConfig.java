@@ -38,7 +38,7 @@ public class GeoNamesConfig {
 
     public String getTimezoneURL(GeoTimezoneQuery geoTimezoneQuery) {
         String requestURL = String.format(timezonePathWithParams,geoUsername,
-                geoTimezoneQuery.getLatitude(), geoTimezoneQuery.getLatitude());
+                geoTimezoneQuery.getLatitude(), geoTimezoneQuery.getLongitude());
         if (StringUtils.isNotBlank(geoTimezoneQuery.getLanguage())){
             requestURL = requestURL.concat(String.format("&%s=%s",
                     GeoNames.ParameterNames.LANGUAGE,geoTimezoneQuery.getLanguage()));

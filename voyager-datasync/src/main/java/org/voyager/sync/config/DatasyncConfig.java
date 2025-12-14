@@ -146,7 +146,11 @@ public abstract class DatasyncConfig {
     }
 
     public VoyagerConfig getVoyagerConfig() {
-        return new VoyagerConfig(Protocol.HTTP,this.getHostname(),this.getPort(),this.getAccessToken());
+        if (this.getHostname().equalsIgnoreCase("localhost")) {
+            return new VoyagerConfig(Protocol.HTTP,this.getHostname(),this.getPort(),this.getAccessToken());
+        } else {
+            return new VoyagerConfig(Protocol.HTTPS,this.getHostname(),this.getAccessToken());
+        }
     }
 
     private void processFlag(String flag, String token) {

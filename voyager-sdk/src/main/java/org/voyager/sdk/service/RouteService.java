@@ -4,7 +4,7 @@ import io.vavr.control.Either;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.voyager.commons.error.ServiceError;
-import org.voyager.sdk.model.RouteQuery;
+import org.voyager.commons.model.route.RouteQuery;
 import org.voyager.commons.model.route.Route;
 import org.voyager.commons.model.route.RouteForm;
 import org.voyager.commons.model.route.RoutePatch;

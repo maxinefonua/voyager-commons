@@ -2,10 +2,10 @@ package org.voyager.commons.validate.validators;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.voyager.commons.validate.annotations.ValidPatch;
+import org.voyager.commons.validate.annotations.ValidNonNullField;
 import java.lang.reflect.Field;
 
-public class PatchValidator implements ConstraintValidator<ValidPatch,Object> {
+public class PatchValidator implements ConstraintValidator<ValidNonNullField,Object> {
     @Override
     public boolean isValid(Object object, ConstraintValidatorContext constraintValidatorContext) {
         if (object == null) return false;

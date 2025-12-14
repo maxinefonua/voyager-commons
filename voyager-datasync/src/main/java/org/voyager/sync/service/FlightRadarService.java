@@ -225,7 +225,7 @@ public class FlightRadarService {
                                                                                             String iata,
                                                                                             String requestURL) {
         if (StringUtils.isBlank(jsonBody) || jsonBody.equals("[]")) {
-            LOGGER.info("{} airport returns no details", iata);
+            LOGGER.debug("{} airport returns no details", iata);
             return Either.right(Option.none());
         } else {
             try {

@@ -7,5 +7,5 @@ public class FlightTimeFR {
     String aircraft;
     String time;
     Long timestamp;
-    Long offset;
+    Integer offset;
 }

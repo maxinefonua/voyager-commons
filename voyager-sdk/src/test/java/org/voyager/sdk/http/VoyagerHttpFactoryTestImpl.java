@@ -1,7 +1,6 @@
 package org.voyager.sdk.http;
 
 import org.junit.platform.commons.util.StringUtils;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;

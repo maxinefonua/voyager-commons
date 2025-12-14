@@ -8,11 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.error.ServiceError;
+import org.voyager.commons.model.airline.*;
+import org.voyager.commons.validate.ValidationUtils;
 import org.voyager.sdk.http.HttpMethod;
-import org.voyager.commons.model.airline.Airline;
-import org.voyager.sdk.model.AirlineQuery;
-import org.voyager.commons.model.airline.AirlineAirport;
-import org.voyager.commons.model.airline.AirlineBatchUpsert;
 import org.voyager.sdk.service.AirlineService;
 import org.voyager.sdk.utils.ServiceUtils;
 import org.voyager.sdk.utils.ServiceUtilsFactory;
@@ -41,6 +39,7 @@ public class AirlineServiceImpl implements AirlineService {
 
     @Override
     public Either<ServiceError, List<Airline>> getAirlines(@NonNull AirlineQuery airlineQuery) {
+        ValidationUtils.validateAndThrow(airlineQuery);
         LOGGER.debug("attempting to GET {}", airlineQuery.getRequestURL());
         return serviceUtils.fetch(airlineQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
         });

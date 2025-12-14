@@ -36,7 +36,7 @@ public class VoyagerServiceRegistry {
         return INSTANCE;
     }
 
-    public <T> void registerTestImplementation(Class<T> interfaceClass, Class<? extends T> implementationClass,
+    protected <T> void registerTestImplementation(Class<T> interfaceClass, Class<? extends T> implementationClass,
                                                ServiceUtils serviceUtils) {
         testMode = true;
         services.computeIfAbsent(interfaceClass,k->{
@@ -74,14 +74,6 @@ public class VoyagerServiceRegistry {
                 }
                 case "FlightService" -> {
                     services.put(serviceClass, new FlightServiceImpl());
-                    yield (T) services.get(serviceClass);
-                }
-                case "LocationService" -> {
-                    services.put(serviceClass, new LocationServiceImpl());
-                    yield (T) services.get(serviceClass);
-                }
-                case "PathService" -> {
-                    services.put(serviceClass, new PathServiceImpl());
                     yield (T) services.get(serviceClass);
                 }
                 case "RouteService" -> {

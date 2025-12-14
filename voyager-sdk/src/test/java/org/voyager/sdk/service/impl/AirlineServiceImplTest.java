@@ -1,11 +1,12 @@
 package org.voyager.sdk.service.impl;
 
 import io.vavr.control.Either;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.sdk.model.AirlineQuery;
+import org.voyager.commons.model.airline.AirlineAirportQuery;
 import org.voyager.commons.model.airline.AirlineAirport;
 import org.voyager.commons.model.airline.AirlineBatchUpsert;
 import org.voyager.sdk.service.AirlineService;
@@ -19,21 +20,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AirlineServiceImplTest {
     private static AirlineService airlineService;
-
     @BeforeEach
-    void init() {
-        TestServiceRegistry testServiceRegistry = TestServiceRegistry.getInstance();
-        testServiceRegistry.registerTestImplementation(
-                AirlineService.class, AirlineServiceImpl.class,ServiceUtilsTestFactory.getInstance());
-        airlineService = testServiceRegistry.get(AirlineService.class);
-        assertNotNull(airlineService);
+    void setup() {
+        TestServiceRegistry.getInstance().registerTestImplementation(AirlineService.class,
+                AirlineServiceImpl.class, ServiceUtilsTestFactory.getInstance());
+        airlineService = VoyagerServiceRegistry.getInstance().get(AirlineService.class);
+    }
+
+    @AfterAll
+    static void cleanup() {
+        TestServiceRegistry.getInstance().reset();
     }
 
     @Test
     void getAirlines() {
         assertThrows(NullPointerException.class,() -> airlineService.getAirlines(null));
-        AirlineQuery airlineQuery = AirlineQuery.builder().withIATAList(List.of("HEL")).build();
-        Either<ServiceError, List<Airline>> either = airlineService.getAirlines(airlineQuery);
+        AirlineAirportQuery airlineAirportQuery = AirlineAirportQuery.builder().iatalist(List.of("HEL")).build();
+        Either<ServiceError, List<Airline>> either = airlineService.getAirlines(airlineAirportQuery);
         assertNotNull(either);
         assertTrue(either.isRight());
         assertEquals(Airline.DELTA,either.get().get(0));

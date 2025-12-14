@@ -29,8 +29,6 @@ class VoyagerServiceRegistryTest {
             testRegistry.get(AirportService.class);
             testRegistry.get(CountryService.class);
             testRegistry.get(FlightService.class);
-            testRegistry.get(LocationService.class);
-            testRegistry.get(PathService.class);
             testRegistry.get(RouteService.class);
             testRegistry.get(SearchService.class);
             testRegistry.get(GeoService.class);
