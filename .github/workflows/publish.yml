@@ -20,15 +20,44 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        server-id: github
-        server-username: maxinefonua
-        server-password: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Build and Deploy All Modules
+    - name: Configure Maven Settings with Token
       run: |
-        # First, install everything locally to resolve dependencies
-        mvn clean install -DskipTests
+        # Create a proper settings.xml with the GitHub token
+        cat > ~/.m2/settings.xml << EOF
+        <?xml version="1.0" encoding="UTF-8"?>
+        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+          <servers>
+            <server>
+              <id>github</id>
+              <username>maxinefonua</username>
+              <!-- Use the GitHub Actions token directly -->
+              <password>\${{ secrets.GITHUB_TOKEN }}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
         
-        # Then deploy from ROOT - this deploys parent POM and all modules
+        # Also set as environment variable for Maven
+        echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+    
+    - name: Verify Authentication
+      run: |
+        echo "Testing GitHub Packages access..."
+        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          https://maven.pkg.github.com/maxinefonua -I
+    
+    - name: Build all modules locally
+      run: mvn clean install -DskipTests
+    
+    - name: Deploy All Modules
+      env:
+        # Pass token as environment variable too
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Deploy from root - this should deploy everything
         mvn deploy -DskipTests \
-          -DrepositoryId=github
+          --settings ~/.m2/settings.xml
