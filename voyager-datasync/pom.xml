@@ -11,7 +11,13 @@
 
     <artifactId>voyager-datasync</artifactId>
     <packaging>jar</packaging>
-
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/maxinefonua/voyager-commons</url>
+        </repository>
+    </distributionManagement>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jsoup.version>1.19.1</jsoup.version>
