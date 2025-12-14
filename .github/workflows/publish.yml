@@ -1,4 +1,4 @@
-name: Publish to GitHub Packages
+name: Publish Modules to GitHub Packages
 
 on:
   push:
@@ -21,14 +21,113 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
-    - name: Build and publish with Maven
-      run: mvn -B clean deploy -DskipTests
+    - name: Create Maven settings with GitHub Token
+      run: |
+        # Create settings.xml in the workspace
+        cat > settings.xml << 'EOF'
+        <?xml version="1.0" encoding="UTF-8"?>
+        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+          <servers>
+            <server>
+              <id>github</id>
+              <username>maxinefonua</username>
+              <password>${{ secrets.GITHUB_TOKEN }}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+        # Copy to Maven directory
+        mkdir -p ~/.m2
+        cp settings.xml ~/.m2/settings.xml
+    
+    - name: Debug - Show module contents before building
+      run: |
+        echo "🔍 Checking what's in each module..."
+        for module in voyager-models voyager-sdk voyager-datasync; do
+            echo ""
+            echo "=== $module ==="
+            echo "Java files:"
+            find $module/src -name "*.java" 2>/dev/null | grep -i "airline\|AirlinePathQuery" | head -5 || echo "  No airline-related Java files found"
+            echo "Looking for AirlinePathQuery:"
+            find $module -name "*.java" -type f -exec grep -l "AirlinePathQuery" {} \; 2>/dev/null || echo "  AirlinePathQuery not found in source"
+        done
+    
+    - name: Build all modules locally
+      run: mvn clean install -DskipTests
+    
+    - name: Debug - Check compiled classes
+      run: |
+        echo "🔍 Checking compiled classes..."
+        for module in voyager-models voyager-sdk voyager-datasync; do
+            echo ""
+            echo "=== $module compiled classes ==="
+            if [ -d "$module/target/classes" ]; then
+                find "$module/target/classes" -name "*.class" | \
+                    grep -i "airline\|AirlinePathQuery" | head -5 || \
+                    echo "  No airline-related compiled classes found"
+            else
+                echo "  No target/classes directory found"
+            fi
+        done
+    
+    - name: Publish parent POM (critical for API to resolve dependencies)
+      run: |
+        echo "📦 Publishing parent POM (voyager-commons:0.1.1)..."
+        # Create a deployable parent POM
+        mvn deploy:deploy-file \
+          -Dfile=pom.xml \
+          -DpomFile=pom.xml \
+          -DrepositoryId=github \
+          -Durl=https://maven.pkg.github.com/maxinefonua/voyager-commons \
+          -DskipTests
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
+    - name: Publish all modules
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "🚀 Publishing all modules..."
+        # Use -pl to publish only modules, not parent
+        mvn deploy -DskipTests \
+          -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/maxinefonua/voyager-commons \
+          -pl voyager-models,voyager-sdk,voyager-datasync \
+          -am
+        
+        echo ""
+        echo "✅ Modules published:"
+        echo "  - voyager-models:0.1.1"
+        echo "  - voyager-sdk:0.1.1"
+        echo "  - voyager-datasync:0.1.1"
+        echo "  - voyager-commons:0.1.1 (parent POM)"
+    
     - name: Verify published packages
       run: |
-        echo "✅ Published packages:"
-        curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          https://api.github.com/user/packages/maven/org.voyager.voyager-commons \
-          | jq -r '.[].name' 2>/dev/null || echo "Check packages at: https://github.com/maxinefonua/voyager-commons/packages"
+        echo "🔍 Verifying published packages on GitHub..."
+        
+        # Wait a moment for GitHub to process
+        sleep 5
+        
+        for package in voyager-commons voyager-models voyager-sdk voyager-datasync; do
+            echo ""
+            echo "=== $package ==="
+            # Check if package exists
+            if curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                "https://api.github.com/users/maxinefonua/packages/maven/org.voyager.$package/versions" \
+                | grep -q "version"; then
+                echo "✅ Published successfully"
+                
+                # Show download URL for verification
+                if [ "$package" != "voyager-commons" ]; then
+                    echo "   JAR URL: https://maven.pkg.github.com/maxinefonua/voyager-commons/org/voyager/$package/0.1.1/$package-0.1.1.jar"
+                fi
+            else
+                echo "❌ Not found or failed to publish"
+            fi
+        done
+        
+        echo ""
+        echo "📦 All packages available at: https://github.com/maxinefonua/voyager-commons/packages"
