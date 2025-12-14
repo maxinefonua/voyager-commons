@@ -1,4 +1,4 @@
-name: Publish to GitHub Packages
+name: Publish Modules to GitHub Packages
 
 on:
   push:
@@ -21,14 +21,46 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
-    - name: Build and publish with Maven
-      run: mvn -B clean deploy -DskipTests
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Configure Maven for GitHub Packages
+      run: |
+        mkdir -p ~/.m2
+        cat > ~/.m2/settings.xml << EOF
+        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+                <server>
+                    <id>github</id>
+                    <username>\${{ github.actor }}</username>
+                    <password>\${{ secrets.GITHUB_TOKEN }}</password>
+                </server>
+            </servers>
+        </settings>
+        EOF
+    
+    - name: Build all modules locally
+      run: mvn clean install -DskipTests
+    
+    - name: Deploy voyager-models
+      run: |
+        cd voyager-models
+        mvn deploy -DskipTests
+    
+    - name: Deploy voyager-sdk
+      run: |
+        cd voyager-sdk
+        mvn deploy -DskipTests
+    
+    - name: Deploy voyager-datasync
+      run: |
+        cd voyager-datasync
+        mvn deploy -DskipTests
     
     - name: Verify published packages
       run: |
-        echo "✅ Published packages:"
-        curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          https://api.github.com/user/packages/maven/org.voyager.voyager-commons \
-          | jq -r '.[].name' 2>/dev/null || echo "Check packages at: https://github.com/maxinefonua/voyager-commons/packages"
+        echo "✅ Checking published packages..."
+        curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/users/maxinefonua/packages" \
+          | jq -r '.[] | select(.package_type=="maven") | .name' 2>/dev/null || \
+          echo "Check packages at: https://github.com/maxinefonua/voyager-commons/packages"
