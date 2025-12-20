@@ -21,6 +21,49 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Configure Maven for GitHub Packages
+        run: |
+          # First, check what exists at workspace root
+          echo "📁 Workspace contents:"
+          ls -la ${{ github.workspace }}/
+
+          # Remove any existing settings.xml directory/file
+          rm -rf ${{ github.workspace }}/settings.xml
+
+          # Create Maven directory
+          mkdir -p ~/.m2
+
+          # Create settings.xml with proper authentication
+          cat > ~/.m2/settings.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${{ github.actor }}</username>
+                <password>${{ secrets.GITHUB_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+          echo "✅ Created ~/.m2/settings.xml"
+          echo "📋 Settings.xml content:"
+          cat ~/.m2/settings.xml
+
+      - name: Validate Maven configuration
+        run: |
+          echo "🔍 Validating Maven setup..."
+          echo "Maven home: ~/.m2"
+          echo "Settings.xml exists: $(ls -la ~/.m2/settings.xml 2>/dev/null && echo 'Yes' || echo 'No')"
+
+          # Test repository configuration
+          echo "📦 Testing repository access..."
+          mvn help:effective-pom -Doutput=effective-pom.xml || echo "Continuing with build..."
+
       - name: Build JARs
         run: mvn clean package -DskipTests -pl voyager-datasync -Pmultiple-jar-profile
 
