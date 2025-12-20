@@ -1,0 +1,37 @@
+name: Test AWS & EC2 SSM Connection
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+permissions:
+  id-token: write   # Required for OIDC
+  contents: read
+
+jobs:
+  test-connection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials from OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::367001718533:role/GitHubActionsVoyagerDeploy # 👈 Use your role ARN
+          aws-region: us-west-1
+
+      - name: Test 1 - Verify AWS Identity
+        run: |
+          echo "🎯 Testing if GitHub can assume the IAM role..."
+          aws sts get-caller-identity
+
+      - name: Test 2 - Verify EC2 SSM Connection
+        run: |
+          echo "🔧 Testing connection to EC2 instance via SSM..."
+          aws ssm send-command \
+            --instance-ids "i-01c48794b4b5561c2" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["echo \"✅ Success! SSM command from GitHub received at $(date)\""]' \
+            --comment "Test connection from GitHub Actions" \
+            --output text
+
+          echo "✅ Test command sent. Check the 'Run Command' history in AWS Systems Manager console for results."
