@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>voyager-datasync</artifactId>
-         <version>0.1.3</version>
     <packaging>jar</packaging>
 
     <properties>

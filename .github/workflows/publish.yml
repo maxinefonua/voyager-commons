@@ -15,42 +15,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17 and Maven
+      - name: Set up JDK 17 and Maven for GitHub Packages
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+          # This automatically configures the 'github' server id in Maven settings.xml
           server-id: github
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
 
-      - name: Try to deploy (will fail if version exists)
-        id: deploy-attempt
-        continue-on-error: true
-        run: |
-          # First compile to ensure we can get version info
-          mvn clean compile -DskipTests
-          
-          # Try to deploy - this will fail if version already exists
-          mvn deploy -DskipTests
+      # Optional: Build and run tests
+      - name: Build all modules
+        run: mvn clean install -DskipTests
+
+      # Key Change: Deploy from the root
+      - name: Deploy all artifacts (Parent and Modules)
+        run: mvn --batch-mode deploy -DskipTests
         env:
+          GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check if deploy succeeded
-        id: deploy-result
-        run: |
-          if [ "${{ steps.deploy-attempt.outcome }}" == "success" ]; then
-            echo "Deployment successful - version was new"
-            echo "deployed=true" >> $GITHUB_OUTPUT
-          else
-            echo "Deployment failed - version likely already exists"
-            echo "deployed=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Handle deployment result
-        run: |
-          if [ "${{ steps.deploy-result.outputs.deployed }}" == "true" ]; then
-            echo "✅ Successfully published new version to GitHub Packages"
-          else
-            echo "ℹ️ Version already exists in GitHub Packages. Nothing to publish."
-          fi
