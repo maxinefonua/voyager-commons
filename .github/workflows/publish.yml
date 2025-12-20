@@ -15,23 +15,70 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17 and Maven for GitHub Packages
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          # This automatically configures the 'github' server id in Maven settings.xml
+
+      - name: Get current version
+        id: get-version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if any version needs publishing
+        id: check-publish
+        run: |
+          # Get all modules
+          MODULES=$(mvn help:evaluate -Dexpression=project.modules -q -DforceStdout | jq -r '.[]')
+          
+          NEEDS_PUBLISH=false
+          
+          for MODULE in $MODULES; do
+            GROUP_ID=$(cd "$MODULE" && mvn help:evaluate -Dexpression=project.groupId -q -DforceStdout)
+            ARTIFACT_ID=$(cd "$MODULE" && mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+            VERSION=$(cd "$MODULE" && mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          
+            PACKAGE_NAME="${GROUP_ID}.${ARTIFACT_ID}"
+            PACKAGE_NAME=$(echo "$PACKAGE_NAME" | tr '.' '-')
+          
+            echo "Checking $GROUP_ID:$ARTIFACT_ID:$VERSION..."
+          
+            # Try to download the artifact
+            URL="https://maven.pkg.github.com/${{ github.repository_owner }}/$PACKAGE_NAME/$GROUP_ID/$ARTIFACT_ID/$VERSION/$ARTIFACT_ID-$VERSION.pom"
+          
+            if curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$URL" | grep -q "<artifactId>$ARTIFACT_ID</artifactId>"; then
+              echo "  ✓ Already exists"
+            else
+              echo "  ✗ Not found, needs publishing"
+              NEEDS_PUBLISH=true
+            fi
+          done
+          
+          if [ "$NEEDS_PUBLISH" = true ]; then
+            echo "should-publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "should-publish=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Maven for deployment
+        if: steps.check-publish.outputs.should-publish == 'true'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
           server-id: github
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
 
-      # Optional: Build and run tests
-      - name: Build all modules
-        run: mvn clean install -DskipTests
-
-      # Key Change: Deploy from the root
-      - name: Deploy all artifacts (Parent and Modules)
-        run: mvn --batch-mode deploy -DskipTests
+      - name: Build and deploy
+        if: steps.check-publish.outputs.should-publish == 'true'
+        run: |
+          mvn clean deploy -DskipTests
         env:
-          GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip notification
+        if: steps.check-publish.outputs.should-publish == 'false'
+        run: echo "All artifacts already exist in GitHub Packages. Skipping build and publish."
