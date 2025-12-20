@@ -5,12 +5,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.error.ServiceException;
-import org.voyager.commons.model.flight.*;
+import org.voyager.commons.model.flight.FlightUpsert;
+import org.voyager.commons.model.flight.FlightBatchUpsertResult;
+import org.voyager.commons.model.flight.FlightBatchDelete;
+import org.voyager.commons.model.flight.FlightBatchUpsert;
 import org.voyager.sdk.model.AirportQuery;
 import org.voyager.sync.config.FlightSyncConfig;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
-import org.voyager.sdk.model.IataQuery;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airline.AirlineAirport;
 import org.voyager.commons.model.airline.AirlineBatchUpsert;
@@ -44,7 +46,14 @@ import org.voyager.sync.utils.ConstantsDatasync;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Arrays;
+import java.util.StringJoiner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Callable;
@@ -72,7 +81,7 @@ public class FlightSync {
         init(args);
         Map<String, Set<String>> routeMap = fetchRouteMap();
         Map<Airline,Set<String>> airlineMap = processAndBuildAirlineMap(routeMap,
-                executorService,flightService,routeService,airportService);
+                executorService,flightService,routeService);
         removePreRetentionDays(flightSyncConfig.getRetentionDays(),flightSyncConfig.getSyncMode(),flightService);
         processAirlineMap(airlineMap);
         shutdown();
@@ -117,8 +126,7 @@ public class FlightSync {
     public static Map<Airline, Set<String>> processAndBuildAirlineMap(Map<String, Set<String>> routeMap,
                                                                       ExecutorService executorService,
                                                                       FlightService flightService,
-                                                                      RouteService routeService,
-                                                                      AirportService airportService) {
+                                                                      RouteService routeService) {
         List<Future<Either<AirportScheduleFailure,AirportScheduleResult>>> futureList = new ArrayList<>();
         CompletionService<Either<AirportScheduleFailure,AirportScheduleResult>> completionService =
                 new ExecutorCompletionService<>(executorService);
@@ -136,8 +144,7 @@ public class FlightSync {
                                                     0,0,0,Set.of(),List.of()));
                                         }
                                         return processAirportSchedule(airportCode1,airportCode2,
-                                                airportScheduleFROption.get(),flightService,routeService,
-                                                airportService);
+                                                airportScheduleFROption.get(),flightService,routeService);
                                     }
                             );
             futureList.add(completionService.submit(airportScheduleTask));
@@ -199,8 +206,7 @@ public class FlightSync {
                                                                                                  String airportCode2,
                                                                                                  AirportScheduleFR airportScheduleFR,
                                                                                                  FlightService flightService,
-                                                                                                 RouteService routeService,
-                                                                                                 AirportService airportService) {
+                                                                                                 RouteService routeService) {
         List<String> failedFlightNumbers = new ArrayList<>();
         Set<Airline> airlineSet = new HashSet<>();
         AtomicInteger flightCreates = new AtomicInteger(0);
