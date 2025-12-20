@@ -20,17 +20,52 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          # This automatically configures the 'github' server id in Maven settings.xml
           server-id: github
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
 
-      # Optional: Build and run tests
+      # Build and run tests
       - name: Build all modules
         run: mvn clean install -DskipTests
 
-      # Key Change: Deploy from the root
+      # Check if version already exists in GitHub Packages
+      - name: Check if version already published
+        id: check-version
+        run: |
+          # Extract artifact coordinates from POM
+          GROUP_ID=$(mvn help:evaluate -Dexpression=project.groupId -q -DforceStdout)
+          ARTIFACT_ID=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          
+          echo "GroupId: $GROUP_ID"
+          echo "ArtifactId: $ARTIFACT_ID"
+          echo "Version: $VERSION"
+          
+          # Convert groupId to URL path
+          GROUP_PATH=$(echo "$GROUP_ID" | tr '.' '/')
+          
+          # Check if artifact exists in GitHub Packages
+          URL="https://maven.pkg.github.com/${{ github.repository }}/$GROUP_PATH/$ARTIFACT_ID/$VERSION/$ARTIFACT_ID-$VERSION.pom"
+          echo "Checking URL: $URL"
+          
+          # Try to download the POM file
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "$URL")
+          
+          echo "HTTP Status: $HTTP_STATUS"
+          
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "Version $VERSION already exists in GitHub Packages. Skipping deployment."
+            echo "skip_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $VERSION not found in GitHub Packages. Proceeding with deployment."
+            echo "skip_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Deploy only if version doesn't exist
       - name: Deploy all artifacts (Parent and Modules)
+        if: steps.check-version.outputs.skip_deploy == 'false'
         run: mvn --batch-mode deploy -DskipTests
         env:
           GITHUB_ACTOR: ${{ github.actor }}
