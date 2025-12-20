@@ -48,8 +48,8 @@ jobs:
           URL="https://maven.pkg.github.com/${{ github.repository }}/$GROUP_PATH/$ARTIFACT_ID/$VERSION/$ARTIFACT_ID-$VERSION.pom"
           echo "Checking URL: $URL"
           
-          # Try to download the POM file
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+          # Try to download the POM file with follow redirects (-L)
+          HTTP_STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             "$URL")
           
