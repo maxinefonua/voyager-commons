@@ -24,11 +24,7 @@ jobs:
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
 
-      # Build and run tests
-      - name: Build all modules
-        run: mvn clean install -DskipTests
-
-      # Check if version already exists in GitHub Packages
+       # Check if version already exists in GitHub Packages
       - name: Check if version already published
         id: check-version
         run: |
@@ -62,6 +58,11 @@ jobs:
             echo "Version $VERSION not found in GitHub Packages. Proceeding with deployment."
             echo "skip_deploy=false" >> $GITHUB_OUTPUT
           fi
+
+      # Build and run tests
+      - name: Build all modules
+        if: steps.check-version.outputs.skip_deploy == 'false'
+        run: mvn clean install -DskipTests
 
       # Deploy only if version doesn't exist
       - name: Deploy all artifacts (Parent and Modules)
