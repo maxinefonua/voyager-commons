@@ -95,6 +95,42 @@ jobs:
             voyager-datasync/target/*.jar \
             ec2-user@$HOST:/home/ec2-user/datasync/
           
+          # Create symlinks for latest JARs
+          echo "Creating symlinks for latest JARs..."
+          ssh -o StrictHostKeyChecking=no -i private_key ec2-user@$HOST "
+            cd /home/ec2-user/datasync
+            
+            # Remove existing symlinks if they exist
+            rm -f flights-sync-latest.jar airports-sync-latest.jar bookings-sync-latest.jar
+            
+            # Find and create symlinks for each type
+            # Flights sync
+            flights_jar=\$(ls flights-sync-*.jar 2>/dev/null | sort -V | tail -1)
+            if [ -n \"\$flights_jar\" ]; then
+              ln -sf \"\$flights_jar\" flights-sync-latest.jar
+              echo \"Created symlink: flights-sync-latest.jar -> \$flights_jar\"
+            fi
+            
+            # Airports sync
+            airports_jar=\$(ls airports-sync-*.jar 2>/dev/null | sort -V | tail -1)
+            if [ -n \"\$airports_jar\" ]; then
+              ln -sf \"\$airports_jar\" airports-sync-latest.jar
+              echo \"Created symlink: airports-sync-latest.jar -> \$airports_jar\"
+            fi
+            
+            # Bookings sync
+            bookings_jar=\$(ls bookings-sync-*.jar 2>/dev/null | sort -V | tail -1)
+            if [ -n \"\$bookings_jar\" ]; then
+              ln -sf \"\$bookings_jar\" bookings-sync-latest.jar
+              echo \"Created symlink: bookings-sync-latest.jar -> \$bookings_jar\"
+            fi
+            
+            # List all symlinks
+            echo '=== Current Symlinks ==='
+            ls -la *.jar | grep ^l
+            echo '========================'
+          "
+          
           # Verify deployment
           echo "Verifying deployment..."
           ssh -o StrictHostKeyChecking=no -i private_key ec2-user@$HOST "
