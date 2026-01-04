@@ -9,7 +9,9 @@ import org.voyager.commons.model.flight.FlightUpsert;
 import org.voyager.commons.model.flight.FlightBatchUpsertResult;
 import org.voyager.commons.model.flight.FlightBatchDelete;
 import org.voyager.commons.model.flight.FlightBatchUpsert;
+import org.voyager.commons.model.route.*;
 import org.voyager.sdk.model.AirportQuery;
+import org.voyager.sdk.service.*;
 import org.voyager.sync.config.FlightSyncConfig;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
@@ -31,29 +33,15 @@ import org.voyager.commons.model.geoname.GeoPlace;
 import org.voyager.commons.model.geoname.GeoTimezone;
 import org.voyager.commons.model.geoname.query.GeoNearbyQuery;
 import org.voyager.commons.model.geoname.query.GeoTimezoneQuery;
-import org.voyager.commons.model.route.Route;
-import org.voyager.commons.model.route.RouteForm;
 import org.voyager.sync.reference.VoyagerReference;
-import org.voyager.sdk.service.RouteService;
-import org.voyager.sdk.service.AirportService;
-import org.voyager.sdk.service.AirlineService;
-import org.voyager.sdk.service.FlightService;
 import org.voyager.sync.service.FlightRadarService;
-import org.voyager.sdk.service.GeoService;
 import org.voyager.sync.service.ChAviationService;
 import org.voyager.sdk.service.impl.VoyagerServiceRegistry;
 import org.voyager.sync.utils.ConstantsDatasync;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Arrays;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Callable;
@@ -63,11 +51,13 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static io.vavr.control.Either.left;
 import static io.vavr.control.Either.right;
 
 public class FlightSync {
     private static FlightSyncConfig flightSyncConfig;
     private static RouteService routeService;
+    private static RouteSyncService routeSyncService;
     private static AirlineService airlineService;
     private static FlightService flightService;
     private static AirportService airportService;
@@ -79,11 +69,10 @@ public class FlightSync {
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
         init(args);
-        Map<String, Set<String>> routeMap = fetchRouteMap();
-        Map<Airline,Set<String>> airlineMap = processAndBuildAirlineMap(routeMap,
-                executorService,flightService,routeService);
-        removePreRetentionDays(flightSyncConfig.getRetentionDays(),flightSyncConfig.getSyncMode(),flightService);
-        processAirlineMap(airlineMap);
+        Map<String, Route> routeMap = getMappedRoutes();
+        List<Route> toProcess = getRoutesToProcess(routeMap);
+        Map<Airline,Set<String>> airlineSetMap = processRouteListAndBuildAirlineMap(routeMap,toProcess);
+//        processAirlineMap(airlineSetMap);
         shutdown();
         long durationMs = System.currentTimeMillis()-startTime;
         int sec = (int) (durationMs/1000);
@@ -92,6 +81,185 @@ public class FlightSync {
         int hr = min/60;
         min %= 60;
         LOGGER.info("completed job in {}hr(s) {}min {}sec",hr,min,sec);
+    }
+
+    private static List<Route> getRoutesToProcess(Map<String, Route> routeMap) {
+        List<RouteSync> pending = getPendingRouteSyncList();
+        if (pending.isEmpty()) {
+//            Map<String, Set<String>> airlineRouteMap = fetchRouteMap();
+//            return setConfirmedRoutesToPending(routeMap,airlineRouteMap);
+            LOGGER.info("voyager returned empty route sync list with status {}",Status.PENDING);
+            return List.of();
+        } else {
+            LOGGER.info("voyager returned {} route sync with status {}",
+                    pending.size(),Status.PENDING);
+            List<Route> toProcess = new ArrayList<>();
+            Map<Integer,Route> idToRouteMap = new HashMap<>();
+            routeMap.forEach((key,route)-> {
+                idToRouteMap.put(route.getId(),route);
+            });
+            pending.forEach(routeSync -> {
+                Route route = idToRouteMap.get(routeSync.getId());
+                if (route == null || route.getOrigin() == null || route.getDestination() == null) return;
+                toProcess.add(route);
+            });
+            LOGGER.info("processing {} routes total", toProcess.size());
+            toProcess.sort(Comparator.comparing(Route::getOrigin).thenComparing(Route::getDestination));
+            return toProcess;
+        }
+    }
+
+    private static List<RouteSync> getPendingRouteSyncList() {
+        Either<ServiceError, List<RouteSync>> either = routeSyncService.getByStatus(Status.PENDING);
+        if (either.isLeft()) {
+            Exception exception = either.getLeft().getException();
+            LOGGER.error("ServiceError returned from get route sync by status {}, error: {}",
+                    Status.PENDING,exception.getMessage());
+            shutdown();
+            throw new RuntimeException(exception.getMessage(),exception);
+        }
+        return either.get();
+    }
+
+    private static Map<Airline,Set<String>> processRouteListAndBuildAirlineMap(Map<String, Route> routeMap, List<Route> routeList) {
+        List<Future<Either<AirportScheduleFailure,AirportScheduleResult>>> futureList = new ArrayList<>();
+        CompletionService<Either<AirportScheduleFailure,AirportScheduleResult>> completionService =
+                new ExecutorCompletionService<>(executorService);
+
+        routeList.forEach((route)->{
+            String airportCode1 = route.getOrigin();
+            String airportCode2 = route.getDestination();
+            Callable<Either<AirportScheduleFailure,AirportScheduleResult>> airportScheduleTask = ()->
+                    FlightRadarService.extractAirportResponseWithRetry(airportCode1,airportCode2)
+                            .mapLeft(serviceError ->
+                                    new AirportScheduleFailure(airportCode1,airportCode2,serviceError))
+                            .flatMap(airportScheduleFROption -> {
+                                if (airportScheduleFROption.isEmpty()) {
+                                    RouteSyncPatch routeSyncPatch = RouteSyncPatch.builder()
+                                            .status(Status.COMPLETED)
+                                            .build();
+                                    Either<ServiceError, RouteSync> patchEither = routeSyncService.patchRouteSync(
+                                            route.getId(),routeSyncPatch);
+                                    if (patchEither.isLeft()) {
+                                        Exception exception = patchEither.getLeft().getException();
+                                        LOGGER.error("failed to patch route sync for empty route {}:{}, error: {}",
+                                                airportCode1,airportCode2,exception.getMessage());
+                                        return left(new AirportScheduleFailure(airportCode1,airportCode2,
+                                                patchEither.getLeft()));
+                                    }
+                                    LOGGER.trace("{}:{} returned no flights, successfully patched as completed", airportCode1, airportCode2);
+                                    return right(new AirportScheduleResult(airportCode1, airportCode2,
+                                            0, 0, 0, Set.of(), List.of()));
+                                }
+                                return processAirportSchedule(airportCode1, airportCode2,
+                                        airportScheduleFROption.get(), flightService, routeService);
+                            });
+            futureList.add(completionService.submit(airportScheduleTask));
+        });
+
+        int totalTasks = futureList.size();
+        int completedTasks = 0;
+        int processingErrors = 0;
+        int flightCreates = 0;
+        int flightPatches = 0;
+        int flightSkips = 0;
+        List<AirportScheduleFailure> failureList = new ArrayList<>();
+        List<AirportScheduleResult> failedFlightNumberList = new ArrayList<>();
+        Map<Airline,Set<String>> airlineToIataMap = new HashMap<>();
+
+        while (completedTasks < totalTasks) {
+            try {
+                Future<Either<AirportScheduleFailure,AirportScheduleResult>> future = completionService.take();
+                Either<AirportScheduleFailure,AirportScheduleResult> either = future.get();
+                completedTasks++;
+                if (either.isLeft()) {
+                    AirportScheduleFailure failure = either.getLeft();
+                    failureList.add(failure);
+                    LOGGER.error("task {}/{} failed for route {}:{} with error: {}", completedTasks,totalTasks,
+                            failure.airportCode1,failure.airportCode2,
+                            failure.serviceError.getException().getMessage());
+                } else {
+                    AirportScheduleResult result = either.get();
+                    result.airlineSet.forEach(airline -> {
+                        Set<String> airlineAirports = airlineToIataMap.getOrDefault(airline,new HashSet<>());
+                        airlineAirports.add(result.airportCode1);
+                        airlineAirports.add(result.airportCode2);
+                        airlineToIataMap.put(airline,airlineAirports);
+                    });
+                    if (!result.flightNumberErrors.isEmpty()) {
+                        failedFlightNumberList.add(result);
+                    }
+                    flightCreates += result.flightsCreated;
+                    flightPatches += result.flightsPatched;
+                    flightSkips += result.flightsSkipped;
+                    LOGGER.info("task {}/{} completed for route {}:{} with {} creates, {} patches, {} skips and {} failed flights",
+                            completedTasks,totalTasks, result.airportCode1,result.airportCode2,
+                            result.flightsCreated,result.flightsPatched,result.flightsSkipped,result.flightNumberErrors.size());
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                processingErrors++;
+                completedTasks++;
+                LOGGER.error("task {}/{} failed with error: {}",completedTasks,totalTasks,e.getMessage());
+            }
+        }
+        LOGGER.info("*****************************************");
+        LOGGER.info("completed {}/{} tasks with {} total flight creates, {} flight patches, {} flight skips - {} route task failures, {} processing errors",
+                completedTasks,totalTasks,flightCreates,flightPatches,flightSkips,failureList.size(),processingErrors);
+        printAndSaveErrors(failedFlightNumberList,failureList);
+        return airlineToIataMap;
+    }
+
+    private static List<Route> setConfirmedRoutesToPending(Map<String, Route> routeMap, Map<String, Set<String>> airlineRouteMap) {
+            List<Route> routeList = new ArrayList<>();
+            LOGGER.info("loaded {} total routes from voyager", routeMap.size());
+            List<Integer> routeIdList = new ArrayList<>();
+            airlineRouteMap.forEach((origin, destinationSet) -> {
+                destinationSet.parallelStream().forEach((destination) -> {
+                    String key = String.format("%s:%s", origin, destination);
+                    if (routeMap.containsKey(key)) {
+                        Route route = routeMap.get(key);
+                        routeIdList.add(route.getId());
+                        routeList.add(route);
+                    } else {
+                        shutdown();
+                        throw new IllegalStateException("route from airline route map does not exist in voyager");
+                    }
+                });
+            });
+            RouteSyncBatchUpdate routeSyncBatchUpdate = RouteSyncBatchUpdate.builder()
+                    .routeIdList(routeIdList)
+                    .status(Status.PENDING)
+                    .build();
+            Either<ServiceError,Integer> updateEither = routeSyncService.batchUpdate(routeSyncBatchUpdate);
+            if (updateEither.isLeft()) {
+                Exception exception = updateEither.getLeft().getException();
+                LOGGER.error("Service Error returned on batch update, error: {}",exception.getMessage());
+                shutdown();
+                throw new RuntimeException(exception.getMessage(), exception);
+            }
+            LOGGER.info("set {} route sync entries to {}",updateEither.get(),Status.PENDING.name());
+            return routeList;
+    }
+
+    private static Map<String, Route> getMappedRoutes() {
+        Either<ServiceError, List<Route>> either = routeService.getRoutes();
+        if (either.isLeft()) {
+            Exception exception = either.getLeft().getException();
+            throw new RuntimeException(exception.getMessage(), exception);
+        }
+        List<Route> routeList = either.get();
+        Map<String, Route> routeMap = new HashMap<>();
+        routeList.forEach(route -> {
+            if (!voyagerReference.civilAirportMap.containsKey(route.getOrigin()) ||
+                    !voyagerReference.civilAirportMap.containsKey(route.getDestination())) {
+                LOGGER.trace("skipping non-civil route {}:{}",route.getOrigin(),route.getDestination());
+            } else {
+                String key = String.format("%s:%s", route.getOrigin(), route.getDestination());
+                routeMap.put(key, route);
+            }
+        });
+        LOGGER.info("loaded {} origin keys from flight radar", routeMap.size());
+        return routeMap;
     }
 
     private static void removePreRetentionDays(int retentionDays, FlightSyncConfig.SyncMode syncMode, FlightService flightService) {
@@ -202,11 +370,9 @@ public class FlightSync {
         return airlineToIataMap;
     }
 
-    private static Either<AirportScheduleFailure,AirportScheduleResult> processAirportSchedule(String airportCode1,
-                                                                                                 String airportCode2,
-                                                                                                 AirportScheduleFR airportScheduleFR,
-                                                                                                 FlightService flightService,
-                                                                                                 RouteService routeService) {
+    private static Either<AirportScheduleFailure,AirportScheduleResult> processAirportSchedule(
+            String airportCode1, String airportCode2, AirportScheduleFR airportScheduleFR, FlightService flightService,
+            RouteService routeService) {
         List<String> failedFlightNumbers = new ArrayList<>();
         Set<Airline> airlineSet = new HashSet<>();
         AtomicInteger flightCreates = new AtomicInteger(0);
@@ -219,18 +385,15 @@ public class FlightSync {
         if (airport1 == null || airport2 == null) {
             return Either.left(new AirportScheduleFailure(airportCode1,airportCode2,
                     new ServiceError(HttpStatus.NOT_FOUND,
-                            new ServiceException("airports not found in voyager reference"))));
+                            new ServiceException("airports not found civil airport map in voyager reference"))));
         }
-
-        if (airportScheduleFR.getArrivals() == null || airportScheduleFR.getArrivals().isEmpty()) {
-            LOGGER.info("processing {}:{}, no arrivals at {} from {}",
-                    airportCode1, airportCode2, airportCode2, airportCode1);
-        } else {
-            Either<ServiceError, Route> either = fetchOrCreateRoute(airport1,airport2,routeService);
-            if (either.isLeft()) {
-                return Either.left(new AirportScheduleFailure(airportCode1,airportCode2,either.getLeft()));
-            }
-            Integer routeId = either.get().getId();
+        Either<ServiceError, Route> processingEither = fetchOrCreateRoute(airport1,airport2,routeService);
+        if (processingEither.isLeft()) {
+            return Either.left(new AirportScheduleFailure(airportCode1,airportCode2,processingEither.getLeft()));
+        }
+        Route processingRoute = processingEither.get();
+        if (airportScheduleFR.getArrivals() != null && !airportScheduleFR.getArrivals().isEmpty()) {
+            Integer routeId = processingRoute.getId();
             airportScheduleFR.getArrivals().forEach((countryName, countryFR) ->
                     countryFR.getIataToFlightsMap().get(airportCode2).getFlightNumberToPlannedMap()
                             .forEach((flightNumber,plannedFR)->{
@@ -264,10 +427,7 @@ public class FlightSync {
                             }));
         }
 
-        if (airportScheduleFR.getDepartures() == null || airportScheduleFR.getDepartures().isEmpty()) {
-            LOGGER.info("processing {}:{}, no departures from {} to {}",
-                    airportCode1, airportCode2, airportCode2, airportCode1);
-        } else {
+        if (airportScheduleFR.getDepartures() != null && !airportScheduleFR.getDepartures().isEmpty()) {
             Either<ServiceError, Route> either = fetchOrCreateRoute(airport2,airport1,routeService);
             if (either.isLeft()) {
                 return Either.left(new AirportScheduleFailure(airportCode1,airportCode2,either.getLeft()));
@@ -321,6 +481,18 @@ public class FlightSync {
                 flightSkips.getAndAdd(batchResult.getSkippedCount());
                 flightCreates.getAndAdd(batchResult.getCreatedCount());
             }
+        }
+        RouteSyncPatch routeSyncPatch = RouteSyncPatch.builder()
+                .status(Status.COMPLETED)
+                .build();
+        Either<ServiceError, RouteSync> patchEither = routeSyncService.patchRouteSync(
+                processingRoute.getId(), routeSyncPatch);
+        if (patchEither.isLeft()) {
+            Exception exception = patchEither.getLeft().getException();
+            LOGGER.error("failed to patch completed sync for route {}, error: {}",processingRoute,exception.getMessage());
+            return Either.left(new AirportScheduleFailure(airportCode1,airportCode2,patchEither.getLeft()));
+        } else {
+            LOGGER.trace("successfully patched as completed for route {}:{}",airportCode1,airportCode2);
         }
         return Either.right(new AirportScheduleResult(airportCode1,airportCode2,flightCreates.get(),flightPatches.get(),
                 flightSkips.get(),airlineSet,failedFlightNumbers));
@@ -636,6 +808,7 @@ public class FlightSync {
         flightService = voyagerServiceRegistry.get(FlightService.class);
         airportService = voyagerServiceRegistry.get(AirportService.class);
         geoService = voyagerServiceRegistry.get(GeoService.class);
+        routeSyncService = voyagerServiceRegistry.get(RouteSyncService.class);
         buildoutVoyagerReference();
     }
 

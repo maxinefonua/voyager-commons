@@ -5,6 +5,7 @@ import io.vavr.control.Either;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceException;
 import org.voyager.commons.model.geoname.response.GeoStatus;
+import org.voyager.commons.model.route.RouteSync;
 import org.voyager.sdk.config.VoyagerConfig;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.sdk.http.HttpMethod;
@@ -171,6 +172,8 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 return Either.right((T)GeoResponse.builder().geoStatus(GeoStatus.builder().value(19).message("testing too many requests").build()).build());
             case "/admin/geonames/nearby?latitude=-1.0&longitude=19.0&radius=25":
                 return Either.right((T)GeoResponse.builder().geoStatus(GeoStatus.builder().value(10).message("testing other geonames error").build()).build());
+            case "/admin/routes/sync?status=PENDING":
+                return Either.right((T)List.of(RouteSync.builder().build()));
             default:
                 throw new RuntimeException(String.format(
                     "ServiceUtilsTest fetch typeReference: '%s' not yet implemented for requestURL: %s",
@@ -200,6 +203,10 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 return Either.right((T) ROUTE);
             case "/admin/airports":
                 return Either.right((T)AIRPORT);
+            case "/admin/routes/sync":
+                return Either.right((T)Integer.valueOf(2));
+            case "/admin/routes/sync/1":
+                return Either.right((T)RouteSync.builder().build());
             default:
                 throw new RuntimeException(String.format(
                     "ServiceUtilsTest fetchWithRequestBody: '%s' not yet implemented for requestURL: %s",
