@@ -35,5 +35,7 @@ public final class Path {
         public static final String AIRLINES = "/admin/airlines";
         public static final String ROUTES = "/admin/routes";
         public static final String ROUTE_BY_ID = "/admin/routes/{id}";
+        public static final String SYNC = "/sync";
+        public static final String SYNC_BY_ID = "/sync/{id}";
     }
 }

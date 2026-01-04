@@ -36,7 +36,7 @@ public class ParameterNames {
     public static final String EXCLUDE_ROUTE_PARAM_NAME = "excludeRoute";
     public static final String EXCLUDE_FLIGHT_PARAM_NAME = "excludeFlight";
     public static final String IS_ACTIVE_PARAM_NAME = "isActive";
-    public static final String LOCATION_STATUS_PARAM_NAME = "status";
+    public static final String STATUS = "status";
     public static final String SOURCE_ID_PARAM_NAME = "sourceId";
     @SuppressWarnings("unused")
     public static final String AIRPORTS_PROPERTY_NAME = "airports";

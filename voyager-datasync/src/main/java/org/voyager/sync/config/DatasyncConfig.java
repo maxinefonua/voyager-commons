@@ -23,7 +23,7 @@ public abstract class DatasyncConfig {
     }
 
     public static class Defaults {
-        public static final int PORT = 3000;
+        public static final int PORT = 8080;
         public static final int PORT_MAX = 65535;
         public static final int THREAD_COUNT = 10;
         public static final int THREAD_COUNT_MAX = 1000;

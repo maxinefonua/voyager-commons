@@ -88,6 +88,10 @@ public class VoyagerServiceRegistry {
                     services.put(serviceClass, new GeoServiceImpl());
                     yield (T) services.get(serviceClass);
                 }
+                case "RouteSyncService" -> {
+                    services.put(serviceClass, new RouteSyncServiceImpl());
+                    yield (T) services.get(serviceClass);
+                }
                 default ->
                         throw new IllegalStateException("No implementation registered for type: " + serviceClass.getSimpleName());
             };
