@@ -24,8 +24,8 @@ public class FlightSyncConfig extends DatasyncConfig {
         public static int THREAD_COUNT = 3;
         public static int THREAD_COUNT_MAX = 5;
         public static SyncMode SYNC_MODE = SyncMode.FULL_SYNC;
-        public static int RETENTION_DAYS = 3;
-        public static int RETENTION_DAYS_MIN = 3;
+        public static int RETENTION_DAYS = 1;
+        public static int RETENTION_DAYS_MIN = 1;
     }
 
     public enum SyncMode {

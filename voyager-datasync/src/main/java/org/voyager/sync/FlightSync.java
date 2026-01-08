@@ -70,9 +70,10 @@ public class FlightSync {
         long startTime = System.currentTimeMillis();
         init(args);
         Map<String, Route> routeMap = getMappedRoutes();
+        removePreRetentionDays(flightSyncConfig.getRetentionDays(),flightSyncConfig.getSyncMode(),flightService);
         List<Route> toProcess = getRoutesToProcess(routeMap);
         Map<Airline,Set<String>> airlineSetMap = processRouteListAndBuildAirlineMap(routeMap,toProcess);
-//        processAirlineMap(airlineSetMap);
+        processAirlineMap(airlineSetMap);
         shutdown();
         long durationMs = System.currentTimeMillis()-startTime;
         int sec = (int) (durationMs/1000);
@@ -86,10 +87,15 @@ public class FlightSync {
     private static List<Route> getRoutesToProcess(Map<String, Route> routeMap) {
         List<RouteSync> pending = getPendingRouteSyncList();
         if (pending.isEmpty()) {
-//            Map<String, Set<String>> airlineRouteMap = fetchRouteMap();
-//            return setConfirmedRoutesToPending(routeMap,airlineRouteMap);
-            LOGGER.info("voyager returned empty route sync list with status {}",Status.PENDING);
-            return List.of();
+            if (flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.RETRY_SYNC)) {
+                LOGGER.info("voyager returned empty route sync list with status {}", Status.PENDING);
+                return List.of();
+            } else {
+                LOGGER.info("voyager returned empty route sync list with status {}, setting all routes to {}",
+                        Status.PENDING, Status.PENDING);
+                Map<String, Set<String>> airlineRouteMap = fetchRouteMap();
+                return setConfirmedRoutesToPending(routeMap,airlineRouteMap);
+            }
         } else {
             LOGGER.info("voyager returned {} route sync with status {}",
                     pending.size(),Status.PENDING);
@@ -100,7 +106,43 @@ public class FlightSync {
             });
             pending.forEach(routeSync -> {
                 Route route = idToRouteMap.get(routeSync.getId());
-                if (route == null || route.getOrigin() == null || route.getDestination() == null) return;
+                if (route == null) {
+                    route = routeService.getRoute(routeSync.getId()).getOrElse(route);
+                    if (route == null) {
+                        LOGGER.info("route does not exist for route sync {}", routeSync);
+                        return;
+                    } else if (!voyagerReference.civilAirportMap.containsKey(route.getOrigin())
+                            || !voyagerReference.civilAirportMap.containsKey(route.getDestination()) ) {
+                        RouteSyncPatch routeSyncPatch = RouteSyncPatch.builder()
+                                .status(Status.COMPLETED)
+                                .build();
+                        Either<ServiceError, RouteSync> either = routeSyncService
+                                .patchRouteSync(route.getId(),routeSyncPatch);
+                        if (either.isLeft()) {
+                            LOGGER.error("failed to patch route id {} as completed for non-civil route, error: {}",
+                                    route.getId(),either.getLeft().getException().getMessage());
+                        } else {
+                            LOGGER.info("successful patch COMPLETE of route id: {} with non-civil route {}:{}",
+                                    route.getId(),route.getOrigin(),route.getDestination());
+                        }
+                        return;
+                    }
+                }
+                if (route.getOrigin() == null || route.getDestination() == null) {
+                    RouteSyncPatch routeSyncPatch = RouteSyncPatch.builder()
+                            .status(Status.COMPLETED)
+                            .build();
+                    Either<ServiceError, RouteSync> either = routeSyncService
+                            .patchRouteSync(route.getId(),routeSyncPatch);
+                    if (either.isLeft()) {
+                        LOGGER.error("failed to patch route id {} as completed, error: {}",
+                                route.getId(),either.getLeft().getException().getMessage());
+                    } else {
+                        LOGGER.info("successful patch COMPLETE of route id: {} with route {}:{}",
+                                route.getId(),route.getOrigin(),route.getDestination());
+                    }
+                    return;
+                }
                 toProcess.add(route);
             });
             LOGGER.info("processing {} routes total", toProcess.size());
@@ -214,15 +256,31 @@ public class FlightSync {
             LOGGER.info("loaded {} total routes from voyager", routeMap.size());
             List<Integer> routeIdList = new ArrayList<>();
             airlineRouteMap.forEach((origin, destinationSet) -> {
-                destinationSet.parallelStream().forEach((destination) -> {
+                destinationSet.forEach((destination) -> {
                     String key = String.format("%s:%s", origin, destination);
                     if (routeMap.containsKey(key)) {
                         Route route = routeMap.get(key);
                         routeIdList.add(route.getId());
                         routeList.add(route);
                     } else {
-                        shutdown();
-                        throw new IllegalStateException("route from airline route map does not exist in voyager");
+                        Airport originAirport = voyagerReference.civilAirportMap.get(origin);
+                        Airport destinationAirport = voyagerReference.civilAirportMap.get(destination);
+                        if (originAirport == null
+                                || destinationAirport == null) {
+                            LOGGER.info("route from airline route map contains non-civil airport, skipping");
+                            return;
+                        }
+                        Either<ServiceError, Route> either =
+                                fetchOrCreateRoute(originAirport,destinationAirport,routeService);
+                        if (either.isLeft()) {
+                            LOGGER.error("create civil route {}:{} from airline route map failed with error: {}",
+                                    origin,destination,either.getLeft().getException().getMessage());
+                            shutdown();
+                            throw new IllegalStateException(either.getLeft().getException().getMessage());
+                        } else {
+                            routeMap.put(String.format("%s:%s",origin,destination),either.get());
+                            LOGGER.info("successfully created civil route {}:{}",origin,destination);
+                        }
                     }
                 });
             });
@@ -238,6 +296,7 @@ public class FlightSync {
                 throw new RuntimeException(exception.getMessage(), exception);
             }
             LOGGER.info("set {} route sync entries to {}",updateEither.get(),Status.PENDING.name());
+            routeList.sort(Comparator.comparing(Route::getOrigin).thenComparing(Route::getDestination));
             return routeList;
     }
 
@@ -406,6 +465,7 @@ public class FlightSync {
                                                 flightSyncConfig.getSyncMode().name(),airline.name());
                                         return;
                                     }
+                                    airlineSet.add(airline);
                                     FlightUpsert flightUpsert = FlightUpsert.builder()
                                             .isArrival(String.valueOf(true))
                                             .airline(airline.name())
@@ -445,6 +505,7 @@ public class FlightSync {
                                                 flightSyncConfig.getSyncMode().name(), airline.name());
                                         return;
                                     }
+                                    airlineSet.add(airline);
                                     FlightUpsert flightUpsert = FlightUpsert.builder()
                                             .isArrival(String.valueOf(false))
                                             .airline(airline.name())
@@ -573,7 +634,10 @@ public class FlightSync {
 
 
     private static void processAirlineMap(Map<Airline, Set<String>> airlineMap) {
+        LOGGER.info("processing airline map of {} total airlines", airlineMap.keySet().size());
         airlineMap.forEach((airline,iataCodes) ->{
+            LOGGER.info("processing airline map of airline {} with {} airport codes",
+                    airline.name(),iataCodes.size());
             if (flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.FULL_SYNC)) {
                 Either<ServiceError, Integer> either = airlineService.batchDeleteAirline(airline);
                 if (either.isLeft()) {

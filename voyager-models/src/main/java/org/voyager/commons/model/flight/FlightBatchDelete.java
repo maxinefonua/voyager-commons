@@ -23,6 +23,6 @@ public class FlightBatchDelete {
             allowNull = true)
     String isActive;
 
-    @Min(value = 3, message = "must be a valid integer with a minimum value of 3")
+    @Min(value = 1, message = "must be a valid integer with a minimum value of 1")
     String daysPast;
 }
