@@ -119,6 +119,8 @@ class AirportServiceImplTest {
         AirportForm invalidForm = AirportForm.builder().build();
         assertThrows(ValidationException.class,()->airportService.createAirport(invalidForm));
         AirportForm airportForm = AirportForm.builder().iata("TES").longitude("1.0").latitude("1.0")
+                .city("Test City").subdivision("Test Subdivision")
+                .name("Test Name")
                 .zoneId("Pacific/Honolulu").countryCode("TS")
                 .airportType(AirportType.UNVERIFIED.name()).build();
         Either<ServiceError, Airport> either = airportService.createAirport(airportForm);

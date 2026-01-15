@@ -72,8 +72,7 @@ public class FlightSync {
         Map<String, Route> routeMap = getMappedRoutes();
         removePreRetentionDays(flightSyncConfig.getRetentionDays(),flightSyncConfig.getSyncMode(),flightService);
         List<Route> toProcess = getRoutesToProcess(routeMap);
-        Map<Airline,Set<String>> airlineSetMap = processRouteListAndBuildAirlineMap(routeMap,toProcess);
-        processAirlineMap(airlineSetMap);
+        processRouteListAndAirlineMap(toProcess);
         shutdown();
         long durationMs = System.currentTimeMillis()-startTime;
         int sec = (int) (durationMs/1000);
@@ -163,7 +162,7 @@ public class FlightSync {
         return either.get();
     }
 
-    private static Map<Airline,Set<String>> processRouteListAndBuildAirlineMap(Map<String, Route> routeMap, List<Route> routeList) {
+    private static void processRouteListAndAirlineMap(List<Route> routeList) {
         List<Future<Either<AirportScheduleFailure,AirportScheduleResult>>> futureList = new ArrayList<>();
         CompletionService<Either<AirportScheduleFailure,AirportScheduleResult>> completionService =
                 new ExecutorCompletionService<>(executorService);
@@ -191,7 +190,7 @@ public class FlightSync {
                                     }
                                     LOGGER.trace("{}:{} returned no flights, successfully patched as completed", airportCode1, airportCode2);
                                     return right(new AirportScheduleResult(airportCode1, airportCode2,
-                                            0, 0, 0, Set.of(), List.of()));
+                                            0, 0, 0, Set.of()));
                                 }
                                 return processAirportSchedule(airportCode1, airportCode2,
                                         airportScheduleFROption.get(), flightService, routeService);
@@ -206,7 +205,6 @@ public class FlightSync {
         int flightPatches = 0;
         int flightSkips = 0;
         List<AirportScheduleFailure> failureList = new ArrayList<>();
-        List<AirportScheduleResult> failedFlightNumberList = new ArrayList<>();
         Map<Airline,Set<String>> airlineToIataMap = new HashMap<>();
 
         while (completedTasks < totalTasks) {
@@ -228,15 +226,12 @@ public class FlightSync {
                         airlineAirports.add(result.airportCode2);
                         airlineToIataMap.put(airline,airlineAirports);
                     });
-                    if (!result.flightNumberErrors.isEmpty()) {
-                        failedFlightNumberList.add(result);
-                    }
                     flightCreates += result.flightsCreated;
                     flightPatches += result.flightsPatched;
                     flightSkips += result.flightsSkipped;
-                    LOGGER.info("task {}/{} completed for route {}:{} with {} creates, {} patches, {} skips and {} failed flights",
+                    LOGGER.info("task {}/{} completed for route {}:{} with {} creates, {} patches, {} skips",
                             completedTasks,totalTasks, result.airportCode1,result.airportCode2,
-                            result.flightsCreated,result.flightsPatched,result.flightsSkipped,result.flightNumberErrors.size());
+                            result.flightsCreated,result.flightsPatched,result.flightsSkipped);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 processingErrors++;
@@ -247,8 +242,9 @@ public class FlightSync {
         LOGGER.info("*****************************************");
         LOGGER.info("completed {}/{} tasks with {} total flight creates, {} flight patches, {} flight skips - {} route task failures, {} processing errors",
                 completedTasks,totalTasks,flightCreates,flightPatches,flightSkips,failureList.size(),processingErrors);
-        printAndSaveErrors(failedFlightNumberList,failureList);
-        return airlineToIataMap;
+        printAndSaveErrors(failureList,airlineToIataMap);
+        if (failureList.isEmpty() && processingErrors == 0) {
+        }
     }
 
     private static List<Route> setConfirmedRoutesToPending(Map<String, Route> routeMap, Map<String, Set<String>> airlineRouteMap) {
@@ -317,7 +313,7 @@ public class FlightSync {
                 routeMap.put(key, route);
             }
         });
-        LOGGER.info("loaded {} origin keys from flight radar", routeMap.size());
+        LOGGER.info("loaded {} routes from voyager", routeMap.size());
         return routeMap;
     }
 
@@ -350,89 +346,9 @@ public class FlightSync {
         }
     }
 
-    public static Map<Airline, Set<String>> processAndBuildAirlineMap(Map<String, Set<String>> routeMap,
-                                                                      ExecutorService executorService,
-                                                                      FlightService flightService,
-                                                                      RouteService routeService) {
-        List<Future<Either<AirportScheduleFailure,AirportScheduleResult>>> futureList = new ArrayList<>();
-        CompletionService<Either<AirportScheduleFailure,AirportScheduleResult>> completionService =
-                new ExecutorCompletionService<>(executorService);
-
-        routeMap.forEach((airportCode1,destinationSet)->
-                destinationSet.forEach(airportCode2 -> {
-                    Callable<Either<AirportScheduleFailure,AirportScheduleResult>> airportScheduleTask = ()->
-                            FlightRadarService.extractAirportResponseWithRetry(airportCode1,airportCode2)
-                                    .mapLeft(serviceError ->
-                                            new AirportScheduleFailure(airportCode1,airportCode2,serviceError))
-                                    .flatMap(airportScheduleFROption -> {
-                                        if (airportScheduleFROption.isEmpty()) {
-                                            LOGGER.info("{}:{} returned no flights",airportCode1,airportCode2);
-                                            return right(new AirportScheduleResult(airportCode1,airportCode2,
-                                                    0,0,0,Set.of(),List.of()));
-                                        }
-                                        return processAirportSchedule(airportCode1,airportCode2,
-                                                airportScheduleFROption.get(),flightService,routeService);
-                                    }
-                            );
-            futureList.add(completionService.submit(airportScheduleTask));
-        }));
-
-        int totalTasks = futureList.size();
-        int completedTasks = 0;
-        int processingErrors = 0;
-        int flightCreates = 0;
-        int flightPatches = 0;
-        int flightSkips = 0;
-        List<AirportScheduleFailure> failureList = new ArrayList<>();
-        List<AirportScheduleResult> failedFlightNumberList = new ArrayList<>();
-        Map<Airline,Set<String>> airlineToIataMap = new HashMap<>();
-
-        while (completedTasks < totalTasks) {
-            try {
-                Future<Either<AirportScheduleFailure,AirportScheduleResult>> future = completionService.take();
-                Either<AirportScheduleFailure,AirportScheduleResult> either = future.get();
-                completedTasks++;
-                if (either.isLeft()) {
-                    AirportScheduleFailure failure = either.getLeft();
-                    failureList.add(failure);
-                    LOGGER.error("task {}/{} failed for route {}:{} with error: {}", completedTasks,totalTasks,
-                            failure.airportCode1,failure.airportCode2,
-                            failure.serviceError.getException().getMessage());
-                } else {
-                    AirportScheduleResult result = either.get();
-                    result.airlineSet.forEach(airline -> {
-                        Set<String> airlineAirports = airlineToIataMap.getOrDefault(airline,new HashSet<>());
-                        airlineAirports.add(result.airportCode1);
-                        airlineAirports.add(result.airportCode2);
-                        airlineToIataMap.put(airline,airlineAirports);
-                    });
-                    if (!result.flightNumberErrors.isEmpty()) {
-                        failedFlightNumberList.add(result);
-                    }
-                    flightCreates += result.flightsCreated;
-                    flightPatches += result.flightsPatched;
-                    flightSkips += result.flightsSkipped;
-                    LOGGER.info("task {}/{} completed for route {}:{} with {} creates, {} patches, {} skips and {} failed flights",
-                            completedTasks,totalTasks, result.airportCode1,result.airportCode2,
-                            result.flightsCreated,result.flightsPatched,result.flightsSkipped,result.flightNumberErrors.size());
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                processingErrors++;
-                completedTasks++;
-                LOGGER.error("task {}/{} failed with error: {}",completedTasks,totalTasks,e.getMessage());
-            }
-        }
-        LOGGER.info("*****************************************");
-        LOGGER.info("completed {}/{} tasks with {} total flight creates, {} flight patches, {} flight skips - {} route task failures, {} processing errors",
-                completedTasks,totalTasks,flightCreates,flightPatches,flightSkips,failureList.size(),processingErrors);
-        printAndSaveErrors(failedFlightNumberList,failureList);
-        return airlineToIataMap;
-    }
-
     private static Either<AirportScheduleFailure,AirportScheduleResult> processAirportSchedule(
             String airportCode1, String airportCode2, AirportScheduleFR airportScheduleFR, FlightService flightService,
             RouteService routeService) {
-        List<String> failedFlightNumbers = new ArrayList<>();
         Set<Airline> airlineSet = new HashSet<>();
         AtomicInteger flightCreates = new AtomicInteger(0);
         AtomicInteger flightSkips = new AtomicInteger(0);
@@ -534,8 +450,7 @@ public class FlightSync {
                     FlightBatchUpsert.builder().flightUpsertList(flightUpsertList).build());
             LOGGER.trace("batchUpsert returned after {}ms",System.currentTimeMillis()-start);
             if (either.isLeft()) {
-                failedFlightNumbers.addAll(flightUpsertList.stream()
-                        .map(FlightUpsert::getFlightNumber).toList());
+                return Either.left(new AirportScheduleFailure(airportCode1,airportCode2,either.getLeft()));
             } else {
                 FlightBatchUpsertResult batchResult = either.get();
                 flightPatches.getAndAdd(batchResult.getUpdatedCount());
@@ -556,7 +471,7 @@ public class FlightSync {
             LOGGER.trace("successfully patched as completed for route {}:{}",airportCode1,airportCode2);
         }
         return Either.right(new AirportScheduleResult(airportCode1,airportCode2,flightCreates.get(),flightPatches.get(),
-                flightSkips.get(),airlineSet,failedFlightNumbers));
+                flightSkips.get(),airlineSet));
     }
 
     private static Either<ServiceError, Route> fetchOrCreateRoute(Airport originAirport,
@@ -580,24 +495,7 @@ public class FlightSync {
         });
     }
 
-    private static void printAndSaveErrors(List<AirportScheduleResult> failedFlightNumberList,
-                                           List<AirportScheduleFailure> failureList) {
-        Set<String> failedFlightNumbers = new HashSet<>();
-        failedFlightNumberList.forEach(airportScheduleResult -> {
-            LOGGER.error("route {}:{} had {} flight number errors",
-                    airportScheduleResult.airportCode1,airportScheduleResult.airportCode2,
-                    airportScheduleResult.flightNumberErrors.size());
-            StringJoiner flightJoiner = new StringJoiner(",");
-            airportScheduleResult.flightNumberErrors.forEach(flightNumber -> {
-                LOGGER.info(flightNumber);
-                flightJoiner.add(flightNumber);
-            });
-            failedFlightNumbers.add(String.format("%s:%s %s",
-                    airportScheduleResult.airportCode1,airportScheduleResult.airportCode2,flightJoiner));
-            LOGGER.info("-----------------------");
-        });
-        ConstantsDatasync.writeSetLineByLineDirectFile(failedFlightNumbers,flightSyncConfig.getFileName());
-
+    private static void printAndSaveErrors(List<AirportScheduleFailure> failureList, Map<Airline, Set<String>> airlineToIataMap) {
         Set<String> failedRoutes = new HashSet<>();
         failureList.forEach(airportScheduleFailure -> {
             LOGGER.error("{}:{} failed with error: {}",airportScheduleFailure.airportCode1,
@@ -606,8 +504,7 @@ public class FlightSync {
             failedRoutes.add(String.format("%s:%s",
                     airportScheduleFailure.airportCode1,airportScheduleFailure.airportCode2));
         });
-        ConstantsDatasync.writeSetLineByLineDirectFile(failedRoutes,flightSyncConfig.getFileName());
-        if (failedRoutes.isEmpty() && failedFlightNumbers.isEmpty()) {
+        if (failedRoutes.isEmpty()) {
             if (flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.AIRLINE_SYNC)) {
                 for (Airline airline : flightSyncConfig.getAirlineList()) {
                     Either<ServiceError, Integer> either = flightService.batchDelete(FlightBatchDelete.builder().airline(airline.name())
@@ -629,35 +526,30 @@ public class FlightSync {
                     LOGGER.info("successful batch DELETE of all inactive flights with {} records",either.get());
                 }
             }
+            processAirlineMap(airlineToIataMap);
         }
     }
 
 
     private static void processAirlineMap(Map<Airline, Set<String>> airlineMap) {
-        LOGGER.info("processing airline map of {} total airlines", airlineMap.keySet().size());
+        LOGGER.info("processing upsert airline map of {} total airlines", airlineMap.size());
+        Map<Airline,List<String>> failedAirlineAirports = new HashMap<>();
         airlineMap.forEach((airline,iataCodes) ->{
-            LOGGER.info("processing airline map of airline {} with {} airport codes",
+            LOGGER.info("upserting airline {} with {} airport codes",
                     airline.name(),iataCodes.size());
-            if (flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.FULL_SYNC)) {
-                Either<ServiceError, Integer> either = airlineService.batchDeleteAirline(airline);
-                if (either.isLeft()) {
-                    LOGGER.error("failed to batch DELETE airline {} with error: {}",
-                            airline,either.getLeft().getException().getMessage());
-                    return;
-                } else {
-                    LOGGER.info("successful batch DELETE airline {} of {} records",airline,either.get());
-                }
-            }
             AirlineBatchUpsert airlineBatchUpsert = AirlineBatchUpsert.builder().airline(airline.name())
                     .isActive(true).iataList(new ArrayList<>(iataCodes)).build();
             Either<ServiceError, List<AirlineAirport>> either = airlineService.batchUpsert(airlineBatchUpsert);
             if (either.isLeft()) {
-                LOGGER.error("failed to batch UPSERT airline {} with codes: {}",airline,iataCodes);
+                LOGGER.error("failed to batch UPSERT airline {} with codes: {}, error: {}",
+                        airline,iataCodes,either.getLeft().getException().getMessage());
+                failedAirlineAirports.put(airline,new ArrayList<>(iataCodes));
             } else {
                 LOGGER.info("successful batch UPSERT airline {} with {} records",airline,either.get().size());
             }
             LOGGER.info("-----------------");
         });
+        ConstantsDatasync.writeAirlineListToFile(failedAirlineAirports,flightSyncConfig.getRetryAirlineFileWriter());
     }
 
     private static void shutdown() {
@@ -672,14 +564,14 @@ public class FlightSync {
             case RETRY_SYNC -> {
                 // load retry routes from target output file
                 List<String> failedRouteList = ConstantsDatasync
-                        .loadStringListFromDirectFile(flightSyncConfig.getFileName());
+                        .loadStringListFromDirectFile(flightSyncConfig.getRetryRouteFileName());
                 // map origin to destination set
                 Map<String,Set<String>> routeMap = new HashMap<>();
                 failedRouteList.forEach(item -> {
                     String[] tokens = item.split(":");
                     if (tokens.length != 2) {
                         throw new RuntimeException(String.format("Retry source file %s must be formatted line by " +
-                                "line with a valid route, ie 'HNL:HND'",flightSyncConfig.getFileName()));
+                                "line with a valid route, ie 'HNL:HND'",flightSyncConfig.getRetryRouteFileName()));
                     }
                     if (voyagerReference.allAirportCodeSet.contains(tokens[0])
                             && !voyagerReference.civilAirportMap.containsKey(tokens[0])) {
