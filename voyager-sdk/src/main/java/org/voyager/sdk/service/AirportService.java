@@ -3,7 +3,7 @@ import io.vavr.control.Either;
 import lombok.NonNull;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.response.PagedResponse;
-import org.voyager.sdk.model.AirportQuery;
+import org.voyager.commons.model.airport.AirportQuery;
 import org.voyager.sdk.model.IataQuery;
 import org.voyager.sdk.model.NearbyAirportQuery;
 import org.voyager.commons.model.airport.Airport;
