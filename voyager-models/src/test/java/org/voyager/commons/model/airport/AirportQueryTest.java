@@ -1,11 +1,9 @@
-package org.voyager.sdk.model;
+package org.voyager.commons.model.airport;
 
 import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.commons.model.airport.AirportType;
 import org.voyager.commons.validate.ValidationUtils;
-import org.voyager.sdk.model.AirportQuery;
 
 import java.util.ArrayList;
 import java.util.List;

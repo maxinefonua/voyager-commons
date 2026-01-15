@@ -11,7 +11,7 @@ import org.voyager.commons.model.flight.FlightBatchDelete;
 import org.voyager.commons.model.flight.FlightBatchUpsert;
 import org.voyager.commons.model.response.PagedResponse;
 import org.voyager.commons.model.route.*;
-import org.voyager.sdk.model.AirportQuery;
+import org.voyager.commons.model.airport.AirportQuery;
 import org.voyager.sdk.service.*;
 import org.voyager.sync.config.FlightSyncConfig;
 import org.voyager.commons.error.HttpStatus;

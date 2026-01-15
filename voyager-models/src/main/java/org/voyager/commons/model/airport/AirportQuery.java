@@ -1,4 +1,4 @@
-package org.voyager.sdk.model;
+package org.voyager.commons.model.airport;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.commons.model.airport.AirportType;
 import org.voyager.commons.validate.annotations.ValidCountryCode;
 import java.util.List;
 import java.util.StringJoiner;

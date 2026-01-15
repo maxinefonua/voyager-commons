@@ -12,13 +12,12 @@ import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.Airport;
 import org.voyager.commons.model.airport.AirportPatch;
 import org.voyager.commons.model.airport.AirportType;
-import org.voyager.sdk.model.AirportQuery;
+import org.voyager.commons.model.airport.AirportQuery;
 import org.voyager.sdk.model.NearbyAirportQuery;
 import org.voyager.sdk.service.AirportService;
 import org.voyager.sdk.service.TestServiceRegistry;
 import org.voyager.sdk.service.utils.ServiceUtilsTestFactory;
 
-import java.time.ZoneId;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
