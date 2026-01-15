@@ -1,5 +1,6 @@
 package org.voyager.commons.model.airport;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,14 +23,17 @@ public class AirportForm {
 
     @Pattern(regexp = Regex.NONEMPTY_TRIMMED,
             message = Regex.ConstraintMessage.NONEMPTY_TRIMMED)
+    @NotNull
     private String name;
 
     @Pattern(regexp = Regex.NONEMPTY_TRIMMED,
             message = Regex.ConstraintMessage.NONEMPTY_TRIMMED)
+    @NotNull
     private String city;
 
     @Pattern(regexp = Regex.NONEMPTY_TRIMMED,
             message = Regex.ConstraintMessage.NONEMPTY_TRIMMED)
+    @NotNull
     private String subdivision;
 
     @ValidCountryCode

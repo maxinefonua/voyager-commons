@@ -11,16 +11,14 @@ public class AirportScheduleResult {
     public int flightsSkipped;
     public int flightsPatched;
     public Set<Airline> airlineSet;
-    public List<String> flightNumberErrors;
 
     public AirportScheduleResult(String airportCode1, String airportCode2, int flightsCreated, int flightsPatched,
-                                 int flightsSkipped, Set<Airline> airlineSet, List<String> flightNumberErrors) {
+                                 int flightsSkipped, Set<Airline> airlineSet) {
         this.airportCode1 = airportCode1;
         this.airportCode2 = airportCode2;
         this.flightsCreated = flightsCreated;
         this.flightsPatched = flightsPatched;
         this.flightsSkipped = flightsSkipped;
         this.airlineSet = airlineSet;
-        this.flightNumberErrors = flightNumberErrors;
     }
 }

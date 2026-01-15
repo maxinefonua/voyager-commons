@@ -1,11 +1,12 @@
 package org.voyager.commons.validate;
 
-import jakarta.validation.ValidationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.ConstraintViolation;
 import org.hibernate.validator.HibernateValidator;
+import org.voyager.commons.error.ValidationException;
+
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,14 +33,16 @@ public class ValidationUtils {
         return VALIDATOR.validate(object);
     }
 
-    public static <T> boolean isValid(T object) {
-        return validate(object).isEmpty();
-    }
-
     public static <T> void validateAndThrow(T object) {
         Set<ConstraintViolation<T>> violations = validate(object);
         if (!violations.isEmpty()) {
-            throw new ValidationException("Validation failed: " + violations);
+            @SuppressWarnings("unchecked")
+            Set<ConstraintViolation<?>> wildcardSet = (Set<ConstraintViolation<?>>) (Set<?>) violations;
+
+            throw ValidationException.builder()
+                    .constraintViolationSet(wildcardSet)
+                    .aClass(object.getClass())
+                    .build();
         }
     }
 }

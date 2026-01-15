@@ -9,18 +9,12 @@ import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.FileWriter;
-import java.util.List;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.MissingResourceException;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ConstantsDatasync {
     public static final String FAILED_AIRPORT_SCHEDULE_FILE = "flights/failed-airport-schedules.txt";
-    public static final String FAILED_FLIGHT_NUMBERS_FILE = "flights/failed-flight-numbers.txt";
+    public static final String FAILED_FLIGHT_NUMBERS_FILE = "flights/failed-airline-batches.txt";
     public static final String NON_CIVIL_AIRPORTS_FILE = "flights/non-civil-airports.txt";
     public static Set<String> loadCodesFromFile(String fileName) {
         InputStream is = ConstantsDatasync.class.getClassLoader().getResourceAsStream(fileName);
@@ -161,6 +155,21 @@ public class ConstantsDatasync {
             writer.write(joiner.toString());
         } catch (IOException e) {
             throw new MissingResourceException(String.format("Error writing to file: %s\nError message: %s",filePath,e.getMessage()), ConstantsDatasync.class.getName(),filePath);
+        }
+    }
+
+    public static void writeAirlineListToFile(Map<Airline, List<String>> airlineListMap, FileWriter fileWriter) {
+        try (BufferedWriter writer = new BufferedWriter(fileWriter)) {
+            StringJoiner lineJoiner = new StringJoiner("\n");
+            airlineListMap.forEach((airline, codes) -> {
+                StringJoiner codeJoiner = new StringJoiner(",");
+                codes.forEach(codeJoiner::add);
+                lineJoiner.add(String.format("%s:%s", airline.name(), codeJoiner));
+            });
+            writer.write(lineJoiner.toString());
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    String.format("Error writing airline data to file: %s", fileWriter), e);
         }
     }
 
