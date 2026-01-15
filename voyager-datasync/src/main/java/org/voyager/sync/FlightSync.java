@@ -9,6 +9,7 @@ import org.voyager.commons.model.flight.FlightUpsert;
 import org.voyager.commons.model.flight.FlightBatchUpsertResult;
 import org.voyager.commons.model.flight.FlightBatchDelete;
 import org.voyager.commons.model.flight.FlightBatchUpsert;
+import org.voyager.commons.model.response.PagedResponse;
 import org.voyager.commons.model.route.*;
 import org.voyager.sdk.model.AirportQuery;
 import org.voyager.sdk.service.*;
@@ -780,15 +781,21 @@ public class FlightSync {
                 voyagerReference.allAirportCodeSet.size());
 
         // load civil codes set
-        AirportQuery airportQuery = AirportQuery.builder().withTypeList(List.of(AirportType.CIVIL)).build();
-        Either<ServiceError, List<Airport>> civilAirportsEither = airportService.getAirports(airportQuery);
-        if (civilAirportsEither.isLeft()) {
-            Exception exception = civilAirportsEither.getLeft().getException();
-            throw new RuntimeException(exception.getMessage(),exception);
+        AirportQuery airportQuery = AirportQuery.builder().airportTypeList(List.of(AirportType.CIVIL)).size(1000).page(0).build();
+        Either<ServiceError, PagedResponse<Airport>> civilAirportsEither = airportService.getAirports(airportQuery);
+        while (civilAirportsEither.isRight()) {
+            PagedResponse<Airport> pagedResponse = civilAirportsEither.get();
+            pagedResponse.getContent().forEach(airport ->
+                    voyagerReference.civilAirportMap.put(airport.getIata(),airport));
+            if (pagedResponse.isLast()) {
+                LOGGER.info("voyager reference loaded {} codes in civil airport codes set",
+                        voyagerReference.civilAirportMap.size());
+                return;
+            }
+            airportQuery.setPage(airportQuery.getPage()+1);
+            civilAirportsEither = airportService.getAirports(airportQuery);
         }
-        civilAirportsEither.get().forEach(airport ->
-                voyagerReference.civilAirportMap.put(airport.getIata(),airport));
-        LOGGER.info("voyager reference loaded {} codes in civil airport codes set",
-                voyagerReference.civilAirportMap.size());
+        Exception exception = civilAirportsEither.getLeft().getException();
+        throw new RuntimeException(exception.getMessage(),exception);
     }
 }

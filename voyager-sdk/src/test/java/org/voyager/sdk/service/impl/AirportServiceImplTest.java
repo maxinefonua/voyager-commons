@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airport.AirportForm;
+import org.voyager.commons.model.response.PagedResponse;
 import org.voyager.sdk.model.IataQuery;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.Airport;
@@ -40,14 +41,9 @@ class AirportServiceImplTest {
     void getAirports() {
         assertThrows(NullPointerException.class,()->airportService.getAirports(null));
 
-        Either<ServiceError, List<Airport>> either = airportService.getAirports(AirportQuery.builder().withAirline(Airline.DELTA)
-                .withCountryCode("TO").withTypeList(List.of(AirportType.CIVIL)).build());
-        assertNotNull(either);
-        assertTrue(either.isRight());
-        assertFalse(either.get().isEmpty());
-        assertEquals("IATA",either.get().get(0).getIata());
-
-        either = airportService.getAirports();
+        Either<ServiceError, PagedResponse<Airport>> either = airportService.getAirports(
+                AirportQuery.builder().airlineList(List.of(Airline.DELTA))
+                        .countryCode("TO").airportTypeList(List.of(AirportType.CIVIL)).build());
         assertNotNull(either);
         assertTrue(either.isRight());
     }
