@@ -1,34 +1,33 @@
 package org.voyager.sdk.model;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NonNull;
+import lombok.Builder;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.model.airport.AirportType;
 import org.voyager.commons.validate.annotations.ValidCountryCode;
-import org.voyager.commons.validate.ValidationUtils;
 import java.util.List;
 import java.util.StringJoiner;
 
-@Getter
+@Data
+@Builder
 public class AirportQuery {
-    @ValidCountryCode(allowNull = true)
+    @Min(1)
+    @Max(1000)
+    @Builder.Default
+    private int size = 100;
+    @Min(0)
+    @Builder.Default
+    private int page = 0;
+    @ValidCountryCode(allowNull = true,caseSensitive = false)
     private String countryCode;
-
-    private final Airline airline;
-
+    private final List<@NotNull Airline> airlineList;
     private final List<@NotNull AirportType> airportTypeList;
-
-    private AirportQuery(String countryCode,Airline airline, List<AirportType> airportTypeList) {
-        this.countryCode = countryCode;
-        this.airline = airline;
-        this.airportTypeList = airportTypeList;
-        if (countryCode == null && airline == null && airportTypeList == null)
-            throw new IllegalArgumentException("at least one field of AirportQuery must be set");
-    }
 
     public String getRequestURL() {
         StringBuilder urlBuilder = new StringBuilder();
@@ -36,12 +35,16 @@ public class AirportQuery {
         urlBuilder.append("?");
 
         StringJoiner paramsJoiner = new StringJoiner("&");
+        paramsJoiner.add(String.format("%s=%d",ParameterNames.PAGE,page));
+        paramsJoiner.add(String.format("%s=%d",ParameterNames.SIZE,size));
 
         if (StringUtils.isNotBlank(countryCode)) {
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.COUNTRY_CODE_PARAM_NAME,countryCode));
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.COUNTRY_CODE_PARAM_NAME,countryCode.toUpperCase()));
         }
-        if (airline != null) {
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.AIRLINE_PARAM_NAME,airline.name()));
+        if (airlineList != null && !airlineList.isEmpty()) {
+            StringJoiner stringJoiner = new StringJoiner(",");
+            airlineList.forEach(airline -> stringJoiner.add(airline.name()));
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.AIRLINE_PARAM_NAME,stringJoiner));
         }
         if (airportTypeList != null) {
             StringJoiner typeJoiner = new StringJoiner(",");
@@ -51,38 +54,5 @@ public class AirportQuery {
 
         urlBuilder.append(paramsJoiner);
         return urlBuilder.toString();
-    }
-
-    public static AirportQueryBuilder builder() {
-        return new AirportQueryBuilder();
-    }
-
-    public static class AirportQueryBuilder {
-        private Airline airline;
-        private String countryCode;
-        private List<AirportType> airportTypeList;
-
-        public AirportQueryBuilder withAirline(@NonNull Airline airline) {
-            this.airline = airline;
-            return this;
-        }
-
-        public AirportQueryBuilder withCountryCode(@NonNull String countryCode) {
-            this.countryCode = countryCode.toUpperCase();
-            return this;
-        }
-
-        public AirportQueryBuilder withTypeList(@NonNull List<AirportType> airportTypeList) {
-            this.airportTypeList = airportTypeList;
-            return this;
-        }
-
-        public AirportQuery build() {
-            AirportQuery airportQuery = new AirportQuery(countryCode, airline, airportTypeList);
-            ValidationUtils.validateAndThrow(airportQuery);
-            if (airportQuery.countryCode != null)
-                airportQuery.countryCode = airportQuery.countryCode.toUpperCase();
-            return airportQuery;
-        }
     }
 }

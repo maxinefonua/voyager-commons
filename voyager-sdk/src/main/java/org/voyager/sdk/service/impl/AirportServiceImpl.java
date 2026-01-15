@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.error.ServiceError;
+import org.voyager.commons.model.response.PagedResponse;
 import org.voyager.commons.validate.ValidationUtils;
 import org.voyager.sdk.http.HttpMethod;
 import org.voyager.sdk.model.AirportQuery;
@@ -34,15 +35,8 @@ public class AirportServiceImpl implements AirportService {
     }
 
     @Override
-    public Either<ServiceError, List<Airport>> getAirports() {
-        String requestURL = Path.AIRPORTS;
-        LOGGER.debug("attempting to GET airports from: {}", requestURL);
-        return serviceUtils.fetch(requestURL,HttpMethod.GET, new TypeReference<>() {
-        });
-    }
-
-    @Override
-    public Either<ServiceError, List<Airport>> getAirports(@NonNull AirportQuery airportQuery) {
+    public Either<ServiceError, PagedResponse<Airport>> getAirports(@NonNull AirportQuery airportQuery) {
+        ValidationUtils.validateAndThrow(airportQuery);
         LOGGER.debug("attempting to GET airports from: {}", airportQuery.getRequestURL());
         return serviceUtils.fetch(airportQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
         });

@@ -126,7 +126,7 @@ public class TestServiceUtils extends ServiceUtilsDefault {
     public <T> Either<ServiceError, T> fetch(String requestURL, HttpMethod httpMethod, TypeReference<T> typeReference) {
         switch (requestURL) {
             case "/airports":
-            case "/airports?countryCode=TO&airline=DELTA&type=CIVIL":
+            case "/airports?page=0&size=100&countryCode=TO&airline=DELTA&type=CIVIL":
                 return Either.right((T) List.of(AIRPORT));
             case "/iata":
             case "/iata?airline=JAPAN":
