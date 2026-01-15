@@ -25,8 +25,8 @@ public class AirportQuery {
     private int page = 0;
     @ValidCountryCode(allowNull = true,caseSensitive = false)
     private String countryCode;
-    private final List<@NotNull Airline> airlineList;
-    private final List<@NotNull AirportType> airportTypeList;
+    private List<@NotNull Airline> airlineList;
+    private List<@NotNull AirportType> airportTypeList;
 
     public String getRequestURL() {
         StringBuilder urlBuilder = new StringBuilder();
