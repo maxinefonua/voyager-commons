@@ -46,7 +46,7 @@ public class AirlineServiceImpl implements AirlineService {
     }
 
     @Override
-    public Either<ServiceError, List<AirlineAirport>> batchUpsert(@NonNull AirlineBatchUpsert airlineBatchUpsert) {
+    public Either<ServiceError, AirlineBatchUpsertResult> batchUpsert(@NonNull AirlineBatchUpsert airlineBatchUpsert) {
         String requestURL = Path.Admin.AIRLINES;
         LOGGER.debug("attempting to PATCH {} with body: {}", requestURL, airlineBatchUpsert);
         return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.POST,
