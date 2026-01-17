@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.error.ServiceException;
+import org.voyager.commons.model.airline.AirlineBatchUpsertResult;
 import org.voyager.commons.model.flight.FlightUpsert;
 import org.voyager.commons.model.flight.FlightBatchUpsertResult;
 import org.voyager.commons.model.flight.FlightBatchDelete;
@@ -252,8 +253,8 @@ public class FlightSync {
             List<Route> routeList = new ArrayList<>();
             LOGGER.info("loaded {} total routes from voyager", routeMap.size());
             List<Integer> routeIdList = new ArrayList<>();
-            airlineRouteMap.forEach((origin, destinationSet) -> {
-                destinationSet.forEach((destination) -> {
+            airlineRouteMap.keySet().parallelStream().forEach(origin -> {
+                airlineRouteMap.get(origin).parallelStream().forEach((destination) -> {
                     String key = String.format("%s:%s", origin, destination);
                     if (routeMap.containsKey(key)) {
                         Route route = routeMap.get(key);
@@ -540,13 +541,17 @@ public class FlightSync {
                     airline.name(),iataCodes.size());
             AirlineBatchUpsert airlineBatchUpsert = AirlineBatchUpsert.builder().airline(airline.name())
                     .isActive(true).iataList(new ArrayList<>(iataCodes)).build();
-            Either<ServiceError, List<AirlineAirport>> either = airlineService.batchUpsert(airlineBatchUpsert);
+            Either<ServiceError, AirlineBatchUpsertResult> either = airlineService.batchUpsert(airlineBatchUpsert);
             if (either.isLeft()) {
                 LOGGER.error("failed to batch UPSERT airline {} with codes: {}, error: {}",
                         airline,iataCodes,either.getLeft().getException().getMessage());
                 failedAirlineAirports.put(airline,new ArrayList<>(iataCodes));
             } else {
-                LOGGER.info("successful batch UPSERT airline {} with {} records",airline,either.get().size());
+                AirlineBatchUpsertResult airlineBatchUpsertResult = either.get();
+                LOGGER.info("successful batch UPSERT airline {} with {} records created, {} records skipped, {} records updated",
+                        airline,airlineBatchUpsertResult.getCreatedCount(),
+                        airlineBatchUpsertResult.getSkippedCount(),
+                        airlineBatchUpsertResult.getUpdatedCount());
             }
             LOGGER.info("-----------------");
         });
