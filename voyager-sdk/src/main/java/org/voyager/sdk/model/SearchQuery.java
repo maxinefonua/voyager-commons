@@ -36,14 +36,14 @@ public class SearchQuery {
     public String getRequestURL() {
         StringJoiner paramsJoiner = new StringJoiner("&");
         paramsJoiner.add(String.format("%s=%s",
-                ParameterNames.QUERY_PARAM_NAME,URLEncoder.encode(query, StandardCharsets.UTF_8)));
+                ParameterNames.QUERY,URLEncoder.encode(query, StandardCharsets.UTF_8)));
 
         if (skipRowCount != null) {
-            paramsJoiner.add(String.format("%s=%s",ParameterNames.SKIP_ROW_PARAM_NAME,skipRowCount));
+            paramsJoiner.add(String.format("%s=%s",ParameterNames.SKIP_ROW_COUNT,skipRowCount));
         }
 
         if (limit != null) {
-            paramsJoiner.add(String.format("%s=%s",ParameterNames.LIMIT_PARAM_NAME,limit));
+            paramsJoiner.add(String.format("%s=%s",ParameterNames.LIMIT,limit));
         }
         return String.format("%s?%s", Path.Admin.SEARCH,paramsJoiner);
     }

@@ -27,12 +27,12 @@ public class IataQuery {
         if (airlineList != null) {
             StringJoiner airlineJoiner = new StringJoiner(",");
             airlineList.forEach(airline -> airlineJoiner.add(airline.name()));
-            paramJoiner.add(String.format("%s=%s", ParameterNames.AIRLINE_PARAM_NAME,airlineJoiner));
+            paramJoiner.add(String.format("%s=%s", ParameterNames.AIRLINE,airlineJoiner));
         }
         if (airportTypeList != null) {
             StringJoiner typeJoiner = new StringJoiner(",");
             airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
-            paramJoiner.add(String.format("%s=%s", ParameterNames.TYPE_PARAM_NAME,typeJoiner));
+            paramJoiner.add(String.format("%s=%s", ParameterNames.TYPE,typeJoiner));
         }
         return String.format("%s?%s", Path.IATA,paramJoiner);
     }

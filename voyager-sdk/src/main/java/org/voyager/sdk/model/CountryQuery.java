@@ -27,7 +27,7 @@ public class CountryQuery {
         StringJoiner continentJoiner = new StringJoiner(",");
         continentList.forEach(continent -> continentJoiner.add(continent.name()));
         return String.format("%s?" + "%s=%s", Path.COUNTRIES,
-                ParameterNames.COUNTRY_CODE_PARAM_NAME,continentJoiner);
+                ParameterNames.COUNTRY_CODE,continentJoiner);
     }
 
     public static class CountryQueryBuilder {

@@ -48,8 +48,8 @@ public class RouteServiceImpl implements RouteService {
     public Either<ServiceError, Route> getRoute(@NonNull String origin, @NonNull String destination) {
         String requestURL = String.format("%s" + "?%s=%s" + "&%s=%s",
                 Path.ROUTE,
-                ParameterNames.ORIGIN_PARAM_NAME,origin,
-                ParameterNames.DESTINATION_PARAM_NAME,destination);
+                ParameterNames.ORIGIN,origin,
+                ParameterNames.DESTINATION,destination);
         return serviceUtils.fetch(requestURL,HttpMethod.GET,Route.class);
     }
 

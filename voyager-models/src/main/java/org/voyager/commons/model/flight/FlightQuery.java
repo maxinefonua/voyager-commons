@@ -38,10 +38,10 @@ public class FlightQuery {
         if (routeIdList != null) {
             StringJoiner routeIdJoiner = new StringJoiner(",");
             routeIdList.forEach(routeId -> routeIdJoiner.add(String.valueOf(routeId)));
-            paramJoiner.add(String.format("%s=%s", ParameterNames.ROUTE_ID_PARAM_NAME,routeIdJoiner));
+            paramJoiner.add(String.format("%s=%s", ParameterNames.ROUTE_ID,routeIdJoiner));
         }
         if (isActive != null) {
-            paramJoiner.add(String.format("%s=%s", ParameterNames.IS_ACTIVE_PARAM_NAME,isActive));
+            paramJoiner.add(String.format("%s=%s", ParameterNames.IS_ACTIVE,isActive));
         }
         paramJoiner.add(String.format("%s=%s",ParameterNames.PAGE,page));
         paramJoiner.add(String.format("%s=%s",ParameterNames.SIZE,pageSize));

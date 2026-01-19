@@ -47,8 +47,8 @@ public class GeoServiceImpl implements GeoService {
     public Either<ServiceError, List<GeoPlace>> findNearbyPlaces(@NonNull GeoNearbyQuery geoNearbyQuery) {
         ValidationUtils.validateAndThrow(geoNearbyQuery);
         String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s",GeoNames.getNearbyPath(),
-                ParameterNames.LATITUDE_PARAM_NAME,geoNearbyQuery.getLatitude(),
-                ParameterNames.LONGITUDE_PARAM_NAME,geoNearbyQuery.getLongitude());
+                ParameterNames.LATITUDE,geoNearbyQuery.getLatitude(),
+                ParameterNames.LONGITUDE,geoNearbyQuery.getLongitude());
         if (geoNearbyQuery.getRadiusKm() != null) {
             requestURL = requestURL.concat(String.format("&%s=%s",
                     GeoNames.ParameterNames.RADIUS,geoNearbyQuery.getRadiusKm()));
@@ -71,8 +71,8 @@ public class GeoServiceImpl implements GeoService {
     public Either<ServiceError, GeoTimezone> getTimezone(@NonNull GeoTimezoneQuery geoTimezoneQuery) {
         ValidationUtils.validateAndThrow(geoTimezoneQuery);
         String requestURL = String.format("%s?" + "%s=%s" + "&%s=%s",GeoNames.getTimezonePath(),
-                ParameterNames.LATITUDE_PARAM_NAME,geoTimezoneQuery.getLatitude(),
-                ParameterNames.LONGITUDE_PARAM_NAME,geoTimezoneQuery.getLongitude());
+                ParameterNames.LATITUDE,geoTimezoneQuery.getLatitude(),
+                ParameterNames.LONGITUDE,geoTimezoneQuery.getLongitude());
         if (geoTimezoneQuery.getRadius() != null) {
             requestURL = requestURL.concat(String.format("&%s=%s",
                     GeoNames.ParameterNames.RADIUS,geoTimezoneQuery.getRadius()));

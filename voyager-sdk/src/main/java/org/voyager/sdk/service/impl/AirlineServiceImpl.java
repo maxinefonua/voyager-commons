@@ -57,7 +57,7 @@ public class AirlineServiceImpl implements AirlineService {
     @Override
     public Either<ServiceError, Integer> batchDeleteAirline(@NonNull Airline airline) {
         String requestURL = String.format("%s?%s=%s",Path.Admin.AIRLINES,
-                ParameterNames.AIRLINE_PARAM_NAME,airline);
+                ParameterNames.AIRLINE,airline);
         LOGGER.debug("attempting to DELETE {}", requestURL);
         return serviceUtils.fetch(requestURL,HttpMethod.DELETE,Integer.class);
     }

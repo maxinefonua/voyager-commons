@@ -1,12 +1,10 @@
 package org.voyager.commons.model.route;
 
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Data;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.constants.Regex;
-import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.validate.annotations.ValidAirportCode;
 import org.voyager.commons.validate.annotations.ValidNonNullField;
 
@@ -29,12 +27,12 @@ public class RouteQuery {
     public String getRequestURL() {
         StringJoiner paramsJoiner = new StringJoiner("&");
         if (originList != null && !originList.isEmpty()) {
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.ORIGIN_PARAM_NAME,
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.ORIGIN,
                     String.join(",",originList)));
         }
 
         if (destinationList != null) {
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.DESTINATION_PARAM_NAME,
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.DESTINATION,
                     String.join(",",destinationList)));
         }
 

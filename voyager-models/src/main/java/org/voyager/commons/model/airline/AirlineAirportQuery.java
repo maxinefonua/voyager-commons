@@ -43,7 +43,7 @@ public class AirlineAirportQuery extends AirlineQuery {
 
         StringJoiner iataJoiner = new StringJoiner(",");
         iatalist.forEach(iataJoiner::add);
-        urlBuilder.append(String.format("?%s=%s", ParameterNames.IATA_PARAM_NAME,iataJoiner));
+        urlBuilder.append(String.format("?%s=%s", ParameterNames.IATA,iataJoiner));
         urlBuilder.append(String.format("&%s=%s",ParameterNames.OPERATOR,operator));
         return urlBuilder.toString();
     }

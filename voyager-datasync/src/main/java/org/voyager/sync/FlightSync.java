@@ -18,7 +18,6 @@ import org.voyager.sync.config.FlightSyncConfig;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.commons.model.airline.AirlineAirport;
 import org.voyager.commons.model.airline.AirlineBatchUpsert;
 import org.voyager.commons.model.airport.Airport;
 import org.voyager.sync.model.chaviation.AirportCH;
@@ -92,8 +91,8 @@ public class FlightSync {
                 LOGGER.info("voyager returned empty route sync list with status {}", Status.PENDING);
                 return List.of();
             } else {
-                LOGGER.info("voyager returned empty route sync list with status {}, setting all routes to {}",
-                        Status.PENDING, Status.PENDING);
+                LOGGER.info("voyager returned empty route sync list with status {}, fetching all airline routes from flight radar",
+                        Status.PENDING);
                 Map<String, Set<String>> airlineRouteMap = fetchRouteMap();
                 return setConfirmedRoutesToPending(routeMap,airlineRouteMap);
             }
@@ -534,9 +533,18 @@ public class FlightSync {
 
 
     private static void processAirlineMap(Map<Airline, Set<String>> airlineMap) {
-        LOGGER.info("processing upsert airline map of {} total airlines", airlineMap.size());
+        LOGGER.info("processing batch delete and upsert airline map of {} total airlines", airlineMap.size());
         Map<Airline,List<String>> failedAirlineAirports = new HashMap<>();
         airlineMap.forEach((airline,iataCodes) ->{
+            LOGGER.info("batch deleting {} airline airports",airline.name());
+            Either<ServiceError, Integer> deleteEither = airlineService.batchDeleteAirline(airline);
+            if (deleteEither.isRight()) {
+                LOGGER.info("successfully batch deleted {} airline of {} airports",
+                        airline.name(),deleteEither.get());
+            } else {
+                LOGGER.error("failed to batch delete {} airline, error: {}",
+                        airline,deleteEither.getLeft().getException().getMessage());
+            }
             LOGGER.info("upserting airline {} with {} airport codes",
                     airline.name(),iataCodes.size());
             AirlineBatchUpsert airlineBatchUpsert = AirlineBatchUpsert.builder().airline(airline.name())
