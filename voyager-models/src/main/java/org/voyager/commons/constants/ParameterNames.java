@@ -19,6 +19,7 @@ public class ParameterNames {
     public static final String PAUSE = "pause";
     public static final String IATA = "iata";
     public static final String FLIGHT_NUMBER = "flightNumber";
+    public static final String ID = "id";
     public static final String START = "start";
     public static final String END = "end";
     public static final String ZONE_ID = "zoneId";
@@ -36,7 +37,6 @@ public class ParameterNames {
     public static final String IS_ACTIVE = "isActive";
     public static final String STATUS = "status";
     public static final String SOURCE_ID = "sourceId";
-    @SuppressWarnings("unused")
-    public static final String AIRPORTS_PROPERTY_NAME = "airports";
+    public static final String AIRPORTS = "airports";
     public static final String OPERATOR = "operator";
 }
