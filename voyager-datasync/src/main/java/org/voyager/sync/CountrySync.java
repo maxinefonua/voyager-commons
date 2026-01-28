@@ -93,8 +93,8 @@ public class CountrySync {
             if (nominatimCountryCodes.contains(geoCountry.getCountryCode())) {
                 FeatureSearch featureSearch = (FeatureSearch) either.get();
                 countryFormList.add(CountryForm.builder()
-                        .countryCode(geoCountry.getCountryCode())
-                        .countryName(geoCountry.getCountryName())
+                        .code(geoCountry.getCountryCode())
+                        .name(geoCountry.getCountryName())
                         .capitalCity(geoCountry.getCapital())
                         .continent(Continent.fromDisplayText(geoCountry.getContinentName()).name())
                         .population(Long.parseLong(geoCountry.getPopulation()))
@@ -110,8 +110,8 @@ public class CountrySync {
             }
             GeoFull geoNameFull = (GeoFull) either.get();
             countryFormList.add(CountryForm.builder()
-                    .countryCode(geoCountry.getCountryCode())
-                    .countryName(geoCountry.getCountryName())
+                    .code(geoCountry.getCountryCode())
+                    .name(geoCountry.getCountryName())
                     .capitalCity(geoCountry.getCapital())
                     .continent(Continent.fromDisplayText(geoCountry.getContinentName()).name())
                     .population(Long.parseLong(geoCountry.getPopulation()))

@@ -350,6 +350,13 @@ public class FlightSync {
     private static Either<AirportScheduleFailure,AirportScheduleResult> processAirportSchedule(
             String airportCode1, String airportCode2, AirportScheduleFR airportScheduleFR, FlightService flightService,
             RouteService routeService) {
+        boolean noDepartures = airportScheduleFR.getDepartures() == null
+                || airportScheduleFR.getDepartures().isEmpty();
+        boolean noArrivals = airportScheduleFR.getArrivals() == null || airportScheduleFR.getArrivals().isEmpty();
+        if (noArrivals && noDepartures) {
+            return Either.right(new AirportScheduleResult(airportCode1,airportCode2,0,0,
+                    0,Collections.emptySet()));
+        }
         Set<Airline> airlineSet = new HashSet<>();
         AtomicInteger flightCreates = new AtomicInteger(0);
         AtomicInteger flightSkips = new AtomicInteger(0);
@@ -517,7 +524,7 @@ public class FlightSync {
                         LOGGER.info("successful batch DELETE airline {} flights with {} records",airline.name(),either.get());
                     }
                 }
-            } else {
+            } else if (!flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.RETRY_SYNC)) {
                 Either<ServiceError, Integer> either = flightService.batchDelete(FlightBatchDelete.builder()
                         .isActive("false").build());
                 if (either.isLeft()) {
@@ -533,6 +540,10 @@ public class FlightSync {
 
 
     private static void processAirlineMap(Map<Airline, Set<String>> airlineMap) {
+        if (airlineMap.isEmpty()) {
+            LOGGER.info("no airlines in process map, skipping airline batch updates");
+            return;
+        }
         LOGGER.info("processing batch delete and upsert airline map of {} total airlines", airlineMap.size());
         Map<Airline,List<String>> failedAirlineAirports = new HashMap<>();
         airlineMap.forEach((airline,iataCodes) ->{
