@@ -40,24 +40,24 @@ public class NearbyAirportQuery {
     public String getRequestURL() {
         StringJoiner paramsJoiner = new StringJoiner("&");
         paramsJoiner.add(String.format("%s" + "?%s=%s", Path.NEARBY_AIRPORTS,
-                ParameterNames.LATITUDE_PARAM_NAME,latitude));
+                ParameterNames.LATITUDE,latitude));
         paramsJoiner.add(String.format("%s=%s",
-                ParameterNames.LONGITUDE_PARAM_NAME,longitude));
+                ParameterNames.LONGITUDE,longitude));
 
         if (limit != null) {
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.LIMIT_PARAM_NAME,limit));
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.LIMIT,limit));
         }
 
         if (airlineList != null) {
             StringJoiner airlineJoiner = new StringJoiner(",");
             airlineList.forEach(airline -> airlineJoiner.add(airline.name()));
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.AIRLINE_PARAM_NAME, airlineJoiner));
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.AIRLINE, airlineJoiner));
         }
 
         if (airportTypeList != null) {
             StringJoiner typeJoiner = new StringJoiner(",");
             airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.TYPE_PARAM_NAME, typeJoiner));
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.TYPE, typeJoiner));
         }
 
         return paramsJoiner.toString();

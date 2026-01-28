@@ -18,7 +18,6 @@ import org.voyager.sync.config.FlightSyncConfig;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.commons.model.airline.AirlineAirport;
 import org.voyager.commons.model.airline.AirlineBatchUpsert;
 import org.voyager.commons.model.airport.Airport;
 import org.voyager.sync.model.chaviation.AirportCH;
@@ -92,8 +91,8 @@ public class FlightSync {
                 LOGGER.info("voyager returned empty route sync list with status {}", Status.PENDING);
                 return List.of();
             } else {
-                LOGGER.info("voyager returned empty route sync list with status {}, setting all routes to {}",
-                        Status.PENDING, Status.PENDING);
+                LOGGER.info("voyager returned empty route sync list with status {}, fetching all airline routes from flight radar",
+                        Status.PENDING);
                 Map<String, Set<String>> airlineRouteMap = fetchRouteMap();
                 return setConfirmedRoutesToPending(routeMap,airlineRouteMap);
             }
@@ -351,6 +350,13 @@ public class FlightSync {
     private static Either<AirportScheduleFailure,AirportScheduleResult> processAirportSchedule(
             String airportCode1, String airportCode2, AirportScheduleFR airportScheduleFR, FlightService flightService,
             RouteService routeService) {
+        boolean noDepartures = airportScheduleFR.getDepartures() == null
+                || airportScheduleFR.getDepartures().isEmpty();
+        boolean noArrivals = airportScheduleFR.getArrivals() == null || airportScheduleFR.getArrivals().isEmpty();
+        if (noArrivals && noDepartures) {
+            return Either.right(new AirportScheduleResult(airportCode1,airportCode2,0,0,
+                    0,Collections.emptySet()));
+        }
         Set<Airline> airlineSet = new HashSet<>();
         AtomicInteger flightCreates = new AtomicInteger(0);
         AtomicInteger flightSkips = new AtomicInteger(0);
@@ -518,7 +524,7 @@ public class FlightSync {
                         LOGGER.info("successful batch DELETE airline {} flights with {} records",airline.name(),either.get());
                     }
                 }
-            } else {
+            } else if (!flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.RETRY_SYNC)) {
                 Either<ServiceError, Integer> either = flightService.batchDelete(FlightBatchDelete.builder()
                         .isActive("false").build());
                 if (either.isLeft()) {
@@ -534,9 +540,22 @@ public class FlightSync {
 
 
     private static void processAirlineMap(Map<Airline, Set<String>> airlineMap) {
-        LOGGER.info("processing upsert airline map of {} total airlines", airlineMap.size());
+        if (airlineMap.isEmpty()) {
+            LOGGER.info("no airlines in process map, skipping airline batch updates");
+            return;
+        }
+        LOGGER.info("processing batch delete and upsert airline map of {} total airlines", airlineMap.size());
         Map<Airline,List<String>> failedAirlineAirports = new HashMap<>();
         airlineMap.forEach((airline,iataCodes) ->{
+            LOGGER.info("batch deleting {} airline airports",airline.name());
+            Either<ServiceError, Integer> deleteEither = airlineService.batchDeleteAirline(airline);
+            if (deleteEither.isRight()) {
+                LOGGER.info("successfully batch deleted {} airline of {} airports",
+                        airline.name(),deleteEither.get());
+            } else {
+                LOGGER.error("failed to batch delete {} airline, error: {}",
+                        airline,deleteEither.getLeft().getException().getMessage());
+            }
             LOGGER.info("upserting airline {} with {} airport codes",
                     airline.name(),iataCodes.size());
             AirlineBatchUpsert airlineBatchUpsert = AirlineBatchUpsert.builder().airline(airline.name())

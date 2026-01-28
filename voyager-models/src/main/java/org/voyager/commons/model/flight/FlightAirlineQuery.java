@@ -1,7 +1,6 @@
 package org.voyager.commons.model.flight;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import org.voyager.commons.constants.ParameterNames;
@@ -18,7 +17,7 @@ public class FlightAirlineQuery extends FlightQuery {
     public String getRequestURL() {
         String superRequestURL = super.getRequestURL();
         return String.format("%s&%s=%s",superRequestURL,
-                ParameterNames.AIRLINE_PARAM_NAME,
+                ParameterNames.AIRLINE,
                 String.join(",",airlineList.stream().map(Airline::name).toList()));
     }
 }

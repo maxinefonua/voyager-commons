@@ -13,6 +13,8 @@ import lombok.ToString;
 public class Country {
     private String code;
     private String name;
+    private String currencyCode;
+    private String[] languages;
     private Long population;
     private String capitalCity;
     private Double areaInSqKm;

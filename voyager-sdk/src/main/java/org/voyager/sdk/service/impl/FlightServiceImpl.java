@@ -62,8 +62,8 @@ public class FlightServiceImpl implements FlightService {
                                                         @NonNull ZoneId zoneId) {
         String requestURL = String.format("%s" + "?%s=%d" + "&%s=%s" + "&%s=%s" + "&%s=%s",
                 Path.FLIGHT,
-                ParameterNames.ROUTE_ID_PARAM_NAME,routeId,
-                ParameterNames.FLIGHT_NUMBER_PARAM_NAME,flightNumber,
+                ParameterNames.ROUTE_ID,routeId,
+                ParameterNames.FLIGHT_NUMBER,flightNumber,
                 ParameterNames.ON_DAY,localDate,
                 ParameterNames.ZONE_ID,zoneId.getId());
         return serviceUtils.fetch(requestURL, HttpMethod.GET, Flight.class);

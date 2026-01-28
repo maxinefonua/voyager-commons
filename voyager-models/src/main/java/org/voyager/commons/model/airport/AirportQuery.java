@@ -38,17 +38,17 @@ public class AirportQuery {
         paramsJoiner.add(String.format("%s=%d",ParameterNames.SIZE,size));
 
         if (StringUtils.isNotBlank(countryCode)) {
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.COUNTRY_CODE_PARAM_NAME,countryCode.toUpperCase()));
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.COUNTRY_CODE,countryCode.toUpperCase()));
         }
         if (airlineList != null && !airlineList.isEmpty()) {
             StringJoiner stringJoiner = new StringJoiner(",");
             airlineList.forEach(airline -> stringJoiner.add(airline.name()));
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.AIRLINE_PARAM_NAME,stringJoiner));
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.AIRLINE,stringJoiner));
         }
         if (airportTypeList != null) {
             StringJoiner typeJoiner = new StringJoiner(",");
             airportTypeList.forEach(airportType -> typeJoiner.add(airportType.name()));
-            paramsJoiner.add(String.format("%s=%s", ParameterNames.TYPE_PARAM_NAME,typeJoiner));
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.TYPE,typeJoiner));
         }
 
         urlBuilder.append(paramsJoiner);

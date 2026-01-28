@@ -31,11 +31,11 @@ public class AirlinePathQuery extends AirlineQuery {
 
         StringJoiner originJoiner = new StringJoiner(",");
         originList.forEach(originJoiner::add);
-        urlBuilder.append(String.format("?%s=%s", ParameterNames.ORIGIN_PARAM_NAME,originJoiner));
+        urlBuilder.append(String.format("?%s=%s", ParameterNames.ORIGIN,originJoiner));
 
         StringJoiner destinationJoiner = new StringJoiner(",");
         destinationList.forEach(destinationJoiner::add);
-        urlBuilder.append(String.format("?%s=%s", ParameterNames.DESTINATION_PARAM_NAME,destinationJoiner));
+        urlBuilder.append(String.format("?%s=%s", ParameterNames.DESTINATION,destinationJoiner));
         return urlBuilder.toString();
     }
 }
