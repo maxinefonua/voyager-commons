@@ -1,4 +1,4 @@
-package org.voyager.sync.service;
+package org.voyager.sync.service.external;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.vavr.control.Either;

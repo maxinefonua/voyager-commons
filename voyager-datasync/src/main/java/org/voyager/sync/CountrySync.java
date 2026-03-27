@@ -15,7 +15,7 @@ import org.voyager.commons.model.geoname.GeoFull;
 import org.voyager.commons.model.nominatim.FeatureSearch;
 import org.voyager.sdk.service.CountryService;
 import org.voyager.sdk.service.GeoService;
-import org.voyager.sync.service.NominatimService;
+import org.voyager.sync.service.external.NominatimService;
 import org.voyager.sdk.service.impl.VoyagerServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;

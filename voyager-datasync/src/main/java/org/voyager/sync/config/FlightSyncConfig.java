@@ -4,8 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.model.airline.Airline;
-
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,8 +26,8 @@ public class FlightSyncConfig extends DatasyncConfig {
         public static int THREAD_COUNT = 3;
         public static int THREAD_COUNT_MAX = 5;
         public static SyncMode SYNC_MODE = SyncMode.FULL_SYNC;
-        public static int RETENTION_DAYS = 1;
-        public static int RETENTION_DAYS_MIN = 1;
+        public static int RETENTION_DAYS = 2;
+        public static int RETENTION_DAYS_MIN = 2;
     }
 
     public enum SyncMode {

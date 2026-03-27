@@ -53,9 +53,9 @@ class AirlineServiceImplTest {
     }
 
     @Test
-    void batchDeleteAirline() {
-        assertThrows(NullPointerException.class,() -> airlineService.batchDeleteAirline(null));
-        Either<ServiceError, Integer> either = airlineService.batchDeleteAirline(Airline.EMIRATES);
+    void deactivateAirline() {
+        assertThrows(NullPointerException.class,() -> airlineService.deactivateAirline(null));
+        Either<ServiceError, Integer> either = airlineService.deactivateAirline(Airline.EMIRATES);
         assertNotNull(either);
         assertTrue(either.isRight());
         assertEquals(1,either.get());

@@ -1,4 +1,4 @@
-package org.voyager.sync.service;
+package org.voyager.sync.service.external;
 
 import io.vavr.control.Either;
 import org.jsoup.Jsoup;

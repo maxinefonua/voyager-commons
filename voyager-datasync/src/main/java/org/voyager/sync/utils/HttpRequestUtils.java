@@ -47,12 +47,12 @@ public class HttpRequestUtils {
             int attempt = 0;
             while (attempt < maxRetries) {
                 attempt++;
-                long delay = 1000L;
+                long delay = 60000L;
                 Optional<String> retryValue = response.headers().firstValue("Retry-After");
                 if (retryValue.isPresent())
                     delay = Integer.parseInt(retryValue.get()) * 1000L;
-                LOGGER.info("will attempt {}/{} retries after {}ms ({}sec) to {}",
-                        attempt, maxRetries, delay, delay / 1000, URL);
+                LOGGER.info("will attempt {}/{} retries after {}sec to {}",
+                        attempt, maxRetries, delay / 1000, URL);
                 Thread.sleep(delay);
                 response = CLIENT.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() != 429) break;
