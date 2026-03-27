@@ -1,4 +1,4 @@
-package org.voyager.sync.service;
+package org.voyager.sync.service.external;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -65,12 +65,14 @@ public class FlightRadarService {
                 int attempt = 0;
                 while (attempt < maxRetries) {
                     attempt++;
-                    long delay = 1000L;
+                    long delay = 60000L;
                     Optional<String> retryValue = response.headers().firstValue("Retry-After");
-                    if (retryValue.isPresent())
-                        delay = Integer.parseInt(retryValue.get()) * 1000L;
-                    LOGGER.info("will attempt {}/{} retires after {}ms ({}sec) to {}",
-                            attempt, maxRetries, delay, delay / 1000, request.uri().toString());
+                    if (retryValue.isPresent()) {
+                        int retryVal = Integer.parseInt(retryValue.get());
+                        if (retryVal > 0) delay = retryVal * 1000L;
+                    }
+                    LOGGER.info("will attempt {}/{} retries for route {}:{} after {}sec to {}",
+                            attempt, maxRetries, airportCode1, airportCode2, delay / 1000, request.uri().toString());
                     Thread.sleep(delay);
                     response = client.send(request, HttpResponse.BodyHandlers.ofString());
                     if (response.statusCode() != 429) break;
@@ -189,10 +191,12 @@ public class FlightRadarService {
                     attempt++;
                     long delay = 1000L;
                     Optional<String> retryValue = response.headers().firstValue("Retry-After");
-                    if (retryValue.isPresent())
-                        delay = Integer.parseInt(retryValue.get()) * 1000L;
-                    LOGGER.info("will attempt {}/{} retires after {}ms ({}sec) to {}",
-                            attempt, maxRetries, delay, delay / 1000, request.uri().toString());
+                    if (retryValue.isPresent()) {
+                        int retryVal = Integer.parseInt(retryValue.get());
+                        if (retryVal > 0) delay = retryVal * 1000L;
+                    }
+                    LOGGER.info("will attempt {}/{} retries for {} airport details after {}sec to {}",
+                            attempt, maxRetries, iata, delay / 1000, request.uri().toString());
                     Thread.sleep(delay);
                     response = client.send(request, HttpResponse.BodyHandlers.ofString());
                     if (response.statusCode() != 429) break;

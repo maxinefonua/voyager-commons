@@ -11,5 +11,5 @@ public interface AirlineService {
     Either<ServiceError, List<Airline>> getAirlines();
     Either<ServiceError, List<Airline>> getAirlines(@NonNull AirlineQuery airlineQuery);
     Either<ServiceError, AirlineBatchUpsertResult> batchUpsert(@NonNull AirlineBatchUpsert airlineBatchUpsert);
-    Either<ServiceError, Integer> batchDeleteAirline(@NonNull Airline airline);
+    Either<ServiceError, Integer> deactivateAirline(@NonNull Airline airline);
 }

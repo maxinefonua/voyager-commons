@@ -55,10 +55,10 @@ public class AirlineServiceImpl implements AirlineService {
     }
 
     @Override
-    public Either<ServiceError, Integer> batchDeleteAirline(@NonNull Airline airline) {
-        String requestURL = String.format("%s?%s=%s",Path.Admin.AIRLINES,
+    public Either<ServiceError, Integer> deactivateAirline(@NonNull Airline airline) {
+        String requestURL = String.format("%s/%s?%s=%s",Path.Admin.AIRLINES,Path.Admin.DEACTIVATE,
                 ParameterNames.AIRLINE,airline);
-        LOGGER.debug("attempting to DELETE {}", requestURL);
-        return serviceUtils.fetch(requestURL,HttpMethod.DELETE,Integer.class);
+        LOGGER.debug("attempting to POST {}", requestURL);
+        return serviceUtils.fetch(requestURL,HttpMethod.POST,Integer.class);
     }
 }
