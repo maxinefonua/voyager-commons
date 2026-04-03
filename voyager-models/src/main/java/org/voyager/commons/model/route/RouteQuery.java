@@ -20,8 +20,7 @@ public class RouteQuery {
     private List<@ValidAirportCode(allowNull = true,
             message = Regex.AIRPORT_CODE) String> destinationList;
 
-    // TODO: add verification for origin only allows excludeDestination etc
-    private Set<@ValidAirportCode String> excludeDestinationSet;
+    private List<@ValidAirportCode String> excludeAirportList;
     private Set<Integer> excludeRouteIdSet;
 
     public String getRequestURL() {
@@ -34,6 +33,17 @@ public class RouteQuery {
         if (destinationList != null) {
             paramsJoiner.add(String.format("%s=%s", ParameterNames.DESTINATION,
                     String.join(",",destinationList)));
+        }
+
+        // TODO: add tests for exclusions
+        if (excludeAirportList != null) {
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.EXCLUDE,
+                    String.join(",",excludeAirportList)));
+        }
+
+        if (excludeRouteIdSet != null) {
+            paramsJoiner.add(String.format("%s=%s", ParameterNames.EXCLUDE_ROUTE,
+                    String.join(",",excludeRouteIdSet.stream().map(String::valueOf).toList())));
         }
 
         return String.format("%s?%s",Path.ROUTES,paramsJoiner);

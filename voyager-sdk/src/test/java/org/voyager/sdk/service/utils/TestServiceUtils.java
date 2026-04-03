@@ -87,7 +87,7 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 return Either.right((T) LookupAttribution.builder().build());
             case "/admin/fetch/test-source-id":
                 return Either.right((T) ResultSearchFull.builder().build());
-            case "/admin/airlines?airline=EMIRATES":
+            case "/admin/airlines/deactivate?airline=EMIRATES":
                 return Either.right((T)Integer.valueOf("1"));
             case "/admin/geonames/timezone?latitude=4.0&longitude=4.0&radius=10&date=date&lang=lang":
             case "/admin/geonames/timezone?latitude=4.0&longitude=4.0":
