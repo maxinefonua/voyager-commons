@@ -6,6 +6,7 @@ import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.validate.ValidationUtils;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,5 +55,8 @@ class RouteQueryTest {
         RouteQuery routeQuery = RouteQuery.builder().originList(List.of("SLC"))
                 .destinationList(List.of("HEL")).build();
         assertEquals("/routes?origin=SLC&destination=HEL",routeQuery.getRequestURL());
+
+        routeQuery = RouteQuery.builder().excludeAirportList(List.of("SJC","SLC","LAX")).build();
+        assertEquals("/routes?exclude=SJC,SLC,LAX",routeQuery.getRequestURL());
     }
 }

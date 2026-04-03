@@ -56,7 +56,7 @@ public class AirlineServiceImpl implements AirlineService {
 
     @Override
     public Either<ServiceError, Integer> deactivateAirline(@NonNull Airline airline) {
-        String requestURL = String.format("%s/%s?%s=%s",Path.Admin.AIRLINES,Path.Admin.DEACTIVATE,
+        String requestURL = String.format("%s%s?%s=%s",Path.Admin.AIRLINES,Path.Admin.DEACTIVATE,
                 ParameterNames.AIRLINE,airline);
         LOGGER.debug("attempting to POST {}", requestURL);
         return serviceUtils.fetch(requestURL,HttpMethod.POST,Integer.class);
