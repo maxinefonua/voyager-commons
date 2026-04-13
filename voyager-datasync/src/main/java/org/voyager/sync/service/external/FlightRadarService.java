@@ -80,6 +80,7 @@ public class FlightRadarService {
             }
             return processAirportResponse(response,airportCode1,airportCode2,requestURL);
         } catch (IOException | InterruptedException | URISyntaxException e) {
+            LOGGER.error("exception during call to extractAirportResponseWithRetry",e);
             return Either.left(new ServiceError(HttpStatus.INTERNAL_SERVER_ERROR,
                     e.getMessage(), e));
         }

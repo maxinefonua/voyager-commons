@@ -12,28 +12,16 @@ public class AirportSyncConfig extends DatasyncConfig{
         public static final String IATA_LIST = "-il";
     }
 
-    public enum SyncMode {
-        ADD_MISSING, // build out and insert missing airports from given iata list
-        FULL_SYNC // verify and enrich airport data using external service
-    }
-
     public static class Defaults extends DatasyncConfig.Defaults {
         public static final int THREAD_COUNT = 100;
-        public static final SyncMode SYNC_MODE = SyncMode.FULL_SYNC;
         public static final List<AirportType> AIRPORT_TYPES = List.of(AirportType.UNVERIFIED,AirportType.OTHER);
     }
 
     public AirportSyncConfig(String[] args) {
         super(args);
-        processSyncMode();
         processThreadCount();
         validateGeoNamesUser();
-        if (this.additionalOptions.get(Flag.SYNC_MODE).equals(SyncMode.FULL_SYNC)) {
-            processAirportTypeList();
-        }
-        if (this.additionalOptions.get(Flag.SYNC_MODE).equals(SyncMode.ADD_MISSING)) {
-            processIataList();
-        }
+        processAirportTypeList();
     }
 
     private void processThreadCount() {
@@ -64,21 +52,6 @@ public class AirportSyncConfig extends DatasyncConfig{
         this.additionalOptions.put(Flag.IATA_LIST,iataList);
     }
 
-    private void processSyncMode() {
-        if (!this.additionalOptions.containsKey(Flag.SYNC_MODE)) {
-            this.additionalOptions.put(Flag.SYNC_MODE,Defaults.SYNC_MODE);
-        } else {
-            String syncModeValue = (String) this.additionalOptions.get(Flag.SYNC_MODE);
-            try {
-                this.additionalOptions.put(Flag.SYNC_MODE,SyncMode.valueOf(syncModeValue));
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException(Messages.getInvalidListMessage(
-                        "sync mode", Flag.SYNC_MODE,
-                        Arrays.stream(SyncMode.values()).map(SyncMode::name).toList()));
-            }
-        }
-    }
-
     private void processAirportTypeList() {
         if (!this.additionalOptions.containsKey(Flag.AIRPORT_TYPES)) {
             this.additionalOptions.put(Flag.AIRPORT_TYPES,Defaults.AIRPORT_TYPES);
@@ -105,10 +78,6 @@ public class AirportSyncConfig extends DatasyncConfig{
     @SuppressWarnings("unchecked")
     public List<AirportType> getAirportTypeList() {
         return (List<AirportType>) this.additionalOptions.get(Flag.AIRPORT_TYPES);
-    }
-
-    public SyncMode getSyncMode() {
-        return (SyncMode) this.additionalOptions.get(Flag.SYNC_MODE);
     }
 
     @SuppressWarnings("unchecked")

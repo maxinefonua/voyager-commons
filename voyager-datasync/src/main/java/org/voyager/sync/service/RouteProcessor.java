@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface RouteProcessor {
     Either<ServiceError, Route> fetchOrCreateRoute(Airport originAirport, Airport destinationAirport);
-    List<Route> fetchRoutesToProcess(boolean isRetry);
+    List<Route> fetchRoutesToProcess();
     Route fetchSavedCivilRoute(String origin, String destination);
 }

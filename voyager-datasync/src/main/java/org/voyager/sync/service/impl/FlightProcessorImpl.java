@@ -35,13 +35,12 @@ public class FlightProcessorImpl implements FlightProcessor {
 
     public FlightProcessorImpl(
             RouteSyncService routeSyncService, FlightService flightService, AirlineService airlineService,
-            AirportReference airportReference, RouteService routeService, FlightSyncConfig flightSyncConfig,
-            RouteProcessor routeProcessor){
+            AirportReference airportReference, FlightSyncConfig flightSyncConfig, RouteProcessor routeProcessor){
         this.threadCount = flightSyncConfig.getThreadCount();
         this.routeSyncService = routeSyncService;
         this.routeProcessor = routeProcessor;
         this.airportScheduleProcessor = new AirportScheduleProcessorImpl(
-                flightService,airportReference,routeProcessor,flightSyncConfig.getAirlineList());
+                flightService,airportReference,routeProcessor, Arrays.stream(Airline.values()).toList());
         this.resultProcessor = new ResultProcessorImpl(flightSyncConfig,flightService,airlineService);
     }
 

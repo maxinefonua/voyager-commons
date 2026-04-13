@@ -38,6 +38,12 @@ public class RouteSyncServiceImpl implements RouteSyncService {
     }
 
     @Override
+    public Either<ServiceError, RouteSync> getByRouteId(@NonNull Integer routeId) {
+        String requestURL = String.format("%s/%d",Path.Admin.ROUTES.concat(Path.Admin.SYNC),routeId);
+        return serviceUtils.fetch(requestURL, HttpMethod.GET, RouteSync.class);
+    }
+
+    @Override
     public Either<ServiceError, Integer> batchUpdate(@NonNull RouteSyncBatchUpdate routeSyncBatchUpdate) {
         ValidationUtils.validateAndThrow(routeSyncBatchUpdate);
         String requestURL = Path.Admin.ROUTES.concat(Path.Admin.SYNC);

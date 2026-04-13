@@ -45,14 +45,21 @@ public class RouteProcessorImpl implements RouteProcessor {
 
         RouteForm routeForm = RouteForm.builder().origin(originAirport.getIata())
                 .destination(destinationAirport.getIata()).distanceKm(distanceKM).build();
-        return routeService.createRoute(routeForm).map(route -> {
-            LOGGER.info("successfully created route: {}",route);
-            return route;
-        });
+        Either<ServiceError,Route> createEither = routeService.createRoute(routeForm);
+        if (createEither.isLeft()) return createEither;
+        Route route = createEither.get();
+        Either<ServiceError,RouteSync> routeSyncEither = routeSyncService.getByRouteId(route.getId());
+        if (routeSyncEither.isLeft()) {
+            LOGGER.error("failed to confirm route sync created, returning error: {}",
+                    routeSyncEither.getLeft().getException().getMessage());
+            return Either.left(routeSyncEither.getLeft());
+        }
+        LOGGER.info("successfully created route + sync record: {}",route);
+        return createEither;
     }
 
     @Override
-    public List<Route> fetchRoutesToProcess(boolean isRetry) {
+    public List<Route> fetchRoutesToProcess() {
         Either<ServiceError,List<RouteSync>> pendingEither = routeSyncService.getByStatus(Status.PENDING);
         if (pendingEither.isLeft()) {
             Exception exception = pendingEither.getLeft().getException();
@@ -61,31 +68,7 @@ public class RouteProcessorImpl implements RouteProcessor {
         }
         List<RouteSync> routeSyncList = pendingEither.get();
         if (routeSyncList.isEmpty()) {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("no pending routes to process, load all civil routes for processing? y/n");
-            String input = scanner.nextLine().trim();
-            String valid = "yn";
-            while (valid.indexOf(input.toLowerCase().charAt(0)) == -1) {
-                System.out.println("please enter valid response, y/n?");
-                input = scanner.nextLine().trim();
-            }
-            if (input.charAt(0) == 'n') {
-                return List.of();
-            }
-            RouteSyncBatchUpdate routeSyncBatchUpdate = RouteSyncBatchUpdate.builder()
-                    .routeIdList(civilRouteList.stream().map(Route::getId).toList())
-                    .status(Status.PENDING)
-                    .build();
-            Either<ServiceError, Integer> batchPending = routeSyncService.batchUpdate(routeSyncBatchUpdate);
-            if (batchPending.isLeft()) {
-                Exception exception = batchPending.getLeft().getException();
-                throw new RuntimeException(String.format("failed to batch update %d routes to PENDING, error: %s",
-                        routeSyncBatchUpdate.getRouteIdList().size(),exception.getMessage()),exception);
-            }
-            int updatedBatchCount = batchPending.get();
-            LOGGER.info("successfully set {} route syncs to PENDING",updatedBatchCount);
-            civilRouteList.sort(Comparator.comparing(Route::getOrigin));
-            return civilRouteList;
+            return confirmUserInputForCivilRouteList();
         }
 
         // convert pending to routes
@@ -95,6 +78,34 @@ public class RouteProcessorImpl implements RouteProcessor {
                 mappedCivilRoutes.get(routeSync.getId())).toList());
         routeList.sort(Comparator.comparing(Route::getOrigin));
         return routeList;
+    }
+
+    private List<Route> confirmUserInputForCivilRouteList() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("no pending routes to process, load all civil routes for processing? y/n");
+        String input = scanner.nextLine().trim();
+        String valid = "yn";
+        while (valid.indexOf(input.toLowerCase().charAt(0)) == -1) {
+            System.out.println("please enter valid response, y/n?");
+            input = scanner.nextLine().trim();
+        }
+        if (input.charAt(0) == 'n') {
+            return List.of();
+        }
+        RouteSyncBatchUpdate routeSyncBatchUpdate = RouteSyncBatchUpdate.builder()
+                .routeIdList(civilRouteList.stream().map(Route::getId).toList())
+                .status(Status.PENDING)
+                .build();
+        Either<ServiceError, Integer> batchPending = routeSyncService.batchUpdate(routeSyncBatchUpdate);
+        if (batchPending.isLeft()) {
+            Exception exception = batchPending.getLeft().getException();
+            throw new RuntimeException(String.format("failed to batch update %d routes to PENDING, error: %s",
+                    routeSyncBatchUpdate.getRouteIdList().size(),exception.getMessage()),exception);
+        }
+        int updatedBatchCount = batchPending.get();
+        LOGGER.info("successfully set {} route syncs to PENDING",updatedBatchCount);
+        civilRouteList.sort(Comparator.comparing(Route::getOrigin));
+        return civilRouteList;
     }
 
     @Override
