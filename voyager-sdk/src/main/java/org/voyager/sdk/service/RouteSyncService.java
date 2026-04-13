@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface RouteSyncService {
     Either<ServiceError,List<RouteSync>> getByStatus(@NonNull Status status);
+    Either<ServiceError,RouteSync> getByRouteId(@NonNull Integer routeId);
     Either<ServiceError,Integer> batchUpdate(@NonNull RouteSyncBatchUpdate routeSyncBatchUpdate);
     Either<ServiceError,RouteSync> patchRouteSync(@NonNull Integer routeId,@NonNull  RouteSyncPatch routeSyncPatch);
 }

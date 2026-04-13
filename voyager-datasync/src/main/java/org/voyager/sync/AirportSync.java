@@ -57,7 +57,7 @@ public class AirportSync {
         LOGGER.info("printing from airports sync main");
         long startTime = System.currentTimeMillis();
         init(args);
-        List<String> iataList = fetchIataCodesToProcess();
+        List<String> iataList = fullSyncList();
         processAirportsWithCompletionService(iataList);
         long duration = System.currentTimeMillis() - startTime;
         int sec = (int) (duration/1000);
@@ -76,17 +76,6 @@ public class AirportSync {
         VoyagerServiceRegistry voyagerServiceRegistry = VoyagerServiceRegistry.getInstance();
         airportService = voyagerServiceRegistry.get(AirportService.class);
         geoService = voyagerServiceRegistry.get(GeoService.class);
-    }
-
-    private static List<String> fetchIataCodesToProcess() {
-        if (airportSyncConfig.getSyncMode().equals(AirportSyncConfig.SyncMode.FULL_SYNC)) {
-            return fullSyncList();
-        }
-        if (airportSyncConfig.getSyncMode().equals(AirportSyncConfig.SyncMode.ADD_MISSING)) {
-            return airportSyncConfig.getIataList();
-        }
-        throw new RuntimeException(String.format("Sync mode %s not yet implemented",
-                airportSyncConfig.getSyncMode().name()));
     }
 
     private static List<String> fullSyncList() {
@@ -159,21 +148,10 @@ public class AirportSync {
         Either<ServiceError, Option<AirportDetailsFR>> detailsFREither =
                 FlightRadarService.fetchAirportDetails(iata);
 
-
-
-
         if (fetchEither.isLeft()) {
-            ServiceError serviceError = fetchEither.getLeft();
-            if (airportSyncConfig.getSyncMode().equals(AirportSyncConfig.SyncMode.ADD_MISSING)
-                    && serviceError.getHttpStatus().equals(HttpStatus.NOT_FOUND)) {
-                return addMissingAirport(iata,chEither,detailsFREither);
-            }
-            if (airportSyncConfig.getSyncMode().equals(AirportSyncConfig.SyncMode.FULL_SYNC)) {
-                return new Task(iata, -1);
-            } else  {
-                throw new RuntimeException(String.format("Sync mode %s not yet implemented",
-                        airportSyncConfig.getSyncMode()));
-            }
+            Exception exception = fetchEither.getLeft().getException();
+            LOGGER.error("failed to fetch {} airport from voyager API, error: {}",iata,exception.getMessage());
+            return new Task(iata, -1);
         }
 
         Airport existing = fetchEither.get();

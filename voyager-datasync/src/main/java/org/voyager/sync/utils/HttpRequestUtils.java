@@ -41,7 +41,7 @@ public class HttpRequestUtils {
                 .GET();
         headers.forEach(requestBuilder::setHeader);
         HttpResponse<String> response = CLIENT.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-        Set<Integer> retryableCodes = Set.of(429,408,409,500,502,503,504);
+        Set<Integer> retryableCodes = Set.of(429,408,409,500,502,503,504,403);
         if (retryableCodes.contains(response.statusCode())) {
             int maxRetries = 3;
             int attempt = 0;

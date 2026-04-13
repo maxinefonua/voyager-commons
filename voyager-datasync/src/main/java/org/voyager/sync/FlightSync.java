@@ -14,6 +14,7 @@ import org.voyager.sync.service.RouteProcessor;
 import org.voyager.sdk.service.impl.VoyagerServiceRegistry;
 import org.voyager.sync.service.impl.AirportReferenceImpl;
 import org.voyager.sync.service.impl.FlightProcessorImpl;
+import org.voyager.sync.service.impl.FlightProcessorSyncImpl;
 import org.voyager.sync.service.impl.RouteProcessorImpl;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -24,7 +25,6 @@ public class FlightSync {
     private static RouteService routeService;
     private static RouteSyncService routeSyncService;
     private static RouteProcessor routeProcessor;
-    private static AirlineService airlineService;
     private static FlightService flightService;
     private static AirportService airportService;
     private static AirportReference airportReference;
@@ -35,9 +35,8 @@ public class FlightSync {
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
         init(args);
-        removePreRetentionDays(flightSyncConfig.getRetentionDays(),flightSyncConfig.getSyncMode(),flightService);
-        boolean isRetry = flightSyncConfig.getSyncMode().equals(FlightSyncConfig.SyncMode.RETRY_SYNC);
-        List<Route> toProcess = routeProcessor.fetchRoutesToProcess(isRetry);
+        removePreRetentionDays(flightSyncConfig.getRetentionDays(),flightService);
+        List<Route> toProcess = routeProcessor.fetchRoutesToProcess();
         if (toProcess.isEmpty()) {
             LOGGER.info("confirmed no pending routes to process, exiting");
             shutdown();
@@ -61,32 +60,17 @@ public class FlightSync {
         LOGGER.info("completed job in {}hr(s) {}min {}sec",hr,min,sec);
     }
 
-    private static void removePreRetentionDays(int retentionDays, FlightSyncConfig.SyncMode syncMode, FlightService flightService) {
+    private static void removePreRetentionDays(int retentionDays, FlightService flightService) {
         FlightBatchDelete flightBatchDelete = FlightBatchDelete.builder()
                 .daysPast(String.valueOf(retentionDays)).build();
-        if (syncMode.equals(FlightSyncConfig.SyncMode.AIRLINE_SYNC)) {
-            flightSyncConfig.getAirlineList().forEach(airline -> {
-                flightBatchDelete.setAirline(airline.name());
-                Either<ServiceError,Integer> either = flightService.batchDelete(flightBatchDelete);
-                if (either.isLeft()) {
-                    ServiceError serviceError = either.getLeft();
-                    LOGGER.error("batch DELETE for retention days {} with airline {} failed with service error: {}",
-                            retentionDays,airline.name(),serviceError.getMessage());
-                } else {
-                    LOGGER.info("batch DELETE for retention days {} with airline {} successfully deleted {} records",
-                            retentionDays,airline.name(),either.get());
-                }
-            });
+        Either<ServiceError, Integer> either = flightService.batchDelete(flightBatchDelete);
+        if (either.isLeft()) {
+            ServiceError serviceError = either.getLeft();
+            LOGGER.error("batch DELETE for retention days {} for ALL airlines failed with service error: {}",
+                    retentionDays, serviceError.getMessage());
         } else {
-            Either<ServiceError, Integer> either = flightService.batchDelete(flightBatchDelete);
-            if (either.isLeft()) {
-                ServiceError serviceError = either.getLeft();
-                LOGGER.error("batch DELETE for retention days {} for ALL airlines failed with service error: {}",
-                        retentionDays, serviceError.getMessage());
-            } else {
-                LOGGER.info("batch DELETE for retention days {} for ALL airlines successfully deleted {} records",
-                        retentionDays, either.get());
-            }
+            LOGGER.info("batch DELETE for retention days {} for ALL airlines successfully deleted {} records",
+                    retentionDays, either.get());
         }
     }
 
@@ -100,15 +84,14 @@ public class FlightSync {
         executorService = Executors.newFixedThreadPool(flightSyncConfig.getThreadCount());
         VoyagerServiceRegistry.initialize(flightSyncConfig.getVoyagerConfig());
         VoyagerServiceRegistry voyagerServiceRegistry = VoyagerServiceRegistry.getInstance();
-        airlineService = voyagerServiceRegistry.get(AirlineService.class);
+//        airlineService = voyagerServiceRegistry.get(AirlineService.class);
         routeService = voyagerServiceRegistry.get(RouteService.class);
         flightService = voyagerServiceRegistry.get(FlightService.class);
         airportService = voyagerServiceRegistry.get(AirportService.class);
         routeSyncService = voyagerServiceRegistry.get(RouteSyncService.class);
         airportReference = new AirportReferenceImpl(airportService);
         routeProcessor = new RouteProcessorImpl(routeService,routeSyncService,airportReference);
-        flightProcessor = new FlightProcessorImpl(
-                routeSyncService,flightService,airlineService,airportReference,routeService,flightSyncConfig,
-                routeProcessor);
+        flightProcessor = new FlightProcessorSyncImpl(
+                routeSyncService,flightService,airportReference,flightSyncConfig, routeProcessor);
     }
 }

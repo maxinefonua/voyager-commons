@@ -19,15 +19,11 @@ import java.util.Map;
 import java.util.Set;
 
 public class ResultProcessorImpl implements ResultProcessor {
-    private final FlightSyncConfig.SyncMode syncMode;
-    private final List<Airline> airlineList;
     private final FlightService flightService;
     private final AirlineAirportProcessor airlineAirportProcessor;
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultProcessorImpl.class);
 
     ResultProcessorImpl(FlightSyncConfig flightSyncConfig, FlightService flightService, AirlineService airlineService) {
-        this.syncMode = flightSyncConfig.getSyncMode();
-        this.airlineList = flightSyncConfig.getAirlineList();
         this.flightService = flightService;
         this.airlineAirportProcessor = new AirlineAirportProcessorImpl(airlineService,flightSyncConfig);
     }
