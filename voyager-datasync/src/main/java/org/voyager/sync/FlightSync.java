@@ -12,10 +12,8 @@ import org.voyager.sync.service.AirportReference;
 import org.voyager.sync.service.FlightProcessor;
 import org.voyager.sync.service.RouteProcessor;
 import org.voyager.sdk.service.impl.VoyagerServiceRegistry;
-import org.voyager.sync.service.impl.AirportReferenceImpl;
-import org.voyager.sync.service.impl.FlightProcessorImpl;
-import org.voyager.sync.service.impl.FlightProcessorSyncImpl;
-import org.voyager.sync.service.impl.RouteProcessorImpl;
+import org.voyager.sync.service.impl.*;
+
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -80,11 +78,11 @@ public class FlightSync {
 
     private static void init(String[] args) {
         flightSyncConfig = new FlightSyncConfig(args);
-        LOGGER.info("initializing {} with args: {}",FlightSync.class.getSimpleName(),String.join(" ", flightSyncConfig.toArgs()));
+        LOGGER.info("initializing {} with args: {}",
+                FlightSync.class.getSimpleName(),String.join(" ", flightSyncConfig.toArgs()));
         executorService = Executors.newFixedThreadPool(flightSyncConfig.getThreadCount());
         VoyagerServiceRegistry.initialize(flightSyncConfig.getVoyagerConfig());
         VoyagerServiceRegistry voyagerServiceRegistry = VoyagerServiceRegistry.getInstance();
-//        airlineService = voyagerServiceRegistry.get(AirlineService.class);
         routeService = voyagerServiceRegistry.get(RouteService.class);
         flightService = voyagerServiceRegistry.get(FlightService.class);
         airportService = voyagerServiceRegistry.get(AirportService.class);
@@ -92,6 +90,6 @@ public class FlightSync {
         airportReference = new AirportReferenceImpl(airportService);
         routeProcessor = new RouteProcessorImpl(routeService,routeSyncService,airportReference);
         flightProcessor = new FlightProcessorSyncImpl(
-                routeSyncService,flightService,airportReference,flightSyncConfig, routeProcessor);
+                routeSyncService,flightService,airportReference, routeProcessor);
     }
 }

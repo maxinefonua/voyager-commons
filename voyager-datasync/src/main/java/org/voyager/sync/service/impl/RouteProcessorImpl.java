@@ -6,13 +6,21 @@ import org.slf4j.LoggerFactory;
 import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airport.Airport;
-import org.voyager.commons.model.route.*;
+import org.voyager.commons.model.route.Route;
+import org.voyager.commons.model.route.RouteSync;
+import org.voyager.commons.model.route.RouteForm;
+import org.voyager.commons.model.route.RouteSyncBatchUpdate;
+import org.voyager.commons.model.route.Status;
 import org.voyager.sdk.service.RouteService;
 import org.voyager.sdk.service.RouteSyncService;
 import org.voyager.sync.service.AirportReference;
 import org.voyager.sync.service.RouteProcessor;
-
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Comparator;
+import java.util.Scanner;
 
 public class RouteProcessorImpl implements RouteProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(RouteProcessorImpl.class);

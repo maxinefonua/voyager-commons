@@ -11,7 +11,6 @@ import org.voyager.commons.error.ServiceError;
 import org.voyager.sdk.http.HttpMethod;
 import org.voyager.sdk.http.VoyagerHttpFactoryTestImpl;
 import org.voyager.commons.model.airline.Airline;
-import org.voyager.commons.model.airline.AirlineAirport;
 import org.voyager.commons.model.airport.Airport;
 import org.voyager.commons.model.airport.AirportPatch;
 import org.voyager.commons.model.airport.AirportType;
@@ -136,7 +135,7 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 Airport nearby = AIRPORT.toBuilder().type(AirportType.UNVERIFIED).build();
                 return Either.right((T) List.of(nearby));
             case "/airlines":
-            case "/airlines?iata=HEL&operator=OR":
+            case "/airlines?origin=SJC?destination=ITM":
                 return Either.right((T)List.of(Airline.DELTA,Airline.JAPAN));
             case "/countries":
                 return Either.right((T)List.of(COUNTRY));
@@ -223,21 +222,6 @@ public class TestServiceUtils extends ServiceUtilsDefault {
                 throw new RuntimeException(String.format(
                     "ServiceUtilsTest fetchNoResponseBody not yet implemented for requestURL: %s",
                     requestURL));
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> Either<ServiceError, T> fetchWithRequestBody(String requestURL, HttpMethod httpMethod,
-                                                            TypeReference<T> typeReference, Object requestBody) {
-        switch (requestURL) {
-            case "/admin/airlines":
-                return Either.right((T)List.of(AirlineAirport.builder().airline(Airline.JAPAN).isActive(true)
-                        .iata("TEST").build()));
-            default:
-                throw new RuntimeException(String.format(
-                        "ServiceUtilsTest fetchWithRequestBody not yet implemented for requestURL: %s",
-                        requestURL));
         }
     }
 }

@@ -5,7 +5,6 @@ import io.vavr.control.Either;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.commons.model.airline.*;
@@ -43,22 +42,5 @@ public class AirlineServiceImpl implements AirlineService {
         LOGGER.debug("attempting to GET {}", airlineQuery.getRequestURL());
         return serviceUtils.fetch(airlineQuery.getRequestURL(),HttpMethod.GET, new TypeReference<>() {
         });
-    }
-
-    @Override
-    public Either<ServiceError, AirlineBatchUpsertResult> batchUpsert(@NonNull AirlineBatchUpsert airlineBatchUpsert) {
-        String requestURL = Path.Admin.AIRLINES;
-        LOGGER.debug("attempting to PATCH {} with body: {}", requestURL, airlineBatchUpsert);
-        return serviceUtils.fetchWithRequestBody(requestURL,HttpMethod.POST,
-                new TypeReference<>() {
-                }, airlineBatchUpsert);
-    }
-
-    @Override
-    public Either<ServiceError, Integer> deactivateAirline(@NonNull Airline airline) {
-        String requestURL = String.format("%s%s?%s=%s",Path.Admin.AIRLINES,Path.Admin.DEACTIVATE,
-                ParameterNames.AIRLINE,airline);
-        LOGGER.debug("attempting to POST {}", requestURL);
-        return serviceUtils.fetch(requestURL,HttpMethod.POST,Integer.class);
     }
 }

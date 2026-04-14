@@ -7,7 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.error.ServiceError;
-import org.voyager.commons.model.airport.*;
+import org.voyager.commons.model.airport.Airport;
+import org.voyager.commons.model.airport.AirportForm;
+import org.voyager.commons.model.airport.AirportQuery;
+import org.voyager.commons.model.airport.AirportType;
 import org.voyager.commons.model.geoname.GeoPlace;
 import org.voyager.commons.model.geoname.GeoTimezone;
 import org.voyager.commons.model.geoname.query.GeoNearbyQuery;
@@ -22,8 +25,11 @@ import org.voyager.sync.model.flightradar.airport.DetailsFR;
 import org.voyager.sync.service.AirportReference;
 import org.voyager.sync.service.external.ChAviationService;
 import org.voyager.sync.service.external.FlightRadarService;
-
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 public class AirportReferenceImpl implements AirportReference {
     private final Set<String> airportCodes = new HashSet<>();
@@ -36,7 +42,6 @@ public class AirportReferenceImpl implements AirportReference {
         this.airportService = airportService;
         loadAirports();
     }
-
 
     private void loadAirports() {
         // load all airport code set
@@ -79,16 +84,6 @@ public class AirportReferenceImpl implements AirportReference {
         }
         Exception exception = civilAirportsEither.getLeft().getException();
         throw new RuntimeException(exception.getMessage(),exception);
-    }
-
-    @Override
-    public void refreshReference(AirportService airportService) {
-        loadAirports();
-    }
-
-    @Override
-    public void addCivilAirport(Airport airport) {
-        civilAirports.put(airport.getIata(),airport);
     }
 
     @Override
@@ -155,17 +150,15 @@ public class AirportReferenceImpl implements AirportReference {
 
         Either<ServiceError, Airport> createEither = airportService.createAirport(airportForm);
         if (createEither.isRight()) {
-            civilAirports.put(iata,createEither.get());
+            Airport airport = createEither.get();
+            if (airport.getType().equals(AirportType.CIVIL)) {
+                civilAirports.put(iata,createEither.get());
+            }
             airportCodes.add(iata);
         } else {
             missingAirports.put(iata,airportFR);
         }
         return createEither;
-    }
-
-    @Override
-    public void addNonCivilAirport(String airportCode) {
-        airportCodes.add(airportCode);
     }
 
     @Override
