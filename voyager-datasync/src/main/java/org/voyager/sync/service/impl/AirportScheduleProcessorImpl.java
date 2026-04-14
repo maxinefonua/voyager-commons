@@ -23,7 +23,12 @@ import org.voyager.sync.service.RouteProcessor;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AirportScheduleProcessorImpl implements AirportScheduleProcessor {

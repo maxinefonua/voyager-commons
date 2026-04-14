@@ -11,7 +11,6 @@ import org.voyager.commons.model.route.RouteSyncPatch;
 import org.voyager.commons.model.route.Status;
 import org.voyager.sdk.service.FlightService;
 import org.voyager.sdk.service.RouteSyncService;
-import org.voyager.sync.config.FlightSyncConfig;
 import org.voyager.sync.model.flights.AirportScheduleFailure;
 import org.voyager.sync.model.flights.AirportScheduleResult;
 import org.voyager.sync.service.AirportReference;
@@ -19,13 +18,11 @@ import org.voyager.sync.service.AirportScheduleProcessor;
 import org.voyager.sync.service.FlightProcessor;
 import org.voyager.sync.service.RouteProcessor;
 import org.voyager.sync.service.external.FlightRadarService;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import static io.vavr.control.Either.left;
 import static io.vavr.control.Either.right;
 
@@ -37,7 +34,7 @@ public class FlightProcessorSyncImpl implements FlightProcessor {
 
     public FlightProcessorSyncImpl(
             RouteSyncService routeSyncService, FlightService flightService, AirportReference airportReference,
-            FlightSyncConfig flightSyncConfig, RouteProcessor routeProcessor){
+            RouteProcessor routeProcessor){
         this.routeSyncService = routeSyncService;
         this.routeProcessor = routeProcessor;
         this.airportScheduleProcessor = new AirportScheduleProcessorImpl(

@@ -17,7 +17,6 @@ import org.voyager.sync.service.AirlineProcessor;
 import org.voyager.sync.service.AirportReference;
 import org.voyager.sync.service.RouteProcessor;
 import org.voyager.sync.service.external.FlightRadarService;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,14 +38,6 @@ public class AirlineProcessorImpl implements AirlineProcessor {
 
     @Override
     public void process(Airline airline) {
-        fetchAndCreateMissingRoutes(airline);
-        fetchAirlineFlightsAndCreateAirlineAirports(airline);
-    }
-
-    private void fetchAirlineFlightsAndCreateAirlineAirports(Airline airline) {
-    }
-
-    private void fetchAndCreateMissingRoutes(Airline airline) {
         Either<ServiceError, List<RouteFR>> airlineFlightRadarEither = FlightRadarService.extractAirlineRoutes(airline);
         Either<ServiceError, List<Route>> routesEither = routeService.getRoutes();
         if (airlineFlightRadarEither.isLeft()) {

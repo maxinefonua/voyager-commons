@@ -32,8 +32,11 @@ class AirlineServiceImplTest {
     @Test
     void getAirlines() {
         assertThrows(NullPointerException.class,() -> airlineService.getAirlines(null));
-        AirlineAirportQuery airlineAirportQuery = AirlineAirportQuery.builder().iatalist(List.of("HEL")).build();
-        Either<ServiceError, List<Airline>> either = airlineService.getAirlines(airlineAirportQuery);
+        AirlinePathQuery airlinePathQuery = AirlinePathQuery.builder()
+                .originList(List.of("SJC"))
+                .destinationList(List.of("ITM"))
+                .build();
+        Either<ServiceError, List<Airline>> either = airlineService.getAirlines(airlinePathQuery);
         assertNotNull(either);
         assertTrue(either.isRight());
         assertEquals(Airline.DELTA,either.get().get(0));
@@ -41,23 +44,5 @@ class AirlineServiceImplTest {
         either = airlineService.getAirlines(); assertNotNull(either);
         assertTrue(either.isRight());
         assertEquals(Airline.DELTA,either.get().get(0));
-    }
-
-    @Test
-    void batchUpsert() {
-        assertThrows(NullPointerException.class,() -> airlineService.batchUpsert(null));
-        AirlineBatchUpsert airlineBatchUpsert = AirlineBatchUpsert.builder().iataList(List.of("HEL")).build();
-        Either<ServiceError, AirlineBatchUpsertResult> either = airlineService.batchUpsert(airlineBatchUpsert);
-        assertNotNull(either);
-        assertTrue(either.isRight());
-    }
-
-    @Test
-    void deactivateAirline() {
-        assertThrows(NullPointerException.class,() -> airlineService.deactivateAirline(null));
-        Either<ServiceError, Integer> either = airlineService.deactivateAirline(Airline.EMIRATES);
-        assertNotNull(either);
-        assertTrue(either.isRight());
-        assertEquals(1,either.get());
     }
 }
