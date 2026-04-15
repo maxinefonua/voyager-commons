@@ -15,7 +15,6 @@ import org.voyager.sdk.http.HttpMethod;
 import org.voyager.sdk.service.RouteSyncService;
 import org.voyager.sdk.utils.ServiceUtils;
 import org.voyager.sdk.utils.ServiceUtilsFactory;
-
 import java.util.List;
 
 public class RouteSyncServiceImpl implements RouteSyncService {

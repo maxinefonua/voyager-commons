@@ -32,7 +32,6 @@ public final class Path {
 
         public static final String AIRPORTS = "/admin/airports";
 
-        public static final String DEACTIVATE = "/deactivate";
         public static final String ROUTES = "/admin/routes";
         public static final String ROUTE_BY_ID = "/admin/routes/{id}";
         public static final String SYNC = "/sync";

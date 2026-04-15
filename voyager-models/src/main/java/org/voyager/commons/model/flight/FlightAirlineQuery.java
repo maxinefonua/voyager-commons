@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.model.airline.Airline;
-
 import java.util.List;
 
 @SuperBuilder @Getter

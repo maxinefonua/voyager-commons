@@ -10,7 +10,6 @@ import org.voyager.commons.constants.Path;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.model.geoname.fields.SearchOperator;
 import org.voyager.commons.validate.annotations.ValidAirportCode;
-
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;

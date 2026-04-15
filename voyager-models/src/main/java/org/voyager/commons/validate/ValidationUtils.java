@@ -6,7 +6,6 @@ import jakarta.validation.ValidatorFactory;
 import jakarta.validation.ConstraintViolation;
 import org.hibernate.validator.HibernateValidator;
 import org.voyager.commons.error.ValidationException;
-
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;

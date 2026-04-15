@@ -1,7 +1,15 @@
 package org.voyager.commons.model.geoname.query;
 
-import jakarta.validation.constraints.*;
-import lombok.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.AllArgsConstructor;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.model.country.Continent;
 import org.voyager.commons.model.geoname.fields.DocumentEncoding;
@@ -16,7 +24,6 @@ import org.voyager.commons.validate.annotations.ValidCountryCode;
 import org.voyager.commons.validate.annotations.ValidLanguageCode;
 import org.voyager.commons.validate.annotations.ValidLatitude;
 import org.voyager.commons.validate.annotations.ValidLongitude;
-
 import java.util.List;
 
 @Builder

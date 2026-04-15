@@ -7,7 +7,6 @@ import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Path;
 import org.voyager.commons.constants.Regex;
 import org.voyager.commons.validate.annotations.ValidAirportCode;
-
 import java.util.List;
 import java.util.StringJoiner;
 

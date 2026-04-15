@@ -1,6 +1,5 @@
 package org.voyager.commons.model.flight;
 
-import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Data;
