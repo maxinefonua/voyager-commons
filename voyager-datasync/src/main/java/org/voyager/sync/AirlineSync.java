@@ -24,11 +24,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AirlineSync {
-    private static AirlineSyncConfig airlineSyncConfig;
     private static AirlineProcessor airlineProcessor;
     private static AirlineService airlineService;
     private static final Logger LOGGER = LoggerFactory.getLogger(FlightSync.class);
-    // syncs airlines and airline routes
+
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
         init(args);
@@ -55,7 +54,7 @@ public class AirlineSync {
     }
 
     private static void init(String[] args) {
-        airlineSyncConfig = new AirlineSyncConfig(args);
+        AirlineSyncConfig airlineSyncConfig = new AirlineSyncConfig(args);
         LOGGER.info("initializing {} with args: {}",
                 AirlineSync.class.getSimpleName(),String.join(" ", airlineSyncConfig.toArgs()));
         VoyagerServiceRegistry.initialize(airlineSyncConfig.getVoyagerConfig());

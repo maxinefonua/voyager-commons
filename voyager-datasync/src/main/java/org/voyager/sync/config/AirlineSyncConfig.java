@@ -3,7 +3,6 @@ package org.voyager.sync.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.model.airline.Airline;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

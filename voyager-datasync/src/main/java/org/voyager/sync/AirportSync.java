@@ -6,22 +6,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.model.airport.Airport;
-import org.voyager.commons.model.airport.AirportForm;
 import org.voyager.commons.model.airport.AirportPatch;
 import org.voyager.commons.model.airport.AirportType;
 import org.voyager.sdk.service.AirportService;
 import org.voyager.sdk.service.GeoService;
 import org.voyager.sync.config.AirportSyncConfig;
-import org.voyager.commons.error.HttpStatus;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.sdk.model.IataQuery;
 import org.voyager.sync.model.chaviation.AirportCH;
 import org.voyager.sync.model.flightradar.airport.AirportDetailsFR;
-import org.voyager.sync.model.flightradar.airport.DetailsFR;
 import org.voyager.commons.model.geoname.GeoPlace;
-import org.voyager.commons.model.geoname.GeoTimezone;
 import org.voyager.commons.model.geoname.query.GeoNearbyQuery;
-import org.voyager.commons.model.geoname.query.GeoTimezoneQuery;
 import org.voyager.sdk.service.impl.VoyagerServiceRegistry;
 import org.voyager.sync.service.external.ChAviationService;
 import org.voyager.sync.service.external.FlightRadarService;
@@ -219,73 +214,5 @@ public class AirportSync {
         }
         LOGGER.info("successfully patched {}",patchEither.get());
         return new Task(iata,1);
-    }
-
-    private static Task addMissingAirport(String iata, Either<ServiceError, AirportCH> chEither,
-                                          Either<ServiceError, Option<AirportDetailsFR>> detailsFREither) {
-
-        Double latitude = null;
-        Double longitude = null;
-        String name = null;
-        String countryCode = null;
-        AirportType airportType = AirportType.UNVERIFIED;
-
-        if (chEither.isRight()) {
-            AirportCH airportCH = chEither.get();
-            name = airportCH.getName();
-            countryCode = airportCH.getCountryCode();
-            latitude = airportCH.getLatitude();
-            longitude = airportCH.getLongitude();
-            airportType = airportCH.getType();
-        }
-
-        String city = null;
-        String zoneId = null;
-        if (detailsFREither.isRight() && detailsFREither.get().isDefined()) {
-            DetailsFR detailsFR = detailsFREither.get().get().getDetails();
-            if (StringUtils.isBlank(name)) name = detailsFR.getName();
-            if (StringUtils.isBlank(countryCode)) countryCode = detailsFR.getPosition().getCountry().getCode();
-            if (latitude == null) latitude = detailsFR.getPosition().getLatitude();
-            if (longitude == null) longitude = detailsFR.getPosition().getLongitude();
-            city = detailsFR.getPosition().getRegion().getCity();
-            zoneId = detailsFR.getTimezone().getZoneId();
-        }
-
-        if (latitude == null || longitude == null) return new Task(iata,-1);
-
-        String subdivision = null;
-        GeoNearbyQuery geoNearbyQuery = GeoNearbyQuery.builder().latitude(latitude).longitude(longitude).build();
-        Either<ServiceError, List<GeoPlace>> geoEither = geoService.findNearbyPlaces(geoNearbyQuery);
-        if (geoEither.isRight() && !geoEither.get().isEmpty()) {
-            GeoPlace geoPlace = geoEither.get().get(0);
-            if (StringUtils.isBlank(city)) city = geoPlace.getName();
-            if (StringUtils.isBlank(countryCode)) countryCode = geoPlace.getCountryCode();
-            subdivision = geoPlace.getAdminName1();
-        }
-
-        if (StringUtils.isBlank(zoneId)) {
-            GeoTimezoneQuery geoTimezoneQuery = GeoTimezoneQuery.builder().latitude(latitude).longitude(longitude).build();
-            Either<ServiceError, GeoTimezone> timezoneEither = geoService.getTimezone(geoTimezoneQuery);
-            if (timezoneEither.isRight()) {
-                zoneId = timezoneEither.get().getTimezoneId();
-            }
-        }
-
-        if (StringUtils.isNotBlank(subdivision)) subdivision = subdivision.trim();
-        if (StringUtils.isNotBlank(name)) name = name.trim();
-        if (StringUtils.isNotBlank(city)) city = city.trim();
-
-        AirportForm airportForm = AirportForm.builder().iata(iata).longitude(String.valueOf(longitude))
-                .latitude(String.valueOf(latitude)).airportType(airportType.name()).zoneId(zoneId)
-                .countryCode(countryCode).subdivision(subdivision).city(city).name(name)
-                .build();
-        Either<ServiceError,Airport> createEither = airportService.createAirport(airportForm);
-        if (createEither.isLeft()) {
-            LOGGER.error("{} failed to create {} with error: {}",
-                    iata,airportForm,createEither.getLeft().getException().getMessage());
-            return new Task(iata,-1);
-        } else {
-            return new Task(iata,1);
-        }
     }
 }
