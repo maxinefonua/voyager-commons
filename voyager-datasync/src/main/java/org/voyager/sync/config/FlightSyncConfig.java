@@ -1,23 +1,12 @@
 package org.voyager.sync.config;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.voyager.commons.model.airline.Airline;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class FlightSyncConfig extends DatasyncConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlightSyncConfig.class);
 
     public static class Flag extends DatasyncConfig.Flag {
-        public static String RETRY_ROUTE_FILE = "-rr";
-        public static String RETRY_AIRLINE_FILE = "-ra";
         public static String RETENTION_DAYS = "-rd";
     }
 
@@ -32,7 +21,6 @@ public class FlightSyncConfig extends DatasyncConfig {
         super(args);
         validateGeoNamesUser();
         processThreadCount();
-        processRetryFiles();
         processRetentionDays();
     }
 
@@ -55,34 +43,6 @@ public class FlightSyncConfig extends DatasyncConfig {
         }
     }
 
-    private void processRetryFiles() {
-        if (!this.additionalOptions.containsKey(Flag.RETRY_ROUTE_FILE)) {
-            throw new RuntimeException(DatasyncConfig.Messages.getMissingMessage("retry route file",
-                    Flag.RETRY_ROUTE_FILE));
-        }
-        if (!this.additionalOptions.containsKey(Flag.RETRY_AIRLINE_FILE)) {
-            throw new RuntimeException(DatasyncConfig.Messages.getMissingMessage("retry airline file",
-                    Flag.RETRY_AIRLINE_FILE));
-        }
-        String retryRouteFile = (String) this.additionalOptions.get(Flag.RETRY_ROUTE_FILE);
-        try (InputStream ignored = new FileInputStream(retryRouteFile)) {
-            LOGGER.info("successfully loaded retry route file: {}",retryRouteFile);
-        } catch (IOException e) {
-            throw new RuntimeException(DatasyncConfig.Messages.getInvalidValueMessage("retry route file",
-                    Flag.RETRY_ROUTE_FILE,"filename",retryRouteFile));
-        }
-        String retryAirlineFile = (String) this.additionalOptions.get(Flag.RETRY_AIRLINE_FILE);
-        try (FileWriter fileWriter = new FileWriter(retryAirlineFile)) {
-            this.additionalOptions.put(Flag.RETRY_AIRLINE_FILE,fileWriter);
-            LOGGER.info("successfully loaded retry airline file: {}",retryAirlineFile);
-        } catch (IOException e) {
-            throw new RuntimeException(DatasyncConfig.Messages.getInvalidValueMessage("retry airline file",
-                    Flag.RETRY_AIRLINE_FILE,"filename",retryAirlineFile));
-        }
-    }
-
-
-
     private void processThreadCount() {
         int fromProgramArgs = (int) this.optionMap.get(Flag.THREAD_COUNT);
         if (fromProgramArgs == DatasyncConfig.Defaults.THREAD_COUNT) {
@@ -91,13 +51,6 @@ public class FlightSyncConfig extends DatasyncConfig {
             LOGGER.info("Provided thread count {} exceeds maximum. Setting thread count to maximum: {}", fromProgramArgs, Defaults.THREAD_COUNT_MAX);
             this.optionMap.put(Flag.THREAD_COUNT,Defaults.THREAD_COUNT_MAX);
         }
-    }
-
-    public String getRetryRouteFileName() {
-        return (String) this.additionalOptions.get(Flag.RETRY_ROUTE_FILE);
-    }
-    public FileWriter getRetryAirlineFileWriter() {
-        return (FileWriter) this.additionalOptions.get(Flag.RETRY_AIRLINE_FILE);
     }
 
     public int getRetentionDays() {

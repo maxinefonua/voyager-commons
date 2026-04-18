@@ -1,4 +1,5 @@
 package org.voyager.sdk.service;
+
 import io.vavr.control.Either;
 import lombok.NonNull;
 import org.voyager.commons.error.ServiceError;
@@ -9,7 +10,6 @@ import org.voyager.sdk.model.NearbyAirportQuery;
 import org.voyager.commons.model.airport.Airport;
 import org.voyager.commons.model.airport.AirportForm;
 import org.voyager.commons.model.airport.AirportPatch;
-
 import java.util.List;
 
 public interface AirportService {

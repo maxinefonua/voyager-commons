@@ -16,7 +16,6 @@ import org.voyager.commons.model.route.RoutePatch;
 import org.voyager.sdk.service.RouteService;
 import org.voyager.sdk.utils.ServiceUtils;
 import org.voyager.sdk.utils.ServiceUtilsFactory;
-
 import java.util.List;
 
 public class RouteServiceImpl implements RouteService {

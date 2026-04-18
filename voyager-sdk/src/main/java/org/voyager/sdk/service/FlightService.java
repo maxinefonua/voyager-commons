@@ -4,11 +4,14 @@ import io.vavr.control.Either;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.voyager.commons.error.ServiceError;
-import org.voyager.commons.model.flight.*;
-
+import org.voyager.commons.model.flight.Flight;
+import org.voyager.commons.model.flight.FlightQuery;
+import org.voyager.commons.model.flight.FlightBatchDelete;
+import org.voyager.commons.model.flight.FlightBatchUpsert;
+import org.voyager.commons.model.flight.FlightBatchUpsertResult;
+import org.voyager.commons.model.flight.FlightForm;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 public interface FlightService {

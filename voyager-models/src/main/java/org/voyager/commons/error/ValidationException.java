@@ -3,7 +3,6 @@ package org.voyager.commons.error;
 import jakarta.validation.ConstraintViolation;
 import lombok.Builder;
 import lombok.Getter;
-
 import java.util.Set;
 import java.util.StringJoiner;
 

@@ -11,8 +11,6 @@ import org.voyager.commons.model.airline.Airline;
 import org.voyager.commons.validate.annotations.ValidBoolean;
 import org.voyager.commons.validate.annotations.ValidEnum;
 import org.voyager.commons.validate.annotations.ValidFlightNumber;
-
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 

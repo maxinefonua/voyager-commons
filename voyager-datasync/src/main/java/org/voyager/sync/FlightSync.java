@@ -4,19 +4,21 @@ import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.voyager.commons.model.flight.FlightBatchDelete;
-import org.voyager.commons.model.route.*;
-import org.voyager.sdk.service.*;
+import org.voyager.commons.model.route.Route;
+import org.voyager.sdk.service.RouteService;
+import org.voyager.sdk.service.AirportService;
+import org.voyager.sdk.service.RouteSyncService;
+import org.voyager.sdk.service.FlightService;
 import org.voyager.sync.config.FlightSyncConfig;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.sync.service.AirportReference;
 import org.voyager.sync.service.FlightProcessor;
 import org.voyager.sync.service.RouteProcessor;
 import org.voyager.sdk.service.impl.VoyagerServiceRegistry;
-import org.voyager.sync.service.impl.*;
-
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import org.voyager.sync.service.impl.FlightProcessorSyncImpl;
+import org.voyager.sync.service.impl.AirportReferenceImpl;
+import org.voyager.sync.service.impl.RouteProcessorImpl;
+import java.util.List;
 
 public class FlightSync {
     private static FlightSyncConfig flightSyncConfig;
@@ -26,7 +28,6 @@ public class FlightSync {
     private static FlightService flightService;
     private static AirportService airportService;
     private static AirportReference airportReference;
-    private static ExecutorService executorService;
     private static FlightProcessor flightProcessor;
     private static final Logger LOGGER = LoggerFactory.getLogger(FlightSync.class);
 
@@ -37,18 +38,9 @@ public class FlightSync {
         List<Route> toProcess = routeProcessor.fetchRoutesToProcess();
         if (toProcess.isEmpty()) {
             LOGGER.info("confirmed no pending routes to process, exiting");
-            shutdown();
-            long durationMs = System.currentTimeMillis()-startTime;
-            int sec = (int) (durationMs/1000);
-            int min = sec/60;
-            sec %= 60;
-            int hr = min/60;
-            min %= 60;
-            LOGGER.info("completed job in {}hr(s) {}min {}sec",hr,min,sec);
-            return;
+        } else {
+            flightProcessor.process(toProcess);
         }
-        flightProcessor.process(toProcess);
-        shutdown();
         long durationMs = System.currentTimeMillis()-startTime;
         int sec = (int) (durationMs/1000);
         int min = sec/60;
@@ -72,15 +64,10 @@ public class FlightSync {
         }
     }
 
-    private static void shutdown() {
-        executorService.shutdown();
-    }
-
     private static void init(String[] args) {
         flightSyncConfig = new FlightSyncConfig(args);
         LOGGER.info("initializing {} with args: {}",
                 FlightSync.class.getSimpleName(),String.join(" ", flightSyncConfig.toArgs()));
-        executorService = Executors.newFixedThreadPool(flightSyncConfig.getThreadCount());
         VoyagerServiceRegistry.initialize(flightSyncConfig.getVoyagerConfig());
         VoyagerServiceRegistry voyagerServiceRegistry = VoyagerServiceRegistry.getInstance();
         routeService = voyagerServiceRegistry.get(RouteService.class);

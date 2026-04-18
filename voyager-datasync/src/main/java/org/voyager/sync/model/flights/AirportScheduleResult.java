@@ -1,9 +1,5 @@
 package org.voyager.sync.model.flights;
 
-import org.voyager.commons.model.airline.Airline;
-import java.util.List;
-import java.util.Set;
-
 public class AirportScheduleResult {
     public String airportCode1;
     public String airportCode2;

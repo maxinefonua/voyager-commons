@@ -13,7 +13,6 @@ import org.voyager.commons.validate.annotations.ValidCountryCode;
 import org.voyager.commons.validate.annotations.ValidEnum;
 import org.voyager.commons.validate.annotations.ValidLatitude;
 import org.voyager.commons.validate.annotations.ValidLongitude;
-
 import java.util.List;
 
 @Builder
